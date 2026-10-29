@@ -1,0 +1,115 @@
+# HabitQuest onboarding backend
+
+Parent concerns -> agent-assisted goal suggestions -> parent-confirmed goals -> reviewed habit and chapter proposal -> versioned confirmed plan.
+
+This is the first backend slice. Daily occurrences, completion approvals, Spark transactions, screen-time enforcement, world rendering, redemption and formal RAGAS/LangSmith experiments are later integrations. Proposed point fields are catalog metadata, not awards.
+
+## Stack
+
+Python 3.12, uv, FastAPI/Pydantic, Supabase/Postgres/Auth, psycopg, Deep Agents on LangGraph, PostgreSQL checkpoints. One restricted Director delegates to a catalog Planner; the application always runs the final Reviewer. Chapter wording uses reviewed templates. No shell, arbitrary SQL, web browsing, generic subagent or filesystem tool is exposed to the model.
+
+`MODEL_MODE=fake` is a deterministic, rule-based test double exercising the real graph and tools. It is not evidence of language understanding or recommendation quality. `MODEL_MODE=ollama` uses a real local tool-calling model. The production provider remains open behind the adapter.
+
+## Quick start: local Supabase
+
+Prerequisites: uv, Python 3.12, Node.js, Docker Desktop running. No hosted account is needed.
+
+```powershell
+uv sync --locked
+npm ci
+uv run python scripts/bootstrap_local.py
+uv run python -m uvicorn habitquest_backend.main:app --reload --host 127.0.0.1
+```
+
+In another terminal in the same folder:
+
+```powershell
+uv run python -m habitquest_backend.worker
+```
+
+Open http://127.0.0.1:8000/docs. Create/sign in to a parent through **local Supabase Auth**, then paste the access token into Authorize. Local email confirmation is disabled in this development config. Keep production authentication configuration separate. Local email appears in the Supabase inbox; no external mail service is configured.
+
+For a Supabase version using legacy symmetric signing, explicitly set the matching local `JWT_SECRET`; otherwise JWKS validation supports ES256/RS256. Never use a service-role key as a parent access token. The `hq` schema is not exposed through the Data API.
+
+## Alternative: native PostgreSQL, without Docker
+
+This preserves the same application schema, RLS roles and checkpoint code. It does **not** emulate Supabase Auth or Storage. Development-only signed tokens substitute for Auth so the backend mechanics can run locally.
+
+Install PostgreSQL and put its `bin` folder on PATH. Then:
+
+```powershell
+uv sync --locked
+uv run python scripts/bootstrap_local.py --native
+uv run python -m uvicorn habitquest_backend.main:app --reload --host 127.0.0.1
+```
+
+The bootstrap creates a loopback-only, password-authenticated cluster under `.local/postgres`, application and test databases, and a git-ignored `.env`. It preserves existing `.env` files. Default port: 55433. Data remains there across restarts. To stop it:
+
+```powershell
+pg_ctl -D .local/postgres -w stop
+```
+
+With the API running, the complete synthetic demonstration invokes separate worker processes itself:
+
+```powershell
+uv run python scripts/demo.py
+```
+
+Do not run an additional continuously polling worker during this demo. For manual `/docs` usage, run `uv run python scripts/local_token.py` and paste its short-lived native-local token into Authorize. These token utilities require `LOCAL_DEMO_AUTH=true` and are not for hosted services.
+
+## Real local inference
+
+Install Ollama and download a model that supports tool calling, such as the configured candidate `qwen3:8b`. Hardware suitability and full goal/planning quality must be verified on your machine.
+
+```powershell
+ollama pull qwen3:8b
+```
+
+Set `MODEL_MODE=ollama` in `.env` for both API and worker. The fake path needs no download or paid API key. Model/network errors have bounded retries; invalid, rejected or exhausted runs fail explicitly and publish nothing. There is no unchecked generated fallback.
+
+## API walkthrough
+
+1. `POST /v1/children` with `{"name":"Alex","age_band":"6-9"}`.
+2. `POST /v1/children/{id}/onboarding` with concerns, world (`space`, `forest`, `city`), available_minutes, IANA timezone and agreed readiness times if known. Leave goals empty to begin with free text.
+3. `POST /v1/onboarding/{id}/analyze-runs` with an `Idempotency-Key` header. Poll the returned status URL for suggested goals and clarification questions.
+4. If needed, `POST /v1/onboarding/{id}/clarifications` with the **complete replacement onboarding input**. This invalidates prior goal confirmation and increments the version.
+5. `POST /v1/onboarding/{id}/confirm-goals` with `expected_version` and ordered goal categories. Supported categories: bedtime, morning, meals, responsibility. The parent controls priority order. Missing agreed times block relevant goals.
+6. `POST /v1/onboarding/{id}/plan-runs` with a new `Idempotency-Key`. Poll `/v1/plan-runs/{id}`.
+7. `GET /v1/proposals/{id}`. Read approved habits, up to three initially active options, the chapter outline, source versions and review result. This is not chapter unlock or assignment activation.
+8. `POST /v1/proposals/{id}/confirm` with `expected_plan_version` (0 initially). Repeating confirmation returns the same committed plan.
+9. `GET /v1/children/{id}/plan` and `/preferences`. Preferences support PUT and DELETE. Only explicit parent actions/confirmed decisions become approved memory. Preferences inform future planning context; changing them does not silently change an existing plan.
+
+Planning state: queued -> running -> ready/failed/cancelled. Analysis jobs return an `analysis` field. Requests belong to the authenticated parent; access to another household's records returns 404. A parent may own multiple children; their records and preferences remain separate.
+
+## Tests and coverage
+
+Every test run uses a **dedicated disposable test database**. Fixtures truncate HabitQuest tables in `TEST_DATABASE_URL`; never set it to a real household database. The native bootstrap creates `habitquest_test`. Supabase users should create a separate local test project/database, apply `scripts/setup_db.py`, then set `TEST_DATABASE_URL` accordingly.
+
+```powershell
+uv run python -m pytest --cov=habitquest_backend --cov-report=term-missing --cov-report=xml --cov-report=html
+uv run ruff check src tests scripts
+uv run ruff format --check src tests scripts
+uv run python -m mypy src
+```
+
+Coverage enforces 100% owned `src/habitquest_backend` statement/branch coverage; external dependencies and development scripts are outside that denominator. Real database/RLS, actual graph with scripted model, recovery, source revocation, budgets and confirmation concurrency have independent assertions. Worker subprocess coverage is collected. Tests require a database name ending in `_test` to reduce accidental use against application data. Code coverage does not prove exhaustive scenarios, child suitability or model quality. CI uses real Postgres and fake models, no cloud credentials.
+
+With Docker/Supabase available, also run `npx supabase test db` for the supplied pgTAP policies and `uv run python scripts/smoke_supabase_auth.py` for real local signup/JWT validation. These require the Supabase runtime; native Postgres tests exercise RLS directly but do not claim Supabase Auth coverage.
+
+## Persistence and guardrails
+
+- SQL migrations are versioned and checksummed. The setup script also recognizes migrations applied by Supabase CLI. It never resets an existing database.
+- API transactions switch to `hq_api`; workers to `hq_worker`. RLS scope comes from the verified token. The local bootstrap connection is administrative; a hosted deployment must provision separate least-privileged login credentials for API and worker.
+- Parent confirmation holds content locks through commit and revalidates source fields, policy and plan/session versions. Plan records are not changed in place.
+- Leases fence publication; every lease has a separate checkpoint branch. Recovery copies a snapshot into the new branch, so an old worker cannot mutate the active branch.
+- Model-call and conservative request-unit budgets persist across retries. `reserved_tokens` is a conservative serialized-input/output reservation, **not measured tokenizer usage or cost**. Run deadlines persist and are checked after model calls and at publication. Per-call output is capped for Ollama.
+- Generated explanations are parent-facing. Child instructions and chapter content come from reviewed rows. The seeded lexical harmful-request check is only one layer; it is not a comprehensive safety classifier. Human-reviewed model-quality/security evals are required before a family pilot.
+- External LangSmith tracing is disabled around model workflows, even if inherited tracing environment flags are set. Events store IDs, roles and outcome metadata rather than raw prompts.
+- Checkpoints can contain private context. This local slice has preference correction/deletion, not complete family erasure, retention automation, or production privacy operations. Those are required before a family pilot.
+- Initial migrations contain a small illustrative catalog. Treat release/point policy and content as development fixtures until reviewed for a real pilot.
+
+See `docs/implementation-ledger.md` for decisions, verification evidence and known environment limitations. No cloud deployment or provider purchase is performed.
+
+## Verification on the implementation host
+
+The native PostgreSQL path, actual API/worker demo, 79 automated tests and 100% owned application statement/branch coverage were verified locally. Ruff and Python-module mypy checks passed. The Windows mypy executable launcher was blocked; the documented Python module entrypoint worked. The Supabase CLI launcher failed with spawn UNKNOWN on this host, and Docker/Ollama are absent; Supabase runtime/Auth, pgTAP and real-model smoke checks remain unverified. The pinned npm dependencies reported zero audit findings. No cloud deployment was performed.

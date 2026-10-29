@@ -1,0 +1,65 @@
+[project]
+name = "habitquest-backend"
+version = "0.1.0"
+description = "Locally testable, parent-approved multi-agent habit onboarding"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "deepagents>=0.7.32",
+    "fastapi[standard]>=0.162.0",
+    "httpx>=0.28.1",
+    "langchain>=1.4.7",
+    "langchain-core>=1.7.1",
+    "langchain-ollama>=1.1.0",
+    "langgraph>=1.2.18",
+    "langgraph-checkpoint-postgres>=3.2.0",
+    "langsmith>=0.14.14",
+    "psycopg[binary,pool]>=3.3.6",
+    "pydantic>=2.14.1",
+    "pydantic-settings>=2.16.2",
+    "pyjwt[crypto]>=2.15.1",
+    "python-dotenv>=1.2.4",
+]
+
+[project.scripts]
+hq-worker = "habitquest_backend.worker:main"
+
+[build-system]
+requires = ["uv_build>=0.12.23,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "hypothesis>=6.170.13",
+    "mypy>=2.4.1",
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.4.1",
+    "pytest-cov>=7.1.0",
+    "pytest-socket>=0.8.1",
+    "ruff>=0.17.3",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_default_fixture_loop_scope = "function"
+addopts = "--strict-markers --cov=habitquest_backend --cov-report=term-missing"
+markers = ["live_local: requires a downloaded Ollama model", "e2e: separate process local integration"]
+
+[tool.coverage.run]
+source = ["habitquest_backend"]
+branch = true
+patch = ["subprocess"]
+
+[tool.coverage.report]
+fail_under = 100
+show_missing = true
+
+[tool.ruff]
+line-length = 110
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.mypy]
+check_untyped_defs = true
+ignore_missing_imports = true

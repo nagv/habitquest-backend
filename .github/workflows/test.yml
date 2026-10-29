@@ -1,0 +1,39 @@
+name: backend-checks
+on: [push, pull_request]
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: hq_dev
+          POSTGRES_PASSWORD: local-ci-only
+          POSTGRES_DB: hq_test
+        ports: ["55432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U hq_dev -d hq_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://hq_dev:local-ci-only@127.0.0.1:55432/hq_test
+      TEST_DATABASE_URL: postgresql://hq_dev:local-ci-only@127.0.0.1:55432/hq_test
+      LANGSMITH_TRACING: "false"
+      LANGCHAIN_TRACING_V2: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.12.23"
+      - run: uv sync --locked
+      - run: uv run python scripts/setup_db.py
+      - run: uv run ruff check src tests scripts
+      - run: uv run ruff format --check src tests scripts
+      - run: uv run python -m mypy src
+      - run: uv run python -m pytest --cov=habitquest_backend --cov-report=term-missing --cov-report=xml --cov-report=html
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage
+          path: |
+            coverage.xml
+            htmlcov/

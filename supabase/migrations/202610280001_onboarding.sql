@@ -1,0 +1,45 @@
+CREATE SCHEMA IF NOT EXISTS hq;
+CREATE SCHEMA IF NOT EXISTS hq_checkpoint;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname='hq_api') THEN CREATE ROLE hq_api NOLOGIN; END IF;
+  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname='hq_worker') THEN CREATE ROLE hq_worker NOLOGIN; END IF;
+END $$;
+GRANT USAGE ON SCHEMA hq TO hq_api, hq_worker;
+CREATE TABLE hq.households(id uuid PRIMARY KEY, timezone text NOT NULL DEFAULT 'UTC');
+CREATE TABLE hq.memberships(parent_id uuid NOT NULL, household_id uuid REFERENCES hq.households, PRIMARY KEY(parent_id,household_id));
+CREATE TABLE hq.children(id uuid PRIMARY KEY, household_id uuid NOT NULL REFERENCES hq.households, name text NOT NULL, age_band text NOT NULL CHECK(age_band IN ('6-9','10-13')));
+CREATE TABLE hq.catalog(id text PRIMARY KEY, version integer NOT NULL DEFAULT 1, approved boolean NOT NULL DEFAULT true, category text NOT NULL, title text NOT NULL, instruction text NOT NULL, min_age int NOT NULL, max_age int NOT NULL, minutes int NOT NULL CHECK(minutes>0), routine text NOT NULL CHECK(routine IN ('morning','evening','after_school')), points int NOT NULL CHECK(points BETWEEN 1 AND 3));
+CREATE TABLE hq.chapters(id text PRIMARY KEY, version int NOT NULL DEFAULT 1, approved boolean NOT NULL DEFAULT true, world text NOT NULL, category text NOT NULL, title text NOT NULL, UNIQUE(world,category));
+CREATE TABLE hq.sessions(id uuid PRIMARY KEY, child_id uuid NOT NULL REFERENCES hq.children, parent_id uuid NOT NULL, version int NOT NULL DEFAULT 1, goals_confirmed boolean NOT NULL DEFAULT false, data jsonb NOT NULL);
+CREATE TABLE hq.jobs(id uuid PRIMARY KEY, session_id uuid NOT NULL REFERENCES hq.sessions, child_id uuid NOT NULL REFERENCES hq.children, parent_id uuid NOT NULL, session_version int NOT NULL, base_plan_version int NOT NULL, request_key text NOT NULL, status text NOT NULL DEFAULT 'queued' CHECK(status IN ('queued','running','ready','failed','cancelled')), attempts int NOT NULL DEFAULT 0, available_at timestamptz NOT NULL DEFAULT now(), lease_until timestamptz, lease_token uuid, error text, UNIQUE(parent_id,request_key), created_at timestamptz NOT NULL DEFAULT now());
+CREATE TABLE hq.proposals(id uuid PRIMARY KEY REFERENCES hq.jobs, child_id uuid NOT NULL REFERENCES hq.children, parent_id uuid NOT NULL, base_plan_version int NOT NULL, session_version int NOT NULL, data jsonb NOT NULL, expires_at timestamptz NOT NULL DEFAULT now()+interval '7 days', confirmed boolean NOT NULL DEFAULT false);
+CREATE TABLE hq.plans(id uuid PRIMARY KEY, child_id uuid NOT NULL REFERENCES hq.children, parent_id uuid NOT NULL, proposal_id uuid NOT NULL UNIQUE REFERENCES hq.proposals, version int NOT NULL, data jsonb NOT NULL, created_at timestamptz NOT NULL DEFAULT now(), UNIQUE(child_id,version));
+CREATE TABLE hq.preferences(id uuid PRIMARY KEY, child_id uuid NOT NULL REFERENCES hq.children, parent_id uuid NOT NULL, kind text NOT NULL, value jsonb NOT NULL, source_id uuid NOT NULL REFERENCES hq.plans, approved_at timestamptz NOT NULL DEFAULT now(), UNIQUE(child_id,kind));
+CREATE TABLE hq.events(id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, run_id uuid REFERENCES hq.jobs ON DELETE CASCADE, kind text NOT NULL, data jsonb NOT NULL, created_at timestamptz NOT NULL DEFAULT now());
+CREATE INDEX jobs_available ON hq.jobs(available_at) WHERE status IN ('queued','running');
+CREATE INDEX catalog_category ON hq.catalog(category) WHERE approved;
+CREATE OR REPLACE FUNCTION hq.my_parent() RETURNS uuid LANGUAGE sql STABLE AS $$ SELECT NULLIF(current_setting('app.parent_id',true),'')::uuid $$;
+ALTER TABLE hq.memberships ENABLE ROW LEVEL SECURITY;
+CREATE POLICY own_membership ON hq.memberships USING (parent_id=hq.my_parent());
+ALTER TABLE hq.households ENABLE ROW LEVEL SECURITY;
+CREATE POLICY own_household ON hq.households USING (id IN (SELECT household_id FROM hq.memberships)) WITH CHECK (id=hq.my_parent());
+ALTER TABLE hq.children ENABLE ROW LEVEL SECURITY;
+CREATE POLICY own_child ON hq.children USING (household_id IN (SELECT household_id FROM hq.memberships));
+DO $$ DECLARE t text; BEGIN
+  FOREACH t IN ARRAY ARRAY['sessions','jobs','proposals','plans','preferences'] LOOP
+    EXECUTE format('ALTER TABLE hq.%I ENABLE ROW LEVEL SECURITY',t);
+    EXECUTE format('CREATE POLICY parent_scope ON hq.%I USING(parent_id=hq.my_parent() AND child_id IN (SELECT id FROM hq.children))',t);
+  END LOOP;
+END $$;
+CREATE POLICY worker_queue ON hq.jobs TO hq_worker USING(true) WITH CHECK(true);
+ALTER TABLE hq.events ENABLE ROW LEVEL SECURITY;
+CREATE POLICY scoped_events ON hq.events USING(run_id IN (SELECT id FROM hq.jobs));
+GRANT SELECT,INSERT ON hq.households,hq.memberships,hq.children TO hq_api;
+GRANT SELECT ON hq.catalog,hq.chapters TO hq_api,hq_worker;
+GRANT SELECT,INSERT,UPDATE ON hq.sessions,hq.jobs,hq.proposals,hq.plans,hq.preferences TO hq_api;
+GRANT DELETE ON hq.preferences TO hq_api;
+GRANT SELECT ON hq.households,hq.memberships,hq.children,hq.sessions,hq.plans,hq.preferences TO hq_worker;
+GRANT SELECT,UPDATE ON hq.jobs TO hq_worker;
+GRANT SELECT,INSERT ON hq.proposals,hq.events TO hq_worker;
+GRANT SELECT ON hq.events TO hq_api;
+GRANT USAGE,SELECT ON ALL SEQUENCES IN SCHEMA hq TO hq_worker;

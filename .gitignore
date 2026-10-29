@@ -1,0 +1,25 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+.env
+.env.*
+!.env.example
+.local/
+.venv/
+.coverage*
+htmlcov/
+coverage.xml
+*.log
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+node_modules/
+supabase/.temp/
+supabase/.branches/
