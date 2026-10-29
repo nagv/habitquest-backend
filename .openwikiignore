@@ -1,0 +1,27 @@
+# Paths OpenWiki should not read or document.
+
+# Lockfiles: large and generated. Direct dependencies come from pyproject.toml and package.json.
+uv.lock
+package-lock.json
+
+# Build, environment and coverage output.
+.venv/
+node_modules/
+htmlcov/
+coverage.xml
+.coverage*
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.hypothesis/
+.local/
+supabase/.temp/
+supabase/.branches/
+**/__pycache__/
+
+# Local secrets, never documented.
+.env
+.env.*
+
+# Historical step-by-step implementation plans; the spec and ledger hold the current decisions.
+docs/superpowers/plans/
