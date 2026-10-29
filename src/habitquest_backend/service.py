@@ -218,18 +218,3 @@ def cue_loss_habits(old_schedule: dict, new_schedule: dict, active: list[dict]) 
     """Return habit_ids whose routine_anchor cue is being removed by the profile update."""
     removed_anchors = {anchor for anchor in old_schedule if anchor not in new_schedule}
     return [h["habit_id"] for h in active if h.get("anchor") in removed_anchors]
-
-
-def withdraw_habit(conn, habit_id: str, reason: str) -> None:
-    """Mark a habit version withdrawn and create plan_flags for all confirmed plans that use it."""
-    conn.execute(
-        "UPDATE hq.habit_versions SET withdrawn_at=now(),withdrawn_reason=%s WHERE habit_id=%s",
-        (reason, habit_id),
-    )
-    affected = conn.execute(
-        "SELECT DISTINCT p.id FROM hq.plans p "
-        "WHERE EXISTS(SELECT 1 FROM jsonb_array_elements(p.data->'active') h WHERE h->>'habit_id'=%s)",
-        (habit_id,),
-    ).fetchall()
-    for row in affected:
-        flag_plan(conn, row["id"], "habit_withdrawn", habit_id, reason)

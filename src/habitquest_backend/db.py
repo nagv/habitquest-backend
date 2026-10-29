@@ -9,11 +9,17 @@ from habitquest_backend.config import Settings
 
 
 @contextmanager
-def transaction(settings: Settings, parent: UUID | None = None, *, worker: bool = False):
+def transaction(
+    settings: Settings, parent: UUID | None = None, *, worker: bool = False, editor: UUID | None = None
+):
+    role = "hq_editor" if editor else "hq_worker" if worker else "hq_api"
     with psycopg.connect(settings.database_url, row_factory=dict_row, connect_timeout=3) as conn:
-        conn.execute("SET LOCAL ROLE hq_worker" if worker else "SET LOCAL ROLE hq_api")
+        conn.execute(f"SET LOCAL ROLE {role}")
         conn.execute("SET LOCAL statement_timeout='10s'")
-        conn.execute("SELECT set_config('app.parent_id',%s,true)", (str(parent or ""),))
+        conn.execute(
+            "SELECT set_config('app.parent_id',%s,true),set_config('app.editor_id',%s,true)",
+            (str(parent or ""), str(editor or "")),
+        )
         yield conn
 
 

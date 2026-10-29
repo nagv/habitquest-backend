@@ -79,6 +79,20 @@ Set `MODEL_MODE=ollama` in `.env` for both API and worker. The fake path needs n
 
 The planning job: the mapper model turns concerns into goal IDs from the current catalog release; deterministic eligibility and scoring build per-goal shortlists and a template plan; the Director/Planner pick from the shortlists; code validates every pick; the Reviewer must accept the final version. Invalid picks get one revision, then the reviewed template is published. Budget, deadline, cancellation and unsafe requests fail explicitly.
 
+## Editorial API
+
+Catalog staff use `/v1/editor/*` with a JWT whose `app_metadata.hq_role` is `editor` (assigned by an administrator, never by the user). These requests run as the `hq_editor` database role, which can read and write catalog drafts but has no access to household tables.
+
+1. `POST /v1/editor/{habits|goals|concerns|chapters}/{id}/versions` starts an entity or a new draft version of an approved one (one open draft per entity); `PUT .../versions/{n}` replaces a draft; `GET .../versions/{n}` shows it with its audit trail.
+2. `POST .../versions/{n}/submit` runs the deterministic checks (levels, age bounds, linked goals exist, lexical lint for punishment, secrecy, dangerous activity, weight loss, diagnosis or treatment and coercive wording) and returns `422` with reason codes, or moves the draft to `in_review`, where it is frozen.
+3. `POST .../approve` or `.../reject` (with `reason`, back to draft) by an editor other than the author. Approved versions are immutable.
+4. `POST /v1/editor/releases` builds a candidate from the latest approved, non-withdrawn versions, or with `source_release_id` copies a published release (rollback). `GET /v1/editor/releases/{id}/diff` compares it with the current release; `GET .../validate` returns `errors` (missing world × goal chapters, references outside the release, concerns without goals, withdrawn habits) and `warnings` (a goal with no habit for an age band).
+5. `POST /v1/editor/releases/{id}/publish` by an editor other than the builder; validation errors block it. Publishing switches the current release; open proposals built on the old one get `409 replan_required` at confirmation if their habits changed.
+6. `POST /v1/editor/habits/{id}/withdraw` with `reason` withdraws every approved version immediately and permanently and adds a `plan_flags` row to each child's current plan that uses it.
+7. `GET /v1/editor/catalog-requests` lists anonymised unmatched concern phrases.
+
+The two-person rules, status transitions, release builds, publication and withdrawal run in `SECURITY DEFINER` database functions that refuse independently of the API.
+
 ## Tests and coverage
 
 Every test run uses a **dedicated disposable test database**. Fixtures truncate HabitQuest tables in `TEST_DATABASE_URL`; never set it to a real household database. The native bootstrap creates `habitquest_test`. Supabase users should create a separate local test project/database, apply `scripts/setup_db.py`, then set `TEST_DATABASE_URL` accordingly.
@@ -97,7 +111,7 @@ With Docker/Supabase available, also run `npx supabase test db` for the supplied
 ## Persistence and guardrails
 
 - SQL migrations are versioned and checksummed. The setup script also recognizes migrations applied by Supabase CLI. It never resets an existing database.
-- API transactions switch to `hq_api`; workers to `hq_worker`. RLS scope comes from the verified token. The local bootstrap connection is administrative; a hosted deployment must provision separate least-privileged login credentials for API and worker.
+- API transactions switch to `hq_api`; workers to `hq_worker`; editor routes to `hq_editor`. RLS scope comes from the verified token. The local bootstrap connection is administrative; a hosted deployment must provision separate least-privileged login credentials for API and worker.
 - Parent confirmation holds content locks through commit and revalidates source fields, policy and plan/session versions. Plan records are not changed in place.
 - Leases fence publication; every lease has a separate checkpoint branch. Recovery copies a snapshot into the new branch, so an old worker cannot mutate the active branch.
 - Model-call and conservative request-unit budgets persist across retries. `reserved_tokens` is a conservative serialized-input/output reservation, **not measured tokenizer usage or cost**. Run deadlines persist and are checked after model calls and at publication. Per-call output is capped for Ollama.

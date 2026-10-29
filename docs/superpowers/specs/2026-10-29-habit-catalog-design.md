@@ -210,3 +210,12 @@ Daily occurrences, rewards and Spark ledger, parent notifications, AI-drafted ca
 - Mapper `evidence_span` values and unmatched phrases must be non-empty, case-insensitive substrings of the concerns; otherwise the run fails.
 - Proposals record the child's `profile_version`; publication and confirmation reject a proposal whose profile changed. Publication and confirmation record the id of the release they actually checked (`proposals.release_id`, `plans.release_id`).
 - The household timezone is set through the child profile endpoints. Legacy plans keep `release_id = NULL` and carry nothing forward.
+
+## 11. Implementation refinements (plan 3)
+
+- Rejection returns a version to `draft` with an audited reason; the `rejected` status is not used.
+- Editors write drafts directly through column-level grants; `created_by` is always the calling editor. Status changes, releases, publication and withdrawal go through `SECURITY DEFINER` functions. Versions and their details are frozen while `in_review`.
+- Endpoints: `/v1/editor/{kind}/{id}/versions[/{n}[/submit|/approve|/reject]]`, `/v1/editor/releases[/{id}/diff|/validate|/publish]`, `/v1/editor/habits/{id}/withdraw`, `/v1/editor/catalog-requests`.
+- Release builds take the latest approved, non-withdrawn version of each entity; rollback copies a published release's items without withdrawn habit versions. Validation also reports withdrawn habits and habits without levels.
+- Withdrawal flags only each child's current plan, with a fixed parent-facing reason.
+

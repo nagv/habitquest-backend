@@ -1,12 +1,10 @@
 """Smoke tests for the plan_flags migration (DB-only checks, skipped without a DB)."""
 
-import psycopg
 import pytest
 from conftest import ALEX, CONFIRM, queued
-from psycopg.rows import dict_row
 
 from habitquest_backend import worker
-from habitquest_backend.service import flag_plan, withdraw_habit
+from habitquest_backend.service import flag_plan
 
 
 def test_plan_flags_table_exists(db):
@@ -77,20 +75,6 @@ def test_profile_edit_removing_cue_flags_plan(client, settings, db):
     assert client.patch(f"/v1/children/{child['id']}", json=body).status_code == 200, body
     flags = client.get(f"/v1/children/{child['id']}/plan-flags").json()
     assert sorted(f["habit_id"] for f in flags if f["kind"] == "cue_removed") == bedtime
-
-
-def test_withdraw_habit_flags_plans_using_it(client, settings, db):
-    child, _, run = _ready(client, settings)
-    assert client.post(f"/v1/proposals/{run}/confirm", json=CONFIRM).status_code == 200
-    (active,) = db.execute("SELECT data->'active' FROM hq.plans WHERE child_id=%s", (child["id"],)).fetchone()
-    habit_id = active[0]["habit_id"]
-    with psycopg.connect(settings.database_url, autocommit=True, row_factory=dict_row) as conn:
-        withdraw_habit(conn, habit_id, "safety review")
-    assert db.execute(
-        "SELECT withdrawn_reason FROM hq.habit_versions WHERE habit_id=%s", (habit_id,)
-    ).fetchall() == [("safety review",)]
-    flags = client.get(f"/v1/children/{child['id']}/plan-flags").json()
-    assert [(f["kind"], f["habit_id"]) for f in flags] == [("habit_withdrawn", habit_id)]
 
 
 def _ready(client, settings):

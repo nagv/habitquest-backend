@@ -58,7 +58,7 @@ def db(settings):
         conn.execute(
             "TRUNCATE hq.households,hq.memberships,hq.children,hq.intakes,hq.jobs,hq.proposals,hq.plans,hq.child_goals,hq.plan_flags,hq.events CASCADE"
         )
-        conn.execute("TRUNCATE hq.catalog_requests")
+        conn.execute("TRUNCATE hq.catalog_requests,hq.catalog_audit")
         conn.execute("TRUNCATE hq.policy")
         conn.execute(
             "TRUNCATE hq.release_items,hq.catalog_releases,hq.habit_variants,hq.habit_tags,hq.habit_prereqs,"
