@@ -31,7 +31,7 @@ All tables live in schema `hq`.
 ### 3.1 Catalog
 
 ```
-concerns(id text, version, status, label, synonyms text[], search tsvector)
+concerns(id text, version, status, label, synonyms text[])
 goals(id text, version, status, title, description)
 concern_goals(concern_id, concern_version, goal_id, weight numeric)
 
@@ -43,16 +43,19 @@ habit_levels(habit_id, version, level, minutes, points, instruction)
 habit_goals(habit_id, version, goal_id, strength numeric)
 habit_prereqs(habit_id, version, supports_habit_id, kind)
 habit_tags(habit_id, version, tag)               -- interest:*, topic:*, access:*
-habit_variants(habit_id, version, interest, title, instruction, status)
+habit_variants(habit_id, version, interest, title, instruction)
 chapter_templates(id, version, status, world, goal_id, title)
 
-catalog_releases(id, number, built_by, published_by, published_at, notes, is_current)
+catalog_releases(id, built_by, published_by, published_at, notes, is_current)
 release_items(release_id, entity, entity_id, version)
 catalog_audit(entity, entity_id, version, from_status, to_status, actor, reason, at)
 catalog_requests(id, phrase_hash, normalized_phrase, count, first_seen, last_seen)
 ```
 
 - `status` for versioned entities: `draft | in_review | approved | rejected`.
+- `catalog_releases.id` is the release number. Published releases may change only `is_current` and `notes`.
+- Variants belong to a habit version and are reviewed with it.
+- Withdrawal of an approved habit version is permanent.
 - `routine_anchor`: `morning | after_school | evening | bedtime`.
 - `level`: `simple | standard | stretch`; one to three levels per habit version.
 - Constraints: `min_age <= max_age`, ages within 6-13, `points BETWEEN 1 AND 3`, `minutes > 0`, unique `(release_id, entity, entity_id)`, at most one `is_current` release (partial unique index).
@@ -100,7 +103,7 @@ Removed: `/onboarding`, `/clarifications`, `/confirm-goals`, `/analyze-runs`, th
 ### 4.2 Planning job steps
 
 1. **Map concerns (LLM, Director).** Input: intake concerns, active `child_goals`, and the goal and concern IDs of the current release. Output: `{goals: [{goal_id, evidence_span, confidence, suggested_not_stated}], unmatched_phrases, explanation}`. IDs outside the release fail validation. Existing active goals are reused rather than duplicated.
-2. **Eligibility (SQL).** Habit version is in the current release and not withdrawn; the child's whole age band lies within `[min_age, max_age]`; it serves at least one mapped goal; topic tags are in `opted_in_topics`; accessibility tags match the child's needs; it does not duplicate an active canonical habit in the current plan; at least one level fits `available_minutes`. A habit whose `routine_anchor` has no cue in `routine_schedule` is returned with `needs_cue`.
+2. **Eligibility (deterministic, Python over the loaded release; service roles can read only published, approved rows).** Habit version is in the current release and not withdrawn; the child's whole age band lies within `[min_age, max_age]`; it serves at least one mapped goal; topic tags are in `opted_in_topics`; every accessibility need `x` of the child appears on the habit as `access:x`; it does not duplicate an active canonical habit in the current plan; at least one level fits `available_minutes`. A habit whose `routine_anchor` has no cue in `routine_schedule` is returned with `needs_cue`.
 3. **Score (Python, `ranking_version`).**
    `score = Σ(goal_priority_weight × habit_goals.strength) + interest_bonus + prereq_bonus − level_penalty`; ties broken by habit ID. Goal priority is the parent's order once set; before that, existing active goals first, then mapped goals by descending confidence, then by position of `evidence_span` in the concerns text. Produces a per-goal shortlist (up to three) with score breakdowns, and a template plan: top habit per goal, simplest fitting level, within `max_active_habits` and total `available_minutes`.
 4. **Pick (LLM, Planner).** Tool `search_catalog(goal_id)` returns that goal's shortlist; scope is bound server-side. Output: change set (`add`, `replace`, `rotate_to_future`, `pause_goal`) with level, cue and days per active habit, future candidates, rationale, order explanation and routine links.
@@ -152,7 +155,7 @@ Submit runs deterministic checks: schema, age bounds, one to three levels with v
 
 | Path | Actions |
 |---|---|
-| `/v1/editor/{habits,goals,concerns,chapters,variants}` | create draft, edit draft, `submit`, `approve`, `reject` |
+| `/v1/editor/{habits,goals,concerns,chapters}` | create draft, edit draft, `submit`, `approve`, `reject` |
 | `/v1/editor/releases` | create, `diff`, `validate`, `publish` |
 | `/v1/editor/habits/{id}/withdraw` | emergency withdrawal |
 | `/v1/editor/catalog-requests` | anonymized unmatched concerns |
@@ -162,7 +165,7 @@ Submit runs deterministic checks: schema, age bounds, one to three levels with v
 Forward-only migrations:
 
 1. Create catalog, release, audit, intake, `child_goals` and `plan_flags` tables; add profile columns to `children`.
-2. Seed release 1 from the existing `hq.catalog` and `hq.chapters`, preserving the five habit IDs. Goals: the four existing categories plus "Predictable bedtime and mornings". Concerns with synonyms. One `standard` level per habit using current minutes and points. Routine anchors: `bedtime-prep` → `bedtime`, `pack-bag` → `evening`, `morning-ready` → `morning`, `join-meal` and `clear-plate` → `after_school`. `clear-plate` links to both meals and responsibility.
+2. Seed release 1 from the existing `hq.catalog` and `hq.chapters`, preserving the five habit IDs. Goals: the four existing categories plus "Predictable bedtime and mornings". Concerns with synonyms. One `standard` level per habit using current minutes and points. Routine anchors: `bedtime-prep` → `bedtime`, `pack-bag` → `evening`, `morning-ready` → `morning`, `join-meal` and `clear-plate` → `after_school`. `clear-plate` links to both meals and responsibility. Release 1 is seeded idempotently by `supabase/seed.sql`.
 3. Convert `hq.sessions` to `intakes`; copy the latest `preferences` world and routine times into profile fields; set `catalog_release_id = 1` on existing plans. Existing `analysis` jobs stay readable.
 4. Drop `hq.catalog`, `hq.chapters`, `sessions.goals_confirmed`, and the `Category` literal in `schemas.py`.
 
@@ -173,7 +176,7 @@ Restructure code into the v6 15.2 layout as part of this work: `catalog/` (repos
 | Case | Behaviour |
 |---|---|
 | Unknown goal or habit ID, or off-shortlist pick | Validation failure, one revision, then template plan with `fallback: true`. |
-| Goal with no eligible habit | Listed in `unresolved` with reason `age`, `needs_cue` or `no_catalog_entry`; run succeeds for other goals. |
+| Goal with no eligible habit | Listed in `unresolved` with reason `no_catalog_entry`, `needs_cue` or `deferred` (blocked by `max_active_habits` or minutes); run succeeds for other goals. |
 | All goals unresolved | Run `ready` with no active habits and questions; not a failure. |
 | Release changed or habit withdrawn before confirm | `409 replan_required`. |
 | `PATCH` violating limits or coverage | `422` naming the violated rule. |

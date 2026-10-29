@@ -585,7 +585,7 @@ BEGIN
     ('pack-bag', 1, 'responsibility', 0.8), ('pack-bag', 1, 'morning', 0.5);
   INSERT INTO hq.habit_prereqs VALUES ('pack-bag', 1, 'morning-ready', 'prepares');
   INSERT INTO hq.habit_tags
-  SELECT habit_id, 1, 'access:short_instructions' FROM hq.habits
+  SELECT id, 1, 'access:short_instructions' FROM hq.habits
   UNION ALL VALUES ('bedtime-prep', 1, 'interest:space'), ('pack-bag', 1, 'interest:space');
   INSERT INTO hq.habit_variants VALUES
     ('bedtime-prep', 1, 'space', 'Prepare for Night Docking',

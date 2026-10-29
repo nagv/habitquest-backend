@@ -127,3 +127,12 @@ def test_template_plan_invariants(habit_list, goals, max_active, minutes):
     assert covered | set(plan.unresolved) == set(goals)
     assert not set(active_ids) & {s.candidate.habit.id for s in plan.future}
     assert plan == template_plan(lists, goals, max_active=max_active, available_minutes=minutes)
+
+
+def test_duplicate_and_unknown_goal_ids_do_not_distort_scores():
+    habit = make_habit("a", goals={"x": 1.0, "y": 1.0})
+    [dup] = score([candidate(habit, ("x",))], ["x", "x", "y"], frozenset())
+    assert dup.breakdown["goal"] == 1.0
+    [unknown] = score([candidate(habit, ("x", "y"))], ["x"], frozenset())
+    assert unknown.breakdown["goal"] == 1.0
+    assert score([], [], frozenset()) == []

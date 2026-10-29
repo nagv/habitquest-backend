@@ -70,3 +70,8 @@ def test_10_to_13_band_uses_its_own_bounds():
     release = make_release(make_habit("young", max_age=9), make_habit("all"))
     older = ChildProfile(age_band="10-13", routine_schedule=SCHEDULE)
     assert ids(eligible(release, older, ["g"], available_minutes=10)) == ["all"]
+
+
+def test_duplicate_goal_ids_are_served_once():
+    [candidate] = eligible(make_release(make_habit("a")), PROFILE, ["g", "g"], available_minutes=10)
+    assert candidate.goal_ids == ("g",)

@@ -26,12 +26,13 @@ class TemplatePlan:
 
 def score(candidates: list[Candidate], goal_ids: list[str], interests: frozenset[str]) -> list[Scored]:
     """Rank candidates; goal_ids is in parent priority order (first is most important)."""
+    goal_ids = list(dict.fromkeys(goal_ids))
     weights = {goal: (len(goal_ids) - i) / len(goal_ids) for i, goal in enumerate(goal_ids)}
     present = {c.habit.id for c in candidates}
     result = []
     for c in candidates:
         breakdown = {
-            "goal": round(sum(weights[g] * c.habit.goals[g] for g in c.goal_ids), 4),
+            "goal": round(sum(weights.get(g, 0.0) * c.habit.goals[g] for g in c.goal_ids), 4),
             "interest": INTEREST_BONUS if any(f"interest:{i}" in c.habit.tags for i in interests) else 0.0,
             "prereq": PREREQ_BONUS if present & set(c.habit.supports) else 0.0,
             "level": -LEVEL_PENALTY[c.level.level],

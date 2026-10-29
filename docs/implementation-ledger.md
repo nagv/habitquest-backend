@@ -31,3 +31,12 @@ Ruling: Stage files in the chat's writable working directory, then copy only pro
 - Ruling: no hosted release, reward ledger or real family pilot is included. Family deletion/retention, evals and production credentials remain prerequisites for a family pilot.
 - Ruling: one coherent initial feature commit is used for this new repository; no pre-existing application history was available. No remote push or deployment.
 - Deferred minor items: none from the independent review. Broader product capabilities remain intentionally out of scope as specified in implementation-plan.md.
+
+## Catalog foundation (plan 1 of 3)
+
+- Added versioned catalog tables, approval immutability triggers, two-person review checks, numbered releases and read-only `released_*` views; service roles cannot read catalog tables directly.
+- Review follow-up (migration `202610290002_catalog_guards.sql`): published releases may change only `is_current`/`notes` and cannot be deleted; withdrawal is permanent; detail guards lock the parent row `FOR SHARE` to close approve/publish races.
+- Seeded release 1 from the development catalog (five habits, five goals, four concerns, fifteen chapter templates). Plan seed bug fixed during implementation (`hq.habits.id`, not `habit_id`).
+- Added `habitquest_backend.catalog`: release loading, deterministic eligibility, scoring (`RANKING_VERSION 2026-10-29.1`), per-goal shortlists and template plan, with Hypothesis invariants.
+- Planning still uses `hq.catalog`; plan 2 switches it and removes the old tables. Open for plan 2/3: publish-time release validation (dangling goal/entity references, habits without levels) and clearing the previous current release before setting a new one.
+- Final review follow-up: `score` and `eligible` de-duplicate goal ids and tolerate candidate goals outside the priority list. Carried to plan 2: a tested `(habit_id, version)` revalidation helper for confirmation (not in release / superseded / withdrawn); `load_release` should reject unpublished or unknown release ids instead of returning an empty release; distinguish "already covered by an active habit" from `no_catalog_entry`; compute `needs_cue` over all candidates rather than the top-3 shortlist; LLM-facing shortlist serialisation and code-enforced pick validation; read the release in one snapshot.

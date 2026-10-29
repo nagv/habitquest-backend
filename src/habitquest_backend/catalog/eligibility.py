@@ -22,6 +22,7 @@ def eligible(
     active_habit_ids: frozenset[str] = frozenset(),
 ) -> list[Candidate]:
     """Deterministic hard filter; the LLM and scoring only ever see these candidates."""
+    goal_ids = list(dict.fromkeys(goal_ids))
     low, high = AGE_BANDS[profile.age_band]
     required_access = {f"access:{need}" for need in profile.accessibility}
     result = []
