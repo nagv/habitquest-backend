@@ -98,7 +98,7 @@ Environment (the `habitquest-settings` group):
 
 | Variable | Value |
 |---|---|
-| `MODEL_MODE` | `fake`, or `google` with `GOOGLE_MODEL` (a Gemini model id your key can use) and `GOOGLE_API_KEY` (a secret, set in the dashboard) |
+| `MODEL_MODE` | `fake`; `google` with `GOOGLE_MODEL` (a Gemini model id your key can use) and `GOOGLE_API_KEY`; or `openai` for any OpenAI-compatible provider such as Nebius, with `OPENAI_BASE_URL` (the provider's endpoint), `OPENAI_MODEL` (a model that supports tool calling) and `OPENAI_API_KEY`. Keys are secrets: set them in the dashboard. Proposals record the model as `<mode>:<model id>`; `fallback: true` means the model's picks failed validation or review and the reviewed template was used |
 | `JWT_SECRET`, `JWT_ISSUER` | Dev HS256 tokens. Mint them locally with `scripts/local_token.py`, using the same values in your local `.env` plus `LOCAL_DEMO_AUTH=true`. For real users, use Supabase Auth instead: `JWT_ISSUER=https://<project>.supabase.co/auth/v1`, `JWT_JWKS_URL=.../.well-known/jwks.json`, no `JWT_SECRET`, and editors get `app_metadata.hq_role = "editor"` |
 | `LOCAL_DEMO_AUTH` | Always `false` on the server |
 

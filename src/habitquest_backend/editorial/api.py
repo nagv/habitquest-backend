@@ -149,7 +149,7 @@ def release_items(conn, release_id: int) -> dict[tuple[str, str], int]:
 
 
 def router(settings: Settings) -> APIRouter:
-    api = APIRouter(prefix="/v1/editor", tags=["editor"])
+    api = APIRouter(prefix="/v1/editor")
     bearer = HTTPBearer(auto_error=False)
 
     def editor(credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)]) -> UUID:
@@ -162,9 +162,17 @@ def router(settings: Settings) -> APIRouter:
     def register(plural: str, kind: Kind) -> None:
         body_type = kind.body
 
-        @api.post(f"/{plural}/{{entity_id}}/versions", status_code=201, name=f"create_{kind.entity}_draft")
+        @api.post(
+            f"/{plural}/{{entity_id}}/versions",
+            status_code=201,
+            name=f"create_{kind.entity}_draft",
+            tags=["Editor: catalog"],
+            summary=f"Create a {kind.entity} draft",
+            description=f"Starts a new {kind.entity} id at version 1, or the next draft version of an approved "
+            f"{kind.entity}. One open (draft or in-review) version per {kind.entity}, otherwise 409. "
+            "The calling editor is recorded as the author.",
+        )
         def create_draft(entity_id: EntityId, body: body_type, user: Editor):  # type: ignore[valid-type]
-            """Start a new entity, or a new draft version of an existing one."""
             with transaction(settings, editor=user) as conn:
                 conn.execute(
                     "SELECT pg_advisory_xact_lock(hashtextextended(%s,2))", (f"{kind.entity}:{entity_id}",)
@@ -187,7 +195,14 @@ def router(settings: Settings) -> APIRouter:
                 write_details(conn, kind, entity_id, version, body)
                 return version_view(conn, kind, entity_id, version)
 
-        @api.put(f"/{plural}/{{entity_id}}/versions/{{version}}", name=f"edit_{kind.entity}_draft")
+        @api.put(
+            f"/{plural}/{{entity_id}}/versions/{{version}}",
+            name=f"edit_{kind.entity}_draft",
+            tags=["Editor: catalog"],
+            summary=f"Edit a {kind.entity} draft",
+            description=f"Replaces a {kind.entity} draft's content. Versions in review or approved cannot be "
+            "edited (409); create a new version instead.",
+        )
         def edit_draft(entity_id: EntityId, version: int, body: body_type, user: Editor):  # type: ignore[valid-type]
             with transaction(settings, editor=user) as conn:
                 lock_draft(conn, kind, entity_id, version)
@@ -203,13 +218,27 @@ def router(settings: Settings) -> APIRouter:
     for plural, kind in KINDS.items():
         register(plural, kind)
 
-    @api.get("/{kind_name}/{entity_id}/versions/{version}")
+    @api.get(
+        "/{kind_name}/{entity_id}/versions/{version}",
+        tags=["Editor: catalog"],
+        summary="Read a catalog version",
+    )
     def get_version(kind_name: KindName, entity_id: EntityId, version: int, user: Editor):
+        """A habit, goal, concern or chapter version with its details and audit trail (status changes, actors, reasons)."""
         with transaction(settings, editor=user) as conn:
             return version_view(conn, KINDS[kind_name], entity_id, version)
 
-    @api.post("/{kind_name}/{entity_id}/versions/{version}/submit")
+    @api.post(
+        "/{kind_name}/{entity_id}/versions/{version}/submit",
+        tags=["Editor: catalog"],
+        summary="Submit for review",
+    )
     def submit(kind_name: KindName, entity_id: EntityId, version: int, user: Editor):
+        """Runs the deterministic checks: levels, age bounds, linked goals exist, and a lexical lint for
+        punishment, secrecy, dangerous activity, weight loss, diagnosis or treatment and coercive wording.
+        Findings return 422 with reason codes and the version stays a draft; otherwise it moves to `in_review`,
+        where it can no longer be edited.
+        """
         kind = KINDS[kind_name]
         with transaction(settings, editor=user) as conn:
             lock_draft(conn, kind, entity_id, version)
@@ -221,8 +250,15 @@ def router(settings: Settings) -> APIRouter:
             conn.execute("SELECT hq.transition_version(%s,%s,%s,'submit')", (kind.entity, entity_id, version))
             return version_view(conn, kind, entity_id, version)
 
-    @api.post("/{kind_name}/{entity_id}/versions/{version}/approve")
+    @api.post(
+        "/{kind_name}/{entity_id}/versions/{version}/approve",
+        tags=["Editor: catalog"],
+        summary="Approve a version",
+    )
     def approve(kind_name: KindName, entity_id: EntityId, version: int, user: Editor):
+        """An editor other than the author approves a version in review (403 for the author). Approved versions
+        are immutable and go into the next release build.
+        """
         kind = KINDS[kind_name]
         with transaction(settings, editor=user) as conn, refusals():
             conn.execute(
@@ -230,8 +266,13 @@ def router(settings: Settings) -> APIRouter:
             )
             return version_view(conn, kind, entity_id, version)
 
-    @api.post("/{kind_name}/{entity_id}/versions/{version}/reject")
+    @api.post(
+        "/{kind_name}/{entity_id}/versions/{version}/reject",
+        tags=["Editor: catalog"],
+        summary="Reject a version",
+    )
     def reject(kind_name: KindName, entity_id: EntityId, version: int, body: Reason, user: Editor):
+        """An editor other than the author returns a version in review to draft; the reason is kept in the audit trail."""
         kind = KINDS[kind_name]
         with transaction(settings, editor=user) as conn, refusals():
             conn.execute(
@@ -240,28 +281,38 @@ def router(settings: Settings) -> APIRouter:
             )
             return version_view(conn, kind, entity_id, version)
 
-    @api.post("/habits/{entity_id}/withdraw")
+    @api.post("/habits/{entity_id}/withdraw", tags=["Editor: catalog"], summary="Withdraw a habit")
     def withdraw(entity_id: EntityId, body: Reason, user: Editor):
-        """Emergency withdrawal: immediate, permanent, and flags confirmed plans for parent review."""
+        """Emergency withdrawal, immediate and permanent: every approved version is withdrawn, open proposals using
+        the habit can no longer be confirmed, and each child's current plan that uses it gets a
+        `habit_withdrawn` flag for the parent. Returns how many plans were flagged.
+        """
         with transaction(settings, editor=user) as conn, refusals():
             flagged = one(conn, "SELECT hq.withdraw_habit(%s,%s) AS n", (entity_id, body.reason))["n"]
             return {"habit_id": entity_id, "flagged_plans": flagged}
 
-    @api.get("/releases")
+    @api.get("/releases", tags=["Editor: releases"], summary="List releases")
     def releases(user: Editor):
+        """All catalog releases, newest first, with builder, publisher and which one is current."""
         with transaction(settings, editor=user) as conn:
             return conn.execute("SELECT * FROM hq.catalog_releases ORDER BY id DESC").fetchall()
 
-    @api.post("/releases", status_code=201)
+    @api.post("/releases", status_code=201, tags=["Editor: releases"], summary="Build a release")
     def build(body: ReleaseBuild, user: Editor):
+        """Creates an unpublished release from the latest approved, non-withdrawn version of every entity; with
+        `source_release_id` it copies a published release instead (rollback), leaving out withdrawn habits.
+        """
         with transaction(settings, editor=user) as conn, refusals():
             release_id = one(
                 conn, "SELECT hq.build_release(%s,%s) AS id", (body.notes, body.source_release_id)
             )["id"]
             return one(conn, "SELECT * FROM hq.catalog_releases WHERE id=%s", (release_id,))
 
-    @api.get("/releases/{release_id}/diff")
+    @api.get(
+        "/releases/{release_id}/diff", tags=["Editor: releases"], summary="Compare with the current release"
+    )
     def diff(release_id: int, user: Editor):
+        """Added, removed and re-versioned goals, concerns, habits and chapters relative to the current release."""
         with transaction(settings, editor=user) as conn:
             one(conn, "SELECT id FROM hq.catalog_releases WHERE id=%s", (release_id,))
             base = one(conn, "SELECT id FROM hq.current_release")["id"]
@@ -271,14 +322,19 @@ def router(settings: Settings) -> APIRouter:
                 "changes": diff_items(release_items(conn, release_id), release_items(conn, base)),
             }
 
-    @api.get("/releases/{release_id}/validate")
+    @api.get("/releases/{release_id}/validate", tags=["Editor: releases"], summary="Validate a release")
     def validate(release_id: int, user: Editor):
+        """Errors block publication: a missing world x goal chapter, references outside the release, a concern
+        without goals, a withdrawn habit, a habit without levels. Warnings: a goal with no habit for an age band.
+        """
         with transaction(settings, editor=user) as conn:
             return validate_release(load_release(conn, release_id, candidate=True))
 
-    @api.post("/releases/{release_id}/publish")
+    @api.post("/releases/{release_id}/publish", tags=["Editor: releases"], summary="Publish a release")
     def publish(release_id: int, user: Editor):
-        """A different editor from the builder publishes; validation errors block publication."""
+        """An editor other than the builder publishes (403 for the builder); validation errors return 422.
+        The release becomes current for all new planning; open proposals whose habits changed must be replanned.
+        """
         with transaction(settings, editor=user) as conn, refusals():
             report = validate_release(load_release(conn, release_id, candidate=True))
             if report["errors"]:
@@ -286,9 +342,11 @@ def router(settings: Settings) -> APIRouter:
             conn.execute("SELECT hq.publish_release(%s)", (release_id,))
             return {**one(conn, "SELECT * FROM hq.catalog_releases WHERE id=%s", (release_id,)), **report}
 
-    @api.get("/catalog-requests")
+    @api.get("/catalog-requests", tags=["Editor: catalog"], summary="Unmatched concerns")
     def catalog_requests(user: Editor):
-        """Anonymised unmatched concern phrases, most frequent first."""
+        """Anonymised phrases parents used that matched no catalog goal (only when the parent allowed it), most
+        frequent first. Contains no child or household data.
+        """
         with transaction(settings, editor=user) as conn:
             return conn.execute(
                 "SELECT normalized_phrase,count,first_seen,last_seen FROM hq.catalog_requests "
@@ -296,9 +354,9 @@ def router(settings: Settings) -> APIRouter:
             ).fetchall()
 
     # Registered last: "/{kind_name}" would otherwise capture "/releases" and "/catalog-requests".
-    @api.get("/{kind_name}")
+    @api.get("/{kind_name}", tags=["Editor: catalog"], summary="List versions / review queue")
     def list_versions(kind_name: KindName, user: Editor, status: Status | None = None):
-        """Versions of one kind, e.g. `?status=in_review` for the review queue, oldest entity first."""
+        """Versions of one kind; `?status=in_review` is the review queue. Without `status`, every version."""
         kind = KINDS[kind_name]
         with transaction(settings, editor=user) as conn:
             return conn.execute(
