@@ -39,7 +39,7 @@ def test_reviewer_revision_retrieves_evidence_again(client, settings, db, monkey
     monkeypatch.setattr(planning.BoundedChat, "_fake", reject_once)
     worker.run_once(settings)
     assert client.get(f"/v1/plan-runs/{run}").json()["status"] == "ready"
-    assert db.execute("SELECT count(*) FROM hq.events WHERE kind='tool'").fetchone()[0] == 2
+    assert db.execute("SELECT count(*) FROM hq.events WHERE kind='tool'").fetchone()[0] == 8
 
 
 @pytest.mark.parametrize("incomplete", [False, True])
@@ -94,8 +94,10 @@ def test_cli_once_runs_actual_worker_process(client, settings):
     assert client.get(f"/v1/plan-runs/{run}").json()["status"] == "ready"
 
 
-def test_no_eligible_option_is_never_invented(client, settings, db):
+def test_no_eligible_habit_yields_questions_not_invented_habits(client, settings, db):
     _, _, run = queued(client)
-    db.execute("UPDATE hq.catalog SET approved=false")
+    db.execute("UPDATE hq.habit_versions SET withdrawn_at=now(),withdrawn_reason='test'")
     worker.run_once(settings)
-    assert client.get(f"/v1/plan-runs/{run}").json()["status"] == "failed"
+    assert client.get(f"/v1/plan-runs/{run}").json()["status"] == "ready"
+    data = client.get(f"/v1/proposals/{run}").json()["data"]
+    assert data["active"] == [] and set(data["unresolved"].values()) == {"no_catalog_entry"}

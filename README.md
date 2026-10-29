@@ -1,6 +1,6 @@
 # HabitQuest onboarding backend
 
-Parent concerns -> agent-assisted goal suggestions -> parent-confirmed goals -> reviewed habit and chapter proposal -> versioned confirmed plan.
+Child profile + parent concerns -> goals mapped from the reviewed catalog -> ranked, agent-picked and reviewed habits and chapter outline -> parent-confirmed, versioned plan. Parents can add new concerns for the same child later.
 
 This is the first backend slice. Daily occurrences, completion approvals, Spark transactions, screen-time enforcement, world rendering, redemption and formal RAGAS/LangSmith experiments are later integrations. Proposed point fields are catalog metadata, not awards.
 
@@ -65,21 +65,19 @@ Install Ollama and download a model that supports tool calling, such as the conf
 ollama pull qwen3:8b
 ```
 
-Set `MODEL_MODE=ollama` in `.env` for both API and worker. The fake path needs no download or paid API key. Model/network errors have bounded retries; invalid, rejected or exhausted runs fail explicitly and publish nothing. There is no unchecked generated fallback.
+Set `MODEL_MODE=ollama` in `.env` for both API and worker. The fake path needs no download or paid API key. Model/network errors have bounded retries; invalid selections and rejected reviews fall back to the reviewed deterministic template (`fallback: true`); budget, deadline, cancellation and unsafe requests fail explicitly. No unreviewed generated content is published.
 
 ## API walkthrough
 
-1. `POST /v1/children` with `{"name":"Alex","age_band":"6-9"}`.
-2. `POST /v1/children/{id}/onboarding` with concerns, world (`space`, `forest`, `city`), available_minutes, IANA timezone and agreed readiness times if known. Leave goals empty to begin with free text.
-3. `POST /v1/onboarding/{id}/analyze-runs` with an `Idempotency-Key` header. Poll the returned status URL for suggested goals and clarification questions.
-4. If needed, `POST /v1/onboarding/{id}/clarifications` with the **complete replacement onboarding input**. This invalidates prior goal confirmation and increments the version.
-5. `POST /v1/onboarding/{id}/confirm-goals` with `expected_version` and ordered goal categories. Supported categories: bedtime, morning, meals, responsibility. The parent controls priority order. Missing agreed times block relevant goals.
-6. `POST /v1/onboarding/{id}/plan-runs` with a new `Idempotency-Key`. Poll `/v1/plan-runs/{id}`.
-7. `GET /v1/proposals/{id}`. Read approved habits, up to three initially active options, the chapter outline, source versions and review result. This is not chapter unlock or assignment activation.
-8. `POST /v1/proposals/{id}/confirm` with `expected_plan_version` (0 initially). Repeating confirmation returns the same committed plan.
-9. `GET /v1/children/{id}/plan` and `/preferences`. Preferences support PUT and DELETE. Only explicit parent actions/confirmed decisions become approved memory. Preferences inform future planning context; changing them does not silently change an existing plan.
+1. `POST /v1/children` with a profile: `name`, `age_band` (`6-9` or `10-13`), optional `interests`, `accessibility`, `opted_in_topics`, `preferred_world` (`space`, `forest`, `city`), `timezone` (IANA, stored on the household) and `routine_schedule`, e.g. `{"bedtime": {"cue": "20:00", "days": ["mon","tue","wed","thu","fri","sat","sun"]}}`. Anchors: `morning`, `after_school`, `evening`, `bedtime`.
+2. `PATCH /v1/children/{id}` replaces the profile; send `expected_profile_version`. Profile edits never change a confirmed plan; the next intake uses them.
+3. `POST /v1/children/{id}/intakes` with `concerns` (free text) and `available_minutes` for this round. Add a new intake whenever the parent has new pain points.
+4. `POST /v1/intakes/{id}/plan-runs` with an `Idempotency-Key` header; poll `/v1/plan-runs/{run_id}`.
+5. `GET /v1/proposals/{run_id}`: goals mapped from the concerns (with the quoted evidence, confidence and a `suggested_not_stated` flag), active habits with cue and days, future candidates, shortlists with score breakdowns, routine links, chapter outline, unresolved goals (`needs_cue`, `no_catalog_entry`, `deferred`), questions, rationale and review. `fallback: true` means the reviewed deterministic template was used.
+6. `POST /v1/proposals/{run_id}/confirm` with `expected_plan_version` and `expected_proposal_version`. Confirmation revalidates every active habit and chapter against the current catalog release; a withdrawn or superseded item returns `409 replan_required`.
+7. `GET /v1/children/{id}/plan` and `GET /v1/children/{id}/goals`.
 
-Planning state: queued -> running -> ready/failed/cancelled. Analysis jobs return an `analysis` field. Requests belong to the authenticated parent; access to another household's records returns 404. A parent may own multiple children; their records and preferences remain separate.
+The planning job: the mapper model turns concerns into goal IDs from the current catalog release; deterministic eligibility and scoring build per-goal shortlists and a template plan; the Director/Planner pick from the shortlists; code validates every pick; the Reviewer must accept the final version. Invalid picks get one revision, then the reviewed template is published. Budget, deadline, cancellation and unsafe requests fail explicitly.
 
 ## Tests and coverage
 
@@ -105,7 +103,7 @@ With Docker/Supabase available, also run `npx supabase test db` for the supplied
 - Model-call and conservative request-unit budgets persist across retries. `reserved_tokens` is a conservative serialized-input/output reservation, **not measured tokenizer usage or cost**. Run deadlines persist and are checked after model calls and at publication. Per-call output is capped for Ollama.
 - Generated explanations are parent-facing. Child instructions and chapter content come from reviewed rows. The seeded lexical harmful-request check is only one layer; it is not a comprehensive safety classifier. Human-reviewed model-quality/security evals are required before a family pilot.
 - External LangSmith tracing is disabled around model workflows, even if inherited tracing environment flags are set. Events store IDs, roles and outcome metadata rather than raw prompts.
-- Checkpoints can contain private context. This local slice has preference correction/deletion, not complete family erasure, retention automation, or production privacy operations. Those are required before a family pilot.
+- Checkpoints can contain private context. This local slice supports versioned profile correction, not complete family erasure, retention automation, or production privacy operations. Those are required before a family pilot.
 - Initial migrations contain a small illustrative catalog. Treat release/point policy and content as development fixtures until reviewed for a real pilot.
 
 See `docs/implementation-ledger.md` for decisions, verification evidence and known environment limitations. No cloud deployment or provider purchase is performed.

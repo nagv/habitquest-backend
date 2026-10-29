@@ -6,7 +6,7 @@ from langchain_core.messages import AIMessage, ToolMessage
 from habitquest_backend import planning, worker
 
 
-def test_model_cannot_silently_drop_a_confirmed_goal(client, settings, monkeypatch):
+def test_model_cannot_silently_drop_a_template_goal(client, settings, monkeypatch):
     _, _, run = queued(client)
     original = planning.BoundedChat._fake
 
@@ -15,8 +15,9 @@ def test_model_cannot_silently_drop_a_confirmed_goal(client, settings, monkeypat
             return AIMessage(
                 content=json.dumps(
                     {
-                        "option_ids": ["bedtime-prep"],
-                        "rationale": "Only bedtime selected despite three confirmed goals.",
+                        "picks": [{"habit_id": "bedtime-prep", "level": "standard"}],
+                        "rationale": "Only bedtime despite three coverable goals.",
+                        "order_explanation": "Bedtime only.",
                     }
                 )
             )
@@ -24,4 +25,6 @@ def test_model_cannot_silently_drop_a_confirmed_goal(client, settings, monkeypat
 
     monkeypatch.setattr(planning.BoundedChat, "_fake", omit)
     worker.run_once(settings)
-    assert client.get(f"/v1/plan-runs/{run}").json()["status"] == "failed"
+    data = client.get(f"/v1/proposals/{run}").json()["data"]
+    assert data["fallback"]
+    assert [h["habit_id"] for h in data["active"]] == ["bedtime-prep", "clear-plate", "join-meal"]

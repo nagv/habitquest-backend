@@ -60,7 +60,7 @@ def test_provider_failure_retries_then_stops(client, settings, db, monkeypatch):
 
 def test_changed_onboarding_blocks_worker_before_model_call(client, settings, db):
     _, _, run = queued(client)
-    db.execute("UPDATE hq.sessions SET version=version+1")
+    db.execute("UPDATE hq.intakes SET version=version+1")
     assert worker.run_once(settings)
     result = client.get(f"/v1/plan-runs/{run}").json()
     assert result["status"] == "failed" and result["model_calls"] == 0
@@ -72,7 +72,7 @@ def test_state_changes_during_generation_do_not_publish(client, settings, db, mo
 
     def change(*args):
         result = original(*args)
-        db.execute("UPDATE hq.sessions SET version=version+1")
+        db.execute("UPDATE hq.intakes SET version=version+1")
         return result
 
     monkeypatch.setattr(worker, "generate", change)
@@ -97,26 +97,40 @@ def test_cancellation_during_generation_fences_model_and_publication(client, set
 @pytest.mark.parametrize("unsafe_concerns", ["punish the child", "starve to teach a lesson"])
 def test_harmful_goals_fail_closed(client, settings, db, unsafe_concerns):
     _, _, run = queued(client)
-    db.execute("UPDATE hq.sessions SET data=jsonb_set(data,'{concerns}',%s)", (json.dumps(unsafe_concerns),))
+    db.execute("UPDATE hq.intakes SET data=jsonb_set(data,'{concerns}',%s)", (json.dumps(unsafe_concerns),))
     assert worker.run_once(settings)
     assert client.get(f"/v1/plan-runs/{run}").json()["status"] == "failed"
 
 
-@pytest.mark.parametrize("ids", [["invented"], ["bedtime-prep", "bedtime-prep"]])
-def test_invalid_model_catalog_ids_never_publish(client, settings, monkeypatch, ids):
+@pytest.mark.parametrize(
+    "picks",
+    [
+        [{"habit_id": "invented", "level": "standard"}],
+        [{"habit_id": "bedtime-prep", "level": "standard"}] * 2,
+    ],
+)
+def test_invalid_picks_fall_back_to_the_reviewed_template(client, settings, monkeypatch, picks):
     _, _, run = queued(client)
     original = planning.BoundedChat._fake
 
     def corrupt(self, messages):
         if self.role == "planner" and any(isinstance(m, ToolMessage) for m in messages):
             return AIMessage(
-                content=json.dumps({"option_ids": ids, "rationale": "A plausible but invalid proposal"})
+                content=json.dumps(
+                    {
+                        "picks": picks,
+                        "rationale": "Plausible but invalid",
+                        "order_explanation": "No particular order",
+                    }
+                )
             )
         return original(self, messages)
 
     monkeypatch.setattr(planning.BoundedChat, "_fake", corrupt)
     assert worker.run_once(settings)
-    assert client.get(f"/v1/plan-runs/{run}").json()["status"] == "failed"
+    data = client.get(f"/v1/proposals/{run}").json()["data"]
+    assert data["fallback"] and data["review"] is None
+    assert [h["habit_id"] for h in data["active"]] == ["bedtime-prep", "clear-plate", "join-meal"]
 
 
 @pytest.mark.parametrize("reject_count", [1, 2])
@@ -137,7 +151,8 @@ def test_final_review_is_required_after_revision(client, settings, db, monkeypat
     assert worker.run_once(settings)
     result = client.get(f"/v1/plan-runs/{run}").json()
     assert len(calls) == 2
-    assert result["status"] == ("ready" if reject_count == 1 else "failed")
+    assert result["status"] == "ready"
+    assert client.get(f"/v1/proposals/{run}").json()["data"]["fallback"] is (reject_count == 2)
 
 
 def test_time_budget_and_nontext_json(settings):

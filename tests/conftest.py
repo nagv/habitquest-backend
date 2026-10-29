@@ -30,7 +30,7 @@ def settings():
         database_url=URL,
         jwt_secret=SECRET,
         jwt_issuer="http://local-test",
-        max_run_seconds=30,
+        max_run_seconds=120,
         model_mode="fake",
     )
 
@@ -56,9 +56,14 @@ def token(settings, user=PARENT, **overrides):
 def db(settings):
     with psycopg.connect(settings.database_url, autocommit=True) as conn:
         conn.execute(
-            "TRUNCATE hq.households,hq.memberships,hq.children,hq.sessions,hq.jobs,hq.proposals,hq.plans,hq.preferences,hq.events CASCADE"
+            "TRUNCATE hq.households,hq.memberships,hq.children,hq.intakes,hq.jobs,hq.proposals,hq.plans,hq.child_goals,hq.events CASCADE"
         )
-        conn.execute("TRUNCATE hq.catalog,hq.chapters,hq.policy")
+        conn.execute("TRUNCATE hq.policy")
+        conn.execute(
+            "TRUNCATE hq.release_items,hq.catalog_releases,hq.habit_variants,hq.habit_tags,hq.habit_prereqs,"
+            "hq.habit_goals,hq.habit_levels,hq.habit_versions,hq.habits,hq.concern_goals,hq.concerns,"
+            "hq.goals,hq.chapter_templates CASCADE"
+        )
         conn.execute((Path(__file__).parents[1] / "supabase/seed.sql").read_text())
         conn.execute("INSERT INTO hq.policy VALUES('onboarding',1,3)")
         yield conn
@@ -71,29 +76,42 @@ def client(settings, db):
         yield c
 
 
-def onboard(client, **overrides):
-    response = client.post("/v1/children", json={"name": "Alex", "age_band": "6-9"})
+ALL_DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+ALEX = {
+    "name": "Alex",
+    "age_band": "6-9",
+    "interests": ["space"],
+    "accessibility": ["short_instructions"],
+    "preferred_world": "space",
+    "timezone": "America/New_York",
+    "routine_schedule": {
+        "bedtime": {"cue": "20:00", "days": ALL_DAYS},
+        "after_school": {"cue": "16:00", "days": ALL_DAYS[:5]},
+    },
+}
+ALEX_CONCERNS = (
+    "Alex needs repeated reminders at bedtime, mornings are rushed, "
+    "and plates and school things are left everywhere."
+)
+CONFIRM = {"expected_plan_version": 0, "expected_proposal_version": 1}
+
+
+def add_child(client, **overrides):
+    response = client.post("/v1/children", json={**ALEX, **overrides})
     assert response.status_code == 201, response.text
-    child = response.json()
-    data = {
-        "concerns": "Bedtime and rushed mornings; school bag and plate cleanup",
-        "goals": ["bedtime", "morning", "responsibility"],
-        "bedtime": "20:30",
-        "morning": "07:30",
-        **overrides,
-    }
-    response = client.post(f"/v1/children/{child['id']}/onboarding", json=data)
+    return response.json()
+
+
+def intake(client, child=None, **overrides):
+    child = child or add_child(client)
+    body = {"concerns": ALEX_CONCERNS, "available_minutes": 20, **overrides}
+    response = client.post(f"/v1/children/{child['id']}/intakes", json=body)
     assert response.status_code == 201, response.text
     return child, response.json()
 
 
-def queued(client):
-    child, session = onboard(client)
-    response = client.post(
-        f"/v1/onboarding/{session['id']}/confirm-goals",
-        json={"expected_version": 1, "goals": session["data"]["goals"]},
-    )
-    assert response.status_code == 200, response.text
-    response = client.post(f"/v1/onboarding/{session['id']}/plan-runs", headers={"Idempotency-Key": "first"})
+def queued(client, key="first", **overrides):
+    child, record = intake(client, **overrides)
+    response = client.post(f"/v1/intakes/{record['id']}/plan-runs", headers={"Idempotency-Key": key})
     assert response.status_code == 202, response.text
-    return child, session, response.json()["run_id"]
+    return child, record, response.json()["run_id"]

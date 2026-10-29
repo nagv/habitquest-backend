@@ -4,13 +4,13 @@ from types import SimpleNamespace
 
 import jwt
 import pytest
-from conftest import OTHER, PARENT, onboard, queued, token
+from conftest import CONFIRM, OTHER, PARENT, intake, queued, token
 from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi import HTTPException
 from pydantic import ValidationError
 
 from habitquest_backend.auth import verify_token
-from habitquest_backend.schemas import OnboardingInput
+from habitquest_backend.schemas import ChildInput, IntakeInput
 from habitquest_backend.worker import run_once
 
 
@@ -58,20 +58,39 @@ def test_jwks_path_validates_a_real_asymmetric_signature(settings, monkeypatch):
     assert verify_token(value, settings.model_copy(update={"jwt_secret": None})) == PARENT
 
 
+WITHDRAW = (
+    "UPDATE hq.habit_versions SET withdrawn_at=now(),withdrawn_reason='safety' WHERE habit_id='bedtime-prep'"
+)
+EMPTY_RELEASE = (
+    "UPDATE hq.catalog_releases SET is_current=false;"
+    "INSERT INTO hq.catalog_releases(id,built_by,published_by,published_at,is_current) "
+    "VALUES(2,'00000000-0000-0000-0000-0000000000a1','00000000-0000-0000-0000-0000000000a2',now(),true)"
+)
+
+
 @pytest.mark.parametrize(
     "changes",
     [
-        {"goals": ["bedtime", "bedtime"]},
         {"timezone": "Imaginary/Place"},
         {"timezone": "../invalid"},
-        {"bedtime": "25:10"},
-        {"available_minutes": 0},
-        {"world": "unknown"},
+        {"preferred_world": "unknown"},
+        {"interests": ["space", "space"]},
+        {"interests": ["astrology"]},
+        {"routine_schedule": {"bedtime": {"cue": "25:10", "days": ["mon"]}}},
+        {"routine_schedule": {"lunch": {"cue": "12:00", "days": ["mon"]}}},
+        {"routine_schedule": {"bedtime": {"cue": "20:00", "days": []}}},
+        {"routine_schedule": {"bedtime": {"cue": "20:00", "days": ["mon", "mon"]}}},
     ],
 )
-def test_invalid_onboarding_constraints_are_rejected(changes):
+def test_invalid_profiles_are_rejected(changes):
     with pytest.raises(ValidationError):
-        OnboardingInput(concerns="Improve routines", **changes)
+        ChildInput(name="Alex", age_band="6-9", **changes)
+
+
+@pytest.mark.parametrize("changes", [{"available_minutes": 0}, {"concerns": "hi"}])
+def test_invalid_intakes_are_rejected(changes):
+    with pytest.raises(ValidationError):
+        IntakeInput(**{"concerns": "Improve routines", **changes})
 
 
 def test_ready_and_child_validation(client):
@@ -79,89 +98,59 @@ def test_ready_and_child_validation(client):
     assert client.post("/v1/children", json={"name": "", "age_band": "6-9"}).status_code == 422
 
 
-def test_clarification_invalidates_goal_confirmation_and_old_request_key(client):
-    _, session, run = queued(client)
-    response = client.post(
-        f"/v1/onboarding/{session['id']}/clarifications", json={**session["data"], "bedtime": "20:00"}
-    )
-    assert response.json()["version"] == 3
-    assert not response.json()["goals_confirmed"]
-    assert (
-        client.post(
-            f"/v1/onboarding/{session['id']}/confirm-goals",
-            json={"expected_version": 2, "goals": ["bedtime"]},
-        ).status_code
-        == 409
-    )
-    assert (
-        client.post(
-            f"/v1/onboarding/{session['id']}/confirm-goals",
-            json={"expected_version": 3, "goals": ["bedtime", "bedtime"]},
-        ).status_code
-        == 409
-    )
-    assert (
-        client.post(
-            f"/v1/onboarding/{session['id']}/confirm-goals",
-            json={"expected_version": 3, "goals": ["bedtime"]},
-        ).status_code
-        == 200
-    )
-    assert (
-        client.post(
-            f"/v1/onboarding/{session['id']}/plan-runs", headers={"Idempotency-Key": "first"}
-        ).status_code
-        == 409
-    )
-
-
 def ready(client, settings):
-    child, session, run = queued(client)
+    child, record, run = queued(client)
     assert run_once(settings)
     assert client.get(f"/v1/plan-runs/{run}").json()["status"] == "ready"
-    return child, session, run
+    return child, record, run
 
 
 @pytest.mark.parametrize(
     "sql",
     [
-        "UPDATE hq.catalog SET approved=false WHERE id='bedtime-prep'",
-        "UPDATE hq.catalog SET instruction='Changed after review' WHERE id='bedtime-prep'",
-        "UPDATE hq.chapters SET approved=false WHERE id='space-bedtime'",
-        "UPDATE hq.chapters SET title='Changed chapter' WHERE id='space-bedtime'",
+        WITHDRAW,
+        EMPTY_RELEASE,
         "UPDATE hq.policy SET version=2",
         "UPDATE hq.proposals SET expires_at=now()-interval '1 second'",
-        "UPDATE hq.sessions SET version=version+1",
+        "UPDATE hq.intakes SET version=version+1",
+        "UPDATE hq.proposals SET version=2",
     ],
 )
 def test_changed_sources_or_state_block_confirmation(client, settings, db, sql):
     _, _, run = ready(client, settings)
     db.execute(sql)
-    assert client.post(f"/v1/proposals/{run}/confirm", json={"expected_plan_version": 0}).status_code == 409
+    assert client.post(f"/v1/proposals/{run}/confirm", json=CONFIRM).status_code == 409
     assert db.execute("SELECT count(*) FROM hq.plans").fetchone()[0] == 0
 
 
-def test_confirmation_version_and_preferences_lifecycle(client, settings):
+def test_confirmation_versions_and_goal_lifecycle(client, settings):
     child, _, run = ready(client, settings)
-    assert client.post(f"/v1/proposals/{run}/confirm", json={"expected_plan_version": 9}).status_code == 409
-    plan = client.post(f"/v1/proposals/{run}/confirm", json={"expected_plan_version": 0}).json()
-    assert client.get(f"/v1/children/{child['id']}/plan").json()["id"] == plan["id"]
-    assert len(client.get(f"/v1/children/{child['id']}/preferences").json()) == 2
-    response = client.put(
-        f"/v1/children/{child['id']}/preferences",
-        json={"kind": "world", "value": "forest", "source_id": plan["id"]},
+    assert (
+        client.post(f"/v1/proposals/{run}/confirm", json={**CONFIRM, "expected_plan_version": 9}).status_code
+        == 409
     )
-    assert response.status_code == 200
-    assert response.json()["value"] == "forest"
-    assert client.delete(f"/v1/children/{child['id']}/preferences/world").status_code == 204
-    assert len(client.get(f"/v1/children/{child['id']}/preferences").json()) == 1
+    assert (
+        client.post(
+            f"/v1/proposals/{run}/confirm", json={**CONFIRM, "expected_proposal_version": 2}
+        ).status_code
+        == 409
+    )
+    plan = client.post(f"/v1/proposals/{run}/confirm", json=CONFIRM).json()
+    assert plan["version"] == 1 and plan["release_id"] == 1
+    assert client.get(f"/v1/children/{child['id']}/plan").json()["id"] == plan["id"]
+    goals = client.get(f"/v1/children/{child['id']}/goals").json()
+    assert {(g["goal_id"], g["status"], g["since_plan_version"]) for g in goals} == {
+        ("bedtime", "active", 1),
+        ("responsibility", "active", 1),
+        ("meals", "active", 1),
+    }
 
 
 def test_concurrent_confirmation_creates_one_version(client, settings, db):
     _, _, run = ready(client, settings)
 
     def approve(_):
-        return client.post(f"/v1/proposals/{run}/confirm", json={"expected_plan_version": 0})
+        return client.post(f"/v1/proposals/{run}/confirm", json=CONFIRM)
 
     with ThreadPoolExecutor(max_workers=2) as pool:
         responses = list(pool.map(approve, range(2)))
@@ -175,32 +164,21 @@ def test_other_household_cannot_confirm_or_read_proposal(client, settings):
     client.headers["Authorization"] = "Bearer " + token(settings, OTHER)
     assert client.get(f"/v1/plan-runs/{run}").status_code == 404
     assert client.get(f"/v1/proposals/{run}").status_code == 404
-    assert client.post(f"/v1/proposals/{run}/confirm", json={"expected_plan_version": 0}).status_code == 404
+    assert client.post(f"/v1/proposals/{run}/confirm", json=CONFIRM).status_code == 404
     assert client.get(f"/v1/children/{child['id']}/plan").status_code == 404
 
 
-def test_goal_analysis_unknown_and_no_eligible_options_fail_safely(client, settings):
-    _, session = onboard(client, concerns="Something needs to change", goals=[])
-    response = client.post(
-        f"/v1/onboarding/{session['id']}/analyze-runs", headers={"Idempotency-Key": "unknown"}
-    )
+def test_unmatched_concerns_become_questions_without_invented_habits(client, settings):
+    _, _, run = queued(client, concerns="Something needs to change")
     assert run_once(settings)
-    analysis = client.get("/v1/plan-runs/" + response.json()["run_id"]).json()["analysis"]
-    assert analysis["goals"] == [] and len(analysis["questions"]) == 1
+    data = client.get(f"/v1/proposals/{run}").json()["data"]
+    assert data["goals"] == [] and data["active"] == []
+    assert data["unmatched_phrases"] == ["Something needs to change"]
+    assert "describe it another way" in data["questions"][0]
 
 
-def test_idempotency_key_cannot_cross_sessions_or_job_kinds(client):
-    _, first, run = queued(client)
-    _, second = onboard(client)
-    assert (
-        client.post(
-            f"/v1/onboarding/{second['id']}/analyze-runs", headers={"Idempotency-Key": "first"}
-        ).status_code
-        == 409
-    )
-    assert (
-        client.post(
-            f"/v1/onboarding/{first['id']}/analyze-runs", headers={"Idempotency-Key": "first"}
-        ).status_code
-        == 409
-    )
+def test_idempotency_key_cannot_cross_intakes(client):
+    child, _, _ = queued(client)
+    _, second = intake(client, child=child)
+    response = client.post(f"/v1/intakes/{second['id']}/plan-runs", headers={"Idempotency-Key": "first"})
+    assert response.status_code == 409

@@ -10,7 +10,7 @@ SET LOCAL ROLE hq_api;
 SELECT set_config('app.parent_id','90000000-0000-0000-0000-000000000001',true);
 SELECT extensions.is((SELECT count(*) FROM hq.children WHERE id='90000000-0000-0000-0000-000000000011'),1::bigint,'Own child visible');
 SELECT extensions.is((SELECT count(*) FROM hq.children WHERE id='90000000-0000-0000-0000-000000000022'),0::bigint,'Other household child hidden');
-SELECT extensions.throws_ok($$UPDATE hq.catalog SET approved=false$$,'42501',NULL,'API cannot change reviewed catalog');
+SELECT extensions.throws_ok($$UPDATE hq.habit_versions SET title='x'$$,'42501',NULL,'API cannot change reviewed catalog');
 RESET ROLE;
 SELECT * FROM extensions.finish();
 ROLLBACK;

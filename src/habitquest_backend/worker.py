@@ -12,10 +12,12 @@ from langsmith import tracing_context
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
 
+from habitquest_backend.catalog.models import profile_from_row
+from habitquest_backend.catalog.repository import load_release
 from habitquest_backend.config import Settings
 from habitquest_backend.db import one, transaction
-from habitquest_backend.planning import BudgetExceeded, analyze, generate
-from habitquest_backend.service import current_version, eligible, validate_sources
+from habitquest_backend.planning import BudgetExceeded, generate
+from habitquest_backend.service import current_version, validate_sources
 
 
 def claim(settings):
@@ -28,7 +30,7 @@ def claim(settings):
             (settings.max_attempts,),
         )
         row = conn.execute(
-            "SELECT id FROM hq.jobs WHERE attempts<%s AND ((status='queued' AND available_at<=now()) OR (status='running' AND lease_until<=now())) ORDER BY created_at FOR UPDATE SKIP LOCKED LIMIT 1",
+            "SELECT id FROM hq.jobs WHERE kind='plan' AND attempts<%s AND ((status='queued' AND available_at<=now()) OR (status='running' AND lease_until<=now())) ORDER BY created_at FOR UPDATE SKIP LOCKED LIMIT 1",
             (settings.max_attempts,),
         ).fetchone()
         if row is None:
@@ -103,42 +105,32 @@ def run_once(settings: Settings) -> bool:
 
     try:
         with transaction(settings, job["parent_id"], worker=True) as conn:
-            child = one(conn, "SELECT * FROM hq.children WHERE id=%s", (job["child_id"],))
-            session = one(conn, "SELECT * FROM hq.sessions WHERE id=%s", (job["session_id"],))
-            if session["version"] != job["session_version"]:
-                raise ValueError("Onboarding changed")
-            catalog = eligible(conn, child, session["data"])
-            chapters = conn.execute(
-                "SELECT * FROM hq.chapters WHERE approved AND world=%s", (session["data"]["world"],)
-            ).fetchall()
-            memory = conn.execute(
-                "SELECT kind,value FROM hq.preferences WHERE child_id=%s", (child["id"],)
-            ).fetchall()
+            child = one(
+                conn,
+                "SELECT c.*,h.timezone FROM hq.children c JOIN hq.households h ON h.id=c.household_id WHERE c.id=%s",
+                (job["child_id"],),
+            )
+            intake = one(conn, "SELECT * FROM hq.intakes WHERE id=%s", (job["intake_id"],))
+            if intake["version"] != job["intake_version"]:
+                raise ValueError("Intake changed")
+            base = conn.execute(
+                "SELECT data,release_id FROM hq.plans WHERE child_id=%s ORDER BY version DESC LIMIT 1",
+                (child["id"],),
+            ).fetchone()
+            release = load_release(conn)
             policy = one(conn, "SELECT * FROM hq.policy WHERE name='onboarding'")
         context = {
-            **session["data"],
+            "concerns": intake["data"]["concerns"],
+            "available_minutes": intake["data"]["available_minutes"],
+            "world": child["preferred_world"],
+            "timezone": child["timezone"],
             "age_band": child["age_band"],
-            "preferences": memory,
+            "interests": sorted(child["interests"]),
             "policy_version": policy["version"],
             "max_active_habits": policy["max_active_habits"],
+            "profile_version": child["profile_version"],
+            "base_plan_version": job["base_plan_version"],
         }
-        if job["kind"] == "analysis":
-            with tracing_context(enabled=False):
-                result = analyze(settings, context, charge, job["deadline"].timestamp())
-            with transaction(settings, job["parent_id"], worker=True) as conn:
-                conn.execute("SELECT hq.lock_session(%s)", (job["session_id"],))
-                one(
-                    conn,
-                    "SELECT id FROM hq.sessions WHERE id=%s AND version=%s",
-                    (job["session_id"], job["session_version"]),
-                )
-                updated = conn.execute(
-                    "UPDATE hq.jobs SET status='ready',analysis=%s,lease_token=NULL,lease_until=NULL,error=NULL WHERE id=%s AND lease_token=%s AND status='running' AND lease_until>now() AND deadline>now() RETURNING id",
-                    (Jsonb(result), job["id"], job["lease_token"]),
-                ).fetchone()
-                if updated is None:
-                    raise BudgetExceeded("Analysis lease or deadline lost")
-            return True
         with psycopg.connect(
             settings.database_url, autocommit=True, prepare_threshold=0, row_factory=dict_row
         ) as cp:
@@ -148,8 +140,10 @@ def run_once(settings: Settings) -> bool:
                 data = generate(
                     settings,
                     context,
-                    catalog,
-                    chapters,
+                    profile_from_row(child),
+                    release,
+                    # Legacy plans (no release) carry nothing forward.
+                    base["data"] if base and base["release_id"] is not None else {},
                     PostgresSaver(cp),
                     job["checkpoint_thread"],
                     charge,
@@ -163,24 +157,28 @@ def run_once(settings: Settings) -> bool:
                 "SELECT id FROM hq.jobs WHERE id=%s AND lease_token=%s AND status='running' AND lease_until>now() AND deadline>now() FOR UPDATE",
                 (job["id"], job["lease_token"]),
             )
-            one(conn, "SELECT id FROM hq.children WHERE id=%s", (job["child_id"],))
+            child = one(conn, "SELECT profile_version FROM hq.children WHERE id=%s", (job["child_id"],))
             conn.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s,1))", (str(job["child_id"]),))
-            conn.execute("SELECT hq.lock_session(%s)", (job["session_id"],))
-            session = one(conn, "SELECT version FROM hq.sessions WHERE id=%s", (job["session_id"],))
+            conn.execute("SELECT hq.lock_intake(%s)", (job["intake_id"],))
+            intake = one(conn, "SELECT version FROM hq.intakes WHERE id=%s", (job["intake_id"],))
             if (
-                session["version"] != job["session_version"]
+                intake["version"] != job["intake_version"]
                 or current_version(conn, job["child_id"]) != job["base_plan_version"]
             ):
                 raise ValueError("State changed while planning")
-            validate_sources(conn, data)
+            if child["profile_version"] != data["profile_version"]:
+                raise ValueError("Profile changed while planning")
+            data["release_id"] = validate_sources(conn, data)
             conn.execute(
-                "INSERT INTO hq.proposals(id,child_id,parent_id,base_plan_version,session_version,data) VALUES(%s,%s,%s,%s,%s,%s) ON CONFLICT(id) DO NOTHING",
+                "INSERT INTO hq.proposals(id,child_id,parent_id,base_plan_version,intake_version,release_id,data) "
+                "VALUES(%s,%s,%s,%s,%s,%s,%s) ON CONFLICT(id) DO NOTHING",
                 (
                     job["id"],
                     job["child_id"],
                     job["parent_id"],
                     job["base_plan_version"],
-                    job["session_version"],
+                    job["intake_version"],
+                    data["release_id"],
                     Jsonb(data),
                 ),
             )
