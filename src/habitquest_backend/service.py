@@ -1,8 +1,10 @@
+import copy
 from uuid import UUID, uuid4
 
 from fastapi import HTTPException
 from psycopg.types.json import Jsonb
 
+from habitquest_backend.catalog.models import Release
 from habitquest_backend.catalog.repository import load_release
 from habitquest_backend.catalog.revalidation import stale_references
 from habitquest_backend.db import one
@@ -106,3 +108,132 @@ def confirm(conn, proposal_id: UUID, expected_plan: int, expected_proposal: int)
                 (proposal["child_id"], proposal["parent_id"], goal["goal_id"], plan["version"], intake["id"]),
             )
     return plan
+
+
+def apply_patch(data: dict, edit: dict, release: Release | None = None) -> dict:
+    """Pure dict transform; raises ValueError (→ 422) for invalid edits."""
+    data = copy.deepcopy(data)
+    op = edit["op"]
+    active = data["active"]
+    future = data["future"]
+    goals = data["goals"]
+    shortlists = data.get("shortlists", {})
+
+    if op == "remove_goal":
+        gid = edit["goal_id"]
+        data["goals"] = [g for g in goals if g["goal_id"] != gid]
+        return data
+
+    if op == "reorder_goals":
+        ordered = edit["goal_ids"]
+        by_id = {g["goal_id"]: g for g in goals}
+        missing = [gid for gid in ordered if gid not in by_id]
+        if missing:
+            raise ValueError(f"reorder_goals: unknown goal ids {missing}")
+        data["goals"] = [by_id[gid] for gid in ordered if gid in by_id]
+        return data
+
+    if op == "change_level":
+        hid, new_level = edit["habit_id"], edit["level"]
+        entry = next((h for h in active if h["habit_id"] == hid), None)
+        if entry is None:
+            raise ValueError(f"change_level: {hid!r} is not an active habit")
+        entry["level"] = new_level
+        return data
+
+    if op == "change_schedule":
+        hid = edit["habit_id"]
+        entry = next((h for h in active if h["habit_id"] == hid), None)
+        if entry is None:
+            raise ValueError(f"change_schedule: {hid!r} is not an active habit")
+        entry["cue"] = edit["cue"]
+        entry["days"] = edit["days"]
+        return data
+
+    if op == "swap_habit":
+        old_id, new_id, new_level = edit["old_habit_id"], edit["new_habit_id"], edit["level"]
+        old = next((h for h in active if h["habit_id"] == old_id), None)
+        if old is None:
+            raise ValueError(f"swap_habit: {old_id!r} is not active")
+        goal_ids = old["goal_ids"]
+        in_shortlist = any(
+            o["habit_id"] == new_id
+            for g in goal_ids
+            for o in shortlists.get(g, [])
+        )
+        if not in_shortlist:
+            raise ValueError(f"swap_habit: {new_id!r} is not in the shortlist for goals {goal_ids}")
+        idx = next(i for i, h in enumerate(active) if h["habit_id"] == old_id)
+        active[idx] = {**old, "habit_id": new_id, "level": new_level}
+        return data
+
+    if op == "demote_active":
+        hid = edit["habit_id"]
+        entry = next((h for h in active if h["habit_id"] == hid), None)
+        if entry is None:
+            raise ValueError(f"demote_active: {hid!r} is not an active habit")
+        data["active"] = [h for h in active if h["habit_id"] != hid]
+        data["future"].append({
+            "habit_id": hid,
+            "version": entry.get("version", 1),
+            "goal_ids": entry["goal_ids"],
+            "score": 0,
+        })
+        return data
+
+    if op == "promote_future":
+        hid, new_level = edit["habit_id"], edit["level"]
+        entry = next((h for h in future if h["habit_id"] == hid), None)
+        if entry is None:
+            raise ValueError(f"promote_future: {hid!r} is not in future candidates")
+        if release is not None:
+            problems = stale_references(release, [(hid, entry["version"])], [])
+            if problems:
+                raise ValueError(f"promote_future: candidate is stale ({problems[0]})")
+            habit = release.habits.get(hid)
+            level_obj = next((lv for lv in habit.levels if lv.level == new_level), None) if habit else None
+            minutes = level_obj.minutes if level_obj else 0
+        else:
+            minutes = 0
+        data["future"] = [h for h in future if h["habit_id"] != hid]
+        data["active"].append({
+            "habit_id": hid,
+            "version": entry["version"],
+            "goal_ids": entry["goal_ids"],
+            "level": new_level,
+            "minutes": minutes,
+            "covers": entry["goal_ids"],
+            "cue": "",
+            "days": [],
+        })
+        return data
+
+    raise ValueError(f"Unknown patch op: {op!r}")
+
+
+def flag_plan(conn, plan_id: UUID, kind: str, habit_id: str, reason: str) -> None:
+    conn.execute(
+        "INSERT INTO hq.plan_flags(plan_id,kind,habit_id,reason) VALUES(%s,%s,%s,%s)",
+        (plan_id, kind, habit_id, reason),
+    )
+
+
+def cue_loss_habits(old_schedule: dict, new_schedule: dict, active: list[dict]) -> list[str]:
+    """Return habit_ids whose routine_anchor cue is being removed by the profile update."""
+    removed_anchors = {anchor for anchor in old_schedule if anchor not in new_schedule}
+    return [h["habit_id"] for h in active if h.get("anchor") in removed_anchors]
+
+
+def withdraw_habit(conn, habit_id: str, reason: str) -> None:
+    """Mark a habit version withdrawn and create plan_flags for all confirmed plans that use it."""
+    conn.execute(
+        "UPDATE hq.habit_versions SET withdrawn_at=now(),withdrawn_reason=%s WHERE habit_id=%s",
+        (reason, habit_id),
+    )
+    affected = conn.execute(
+        "SELECT DISTINCT p.id FROM hq.plans p "
+        "WHERE EXISTS(SELECT 1 FROM jsonb_array_elements(p.data->'active') h WHERE h->>'habit_id'=%s)",
+        (habit_id,),
+    ).fetchall()
+    for row in affected:
+        flag_plan(conn, row["id"], "habit_withdrawn", habit_id, reason)

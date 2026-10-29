@@ -9,8 +9,9 @@ from psycopg.types.json import Jsonb
 from habitquest_backend.auth import verify_token
 from habitquest_backend.config import Settings
 from habitquest_backend.db import one, transaction
-from habitquest_backend.schemas import ChildInput, Confirmation, IntakeInput, ProfileUpdate
-from habitquest_backend.service import confirm, enqueue
+from habitquest_backend.catalog.repository import load_release
+from habitquest_backend.schemas import ChildInput, Confirmation, IntakeInput, ProfileUpdate, ProposalPatch
+from habitquest_backend.service import apply_patch, confirm, cue_loss_habits, enqueue, flag_plan
 
 PROFILE_COLUMNS = "name,age_band,interests,accessibility,opted_in_topics,preferred_world,routine_schedule"
 
@@ -86,6 +87,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @application.patch("/v1/children/{child_id}")
     def update_child(child_id: UUID, body: ProfileUpdate, user: Parent):
         with transaction(settings, user) as conn:
+            old_child = conn.execute(
+                "SELECT profile_version,routine_schedule FROM hq.children WHERE id=%s", (child_id,)
+            ).fetchone()
             updated = conn.execute(
                 f"UPDATE hq.children SET ({PROFILE_COLUMNS},profile_version)="
                 "(%s,%s,%s,%s,%s,%s,%s,profile_version+1) WHERE id=%s AND profile_version=%s RETURNING household_id",
@@ -97,6 +101,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             conn.execute(
                 "UPDATE hq.households SET timezone=%s WHERE id=%s", (body.timezone, updated["household_id"])
             )
+            if old_child is not None:
+                current_plan = conn.execute(
+                    "SELECT id,data FROM hq.plans WHERE child_id=%s ORDER BY version DESC LIMIT 1",
+                    (child_id,),
+                ).fetchone()
+                if current_plan:
+                    old_sched = old_child["routine_schedule"] or {}
+                    new_sched = body.model_dump(mode="json")["routine_schedule"]
+                    for habit_id in cue_loss_habits(old_sched, new_sched, current_plan["data"].get("active", [])):
+                        flag_plan(
+                            conn, current_plan["id"], "cue_removed", habit_id,
+                            f"routine_schedule no longer contains the anchor for {habit_id}",
+                        )
             return child_view(conn, child_id)
 
     @application.post("/v1/children/{child_id}/intakes", status_code=201)
@@ -143,6 +160,30 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         with transaction(settings, user) as conn:
             return one(conn, "SELECT * FROM hq.proposals WHERE id=%s", (proposal_id,))
 
+    @application.patch("/v1/proposals/{proposal_id}")
+    def patch_proposal(proposal_id: UUID, body: ProposalPatch, user: Parent):
+        with transaction(settings, user) as conn:
+            proposal = one(
+                conn,
+                "SELECT *,expires_at<=now() AS expired FROM hq.proposals WHERE id=%s FOR UPDATE",
+                (proposal_id,),
+            )
+            if proposal["confirmed"] or proposal["expired"]:
+                raise HTTPException(409, "Proposal is confirmed or expired")
+            if proposal["version"] != body.expected_proposal_version:
+                raise HTTPException(409, "Proposal version changed; reload before editing")
+            release = load_release(conn)
+            edit = body.edit.model_dump(mode="json")
+            try:
+                new_data = apply_patch(proposal["data"], edit, release)
+            except ValueError as exc:
+                raise HTTPException(422, str(exc)) from exc
+            return one(
+                conn,
+                "UPDATE hq.proposals SET data=%s,version=version+1 WHERE id=%s RETURNING *",
+                (Jsonb(new_data), proposal_id),
+            )
+
     @application.post("/v1/proposals/{proposal_id}/confirm")
     def approve(proposal_id: UUID, body: Confirmation, user: Parent):
         with transaction(settings, user) as conn:
@@ -161,6 +202,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             one(conn, "SELECT id FROM hq.children WHERE id=%s", (child_id,))
             return conn.execute(
                 "SELECT * FROM hq.child_goals WHERE child_id=%s ORDER BY goal_id", (child_id,)
+            ).fetchall()
+
+    @application.get("/v1/children/{child_id}/plan-flags")
+    def plan_flags_list(child_id: UUID, user: Parent):
+        with transaction(settings, user) as conn:
+            one(conn, "SELECT id FROM hq.children WHERE id=%s", (child_id,))
+            return conn.execute(
+                "SELECT f.* FROM hq.plan_flags f "
+                "JOIN hq.plans p ON p.id=f.plan_id "
+                "WHERE p.child_id=%s AND f.resolved_at IS NULL ORDER BY f.created_at",
+                (child_id,),
             ).fetchall()
 
     return application
