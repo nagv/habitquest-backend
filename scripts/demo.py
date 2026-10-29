@@ -41,37 +41,48 @@ with httpx.Client(
         r.raise_for_status()
         return r.json()
 
-    child = call("/v1/children", {"name": "Alex", "age_band": "6-9"})
-    data = {
-        "concerns": "Bedtime is difficult, mornings rushed, and school bags and plates left everywhere.",
-        "world": "space",
-        "available_minutes": 10,
-        "timezone": "America/New_York",
-        "bedtime": "20:30",
-        "morning": "07:30",
-    }
-    session = call(f"/v1/children/{child['id']}/onboarding", data)
-    analysis = call(f"/v1/onboarding/{session['id']}/analyze-runs", key="analysis-" + str(uuid.uuid4()))
-    subprocess.run([sys.executable, "-m", "habitquest_backend.worker", "--once"], check=True)
-    suggestions = client.get(analysis["status_url"]).json()
-    assert suggestions["status"] == "ready", suggestions
-    call(
-        f"/v1/onboarding/{session['id']}/confirm-goals",
-        {"expected_version": 1, "goals": suggestions["analysis"]["goals"]},
+    days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+    child = call(
+        "/v1/children",
+        {
+            "name": "Alex",
+            "age_band": "6-9",
+            "interests": ["space"],
+            "preferred_world": "space",
+            "timezone": "America/New_York",
+            "routine_schedule": {
+                "bedtime": {"cue": "20:00", "days": days},
+                "after_school": {"cue": "16:00", "days": days[:5]},
+            },
+        },
     )
-    run = call(f"/v1/onboarding/{session['id']}/plan-runs", key="plan-" + str(uuid.uuid4()))
+    record = call(
+        f"/v1/children/{child['id']}/intakes",
+        {
+            "concerns": "Alex needs repeated reminders at bedtime, mornings are rushed, "
+            "and plates and school things are left everywhere.",
+            "available_minutes": 20,
+        },
+    )
+    run = call(f"/v1/intakes/{record['id']}/plan-runs", key="plan-" + str(uuid.uuid4()))
     subprocess.run([sys.executable, "-m", "habitquest_backend.worker", "--once"], check=True)
     status = client.get(run["status_url"]).json()
     assert status["status"] == "ready", status
-    plan = call(f"/v1/proposals/{run['run_id']}/confirm", {"expected_plan_version": 0})
+    proposal = client.get(f"/v1/proposals/{run['run_id']}").json()
+    plan = call(
+        f"/v1/proposals/{run['run_id']}/confirm",
+        {"expected_plan_version": 0, "expected_proposal_version": proposal["version"]},
+    )
     print(
         json.dumps(
             {
                 "plan_id": plan["id"],
                 "version": plan["version"],
-                "goals": plan["data"]["goals"],
-                "active_habits": plan["data"]["active_option_ids"],
+                "goals": [(g["goal_id"], g["status"]) for g in plan["data"]["goals"]],
+                "active_habits": [h["title"] for h in plan["data"]["active"]],
                 "chapters": [c["title"] for c in plan["data"]["chapters"]],
+                "questions": plan["data"]["questions"],
+                "fallback": plan["data"]["fallback"],
             },
             indent=2,
         )

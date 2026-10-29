@@ -87,3 +87,17 @@ class ChildProfile:
     accessibility: frozenset[str] = frozenset()
     opted_in_topics: frozenset[str] = frozenset()
     routine_schedule: dict[str, RoutineSlot] = field(default_factory=dict)
+
+
+def profile_from_row(row: dict) -> ChildProfile:
+    """Build the eligibility profile from an `hq.children` row."""
+    return ChildProfile(
+        age_band=row["age_band"],
+        interests=frozenset(row["interests"]),
+        accessibility=frozenset(row["accessibility"]),
+        opted_in_topics=frozenset(row["opted_in_topics"]),
+        routine_schedule={
+            anchor: RoutineSlot(slot["cue"], tuple(slot["days"]))
+            for anchor, slot in row["routine_schedule"].items()
+        },
+    )

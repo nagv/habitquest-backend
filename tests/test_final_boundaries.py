@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor, TimeoutError
 from types import SimpleNamespace
 
 import pytest
-from conftest import onboard, queued
+from conftest import CONFIRM, queued
 from langchain_core.messages import AIMessage, HumanMessage
 from test_security_and_changes import ready
 
@@ -25,11 +25,13 @@ def test_content_edit_waits_until_confirmation_commits(client, settings, db, mon
 
     monkeypatch.setattr(service, "validate_sources", pause)
     with ThreadPoolExecutor(max_workers=2) as pool:
-        confirmation = pool.submit(
-            lambda: client.post(f"/v1/proposals/{run}/confirm", json={"expected_plan_version": 0})
-        )
+        confirmation = pool.submit(lambda: client.post(f"/v1/proposals/{run}/confirm", json=CONFIRM))
         assert validated.wait(5)
-        edit = pool.submit(lambda: db.execute("UPDATE hq.catalog SET approved=false WHERE id='bedtime-prep'"))
+        edit = pool.submit(
+            lambda: db.execute(
+                "UPDATE hq.habit_versions SET withdrawn_at=now(),withdrawn_reason='safety' WHERE habit_id='bedtime-prep'"
+            )
+        )
         try:
             with pytest.raises(TimeoutError):
                 edit.result(timeout=0.2)
@@ -53,36 +55,25 @@ def test_publication_rolls_back_when_deadline_passes_after_source_check(client, 
     assert db.execute("SELECT count(*) FROM hq.proposals").fetchone()[0] == 0
 
 
-def test_analysis_cancellation_cannot_publish_results(client, settings, monkeypatch):
-    _, session = onboard(client)
-    run = client.post(
-        f"/v1/onboarding/{session['id']}/analyze-runs", headers={"Idempotency-Key": "a"}
-    ).json()["run_id"]
-    original = worker.analyze
-
-    def cancel(*args):
-        result = original(*args)
-        client.post(f"/v1/plan-runs/{run}/cancel")
-        return result
-
-    monkeypatch.setattr(worker, "analyze", cancel)
-    worker.run_once(settings)
-    result = client.get(f"/v1/plan-runs/{run}").json()
-    assert result["status"] == "cancelled" and result["analysis"] is None
+RELEASE_WITHOUT_CHAPTERS = (
+    "INSERT INTO hq.catalog_releases(id,built_by) VALUES(2,'00000000-0000-0000-0000-0000000000a1');"
+    "INSERT INTO hq.release_items SELECT 2,entity,entity_id,version FROM hq.release_items "
+    "WHERE release_id=1 AND entity<>'chapter';"
+    "UPDATE hq.catalog_releases SET is_current=false WHERE id=1;"
+    "UPDATE hq.catalog_releases SET published_by='00000000-0000-0000-0000-0000000000a2',"
+    "published_at=now(),is_current=true WHERE id=2"
+)
 
 
-def test_harmful_concerns_are_blocked_during_analysis(client, settings):
-    _, session = onboard(client, concerns="punish the child")
-    run = client.post(
-        f"/v1/onboarding/{session['id']}/analyze-runs", headers={"Idempotency-Key": "a"}
-    ).json()["run_id"]
+def test_harmful_concerns_are_blocked_before_planning(client, settings):
+    _, _, run = queued(client, concerns="punish the child")
     worker.run_once(settings)
     assert client.get(f"/v1/plan-runs/{run}").json()["status"] == "failed"
 
 
-def test_unapproved_chapter_is_not_replaced_with_invented_content(client, settings, db):
+def test_missing_chapter_is_not_replaced_with_invented_content(client, settings, db):
     _, _, run = queued(client)
-    db.execute("UPDATE hq.chapters SET approved=false")
+    db.execute(RELEASE_WITHOUT_CHAPTERS)
     worker.run_once(settings)
     assert client.get(f"/v1/plan-runs/{run}").json()["status"] == "failed"
 

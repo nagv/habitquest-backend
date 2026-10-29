@@ -2,7 +2,7 @@ import json
 
 import psycopg
 import pytest
-from conftest import OTHER, PARENT, onboard, queued, token
+from conftest import CONFIRM, OTHER, PARENT, add_child, queued, token
 from test_security_and_changes import ready
 
 from habitquest_backend import planning, worker
@@ -12,21 +12,23 @@ from habitquest_backend.db import transaction
 @pytest.mark.parametrize(
     "sql",
     [
-        "UPDATE hq.catalog SET min_age=12 WHERE id='bedtime-prep'",
-        "UPDATE hq.catalog SET title='Changed activity' WHERE id='bedtime-prep'",
-        "UPDATE hq.chapters SET world='retired-world' WHERE id='space-bedtime'",
+        "UPDATE hq.habit_versions SET withdrawn_at=now(),withdrawn_reason='safety' WHERE habit_id='clear-plate'",
+        "UPDATE hq.catalog_releases SET is_current=false;"
+        "INSERT INTO hq.catalog_releases(id,built_by,published_by,published_at,is_current) "
+        "VALUES(2,'00000000-0000-0000-0000-0000000000a1','00000000-0000-0000-0000-0000000000a2',now(),true)",
     ],
 )
 def test_source_mutations_cannot_bypass_confirmation(client, settings, db, sql):
     _, _, run = ready(client, settings)
     db.execute(sql)
-    assert client.post(f"/v1/proposals/{run}/confirm", json={"expected_plan_version": 0}).status_code == 409
+    response = client.post(f"/v1/proposals/{run}/confirm", json=CONFIRM)
+    assert response.status_code == 409 and "replan_required" in response.json()["detail"]
 
 
 def test_sql_role_cannot_enroll_itself_in_another_household(client, settings):
-    onboard(client)
+    add_child(client)
     client.headers["Authorization"] = "Bearer " + token(settings, OTHER)
-    onboard(client)
+    add_child(client)
     with pytest.raises(psycopg.errors.InsufficientPrivilege):
         with transaction(settings, PARENT) as conn:
             conn.execute("INSERT INTO hq.memberships VALUES(%s,%s)", (PARENT, OTHER))
@@ -45,7 +47,7 @@ def test_reviewer_receives_the_complete_candidate(client, settings, monkeypatch)
     monkeypatch.setattr(planning.BoundedChat, "_fake", inspect)
     worker.run_once(settings)
     assert candidates and "chapters" in candidates[0]["candidate"]
-    assert "active_option_ids" in candidates[0]["candidate"]
+    assert "active" in candidates[0]["candidate"]
 
 
 def test_checkpoint_namespace_changes_when_lease_is_reclaimed(client, settings, db):

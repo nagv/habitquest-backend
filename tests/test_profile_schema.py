@@ -10,7 +10,7 @@ def seed_child(db, parent, child_id):
         "INSERT INTO hq.children(id,household_id,name,age_band) VALUES(%s,%s,'Kid','6-9')", (child_id, parent)
     )
     db.execute(
-        "INSERT INTO hq.sessions(id,child_id,parent_id,data) VALUES(%s,%s,%s,'{}')",
+        "INSERT INTO hq.intakes(id,child_id,parent_id,data) VALUES(%s,%s,%s,'{}')",
         (child_id, child_id, parent),
     )
 
