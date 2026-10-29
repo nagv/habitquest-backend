@@ -7,9 +7,9 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from psycopg.types.json import Jsonb
 
 from habitquest_backend.auth import verify_token
+from habitquest_backend.catalog.repository import load_release
 from habitquest_backend.config import Settings
 from habitquest_backend.db import one, transaction
-from habitquest_backend.catalog.repository import load_release
 from habitquest_backend.schemas import ChildInput, Confirmation, IntakeInput, ProfileUpdate, ProposalPatch
 from habitquest_backend.service import apply_patch, confirm, cue_loss_habits, enqueue, flag_plan
 
@@ -88,7 +88,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def update_child(child_id: UUID, body: ProfileUpdate, user: Parent):
         with transaction(settings, user) as conn:
             old_child = conn.execute(
-                "SELECT profile_version,routine_schedule FROM hq.children WHERE id=%s", (child_id,)
+                "SELECT routine_schedule FROM hq.children WHERE id=%s", (child_id,)
             ).fetchone()
             updated = conn.execute(
                 f"UPDATE hq.children SET ({PROFILE_COLUMNS},profile_version)="
@@ -101,19 +101,21 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             conn.execute(
                 "UPDATE hq.households SET timezone=%s WHERE id=%s", (body.timezone, updated["household_id"])
             )
-            if old_child is not None:
-                current_plan = conn.execute(
-                    "SELECT id,data FROM hq.plans WHERE child_id=%s ORDER BY version DESC LIMIT 1",
-                    (child_id,),
-                ).fetchone()
-                if current_plan:
-                    old_sched = old_child["routine_schedule"] or {}
-                    new_sched = body.model_dump(mode="json")["routine_schedule"]
-                    for habit_id in cue_loss_habits(old_sched, new_sched, current_plan["data"].get("active", [])):
-                        flag_plan(
-                            conn, current_plan["id"], "cue_removed", habit_id,
-                            f"routine_schedule no longer contains the anchor for {habit_id}",
-                        )
+            current_plan = conn.execute(
+                "SELECT id,data FROM hq.plans WHERE child_id=%s ORDER BY version DESC LIMIT 1", (child_id,)
+            ).fetchone()
+            if current_plan:
+                new_schedule = body.model_dump(mode="json")["routine_schedule"]
+                for habit_id in cue_loss_habits(
+                    old_child["routine_schedule"], new_schedule, current_plan["data"]["active"]
+                ):
+                    flag_plan(
+                        conn,
+                        current_plan["id"],
+                        "cue_removed",
+                        habit_id,
+                        f"routine_schedule no longer contains the anchor for {habit_id}",
+                    )
             return child_view(conn, child_id)
 
     @application.post("/v1/children/{child_id}/intakes", status_code=201)

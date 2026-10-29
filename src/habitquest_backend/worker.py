@@ -1,6 +1,7 @@
 """Durable loopback/local worker. No API server process is required for execution."""
 
 import argparse
+import hashlib
 import threading
 import time
 from uuid import uuid4
@@ -11,8 +12,6 @@ from langgraph.checkpoint.postgres import PostgresSaver
 from langsmith import tracing_context
 from psycopg.rows import dict_row
 from psycopg.types.json import Jsonb
-
-import hashlib
 
 from habitquest_backend.catalog.models import profile_from_row
 from habitquest_backend.catalog.repository import load_release

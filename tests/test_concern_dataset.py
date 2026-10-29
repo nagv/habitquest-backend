@@ -63,9 +63,10 @@ def test_fake_mapping_recall(case):
 def _live_local_report():
     """Optional: run all cases through Ollama and print a recall summary."""
     try:
-        from langchain_community.chat_models import ChatOllama
-        from langchain_core.messages import HumanMessage, SystemMessage
         import re
+
+        from langchain_community.chat_models import ChatOllama
+        from langchain_core.messages import HumanMessage
 
         model = ChatOllama(model="llama3.2", temperature=0, num_predict=512)
         goals_catalog = "bedtime, morning, meals, responsibility"
@@ -81,7 +82,7 @@ def _live_local_report():
                 continue
             msg = model.invoke([HumanMessage(content=prompt_tmpl.format(concerns=case["concerns"]))])
             text = msg.content
-            m = re.search(r'\[.*?\]', text, re.DOTALL)
+            m = re.search(r"\[.*?\]", text, re.DOTALL)
             if not m:
                 misses += len(case["expected_goals"])
                 continue
@@ -95,7 +96,10 @@ def _live_local_report():
             misses += len(expected - found)
 
         total = hits + misses
-        print(f"\nOllama live recall: {hits}/{total} = {hits/total:.1%}" if total else "\nNo cases", file=sys.stderr)
+        print(
+            f"\nOllama live recall: {hits}/{total} = {hits / total:.1%}" if total else "\nNo cases",
+            file=sys.stderr,
+        )
     except Exception as exc:
         print(f"\nLIVE_LOCAL recall skipped: {exc}", file=sys.stderr)
 

@@ -22,7 +22,9 @@ def test_change_level_updates_proposal_version(client, settings):
     first_active = proposal["data"]["active"][0]
     current_level = first_active["level"]
     new_level = "simple" if current_level != "simple" else "standard"
-    resp = patch(client, run, {"op": "change_level", "habit_id": first_active["habit_id"], "level": new_level})
+    resp = patch(
+        client, run, {"op": "change_level", "habit_id": first_active["habit_id"], "level": new_level}
+    )
     assert resp.status_code == 200, resp.text
     updated = resp.json()
     assert updated["version"] == 2
@@ -79,7 +81,9 @@ def test_swap_habit_within_shortlist(client, settings):
         pytest.skip("No alternative in shortlist for this goal")
     new_id = alternatives[0]["habit_id"]
     resp = patch(
-        client, run, {"op": "swap_habit", "old_habit_id": active["habit_id"], "new_habit_id": new_id, "level": "standard"}
+        client,
+        run,
+        {"op": "swap_habit", "old_habit_id": active["habit_id"], "new_habit_id": new_id, "level": "standard"},
     )
     assert resp.status_code == 200
 

@@ -12,7 +12,8 @@ CREATE TABLE hq.plan_flags(
 ALTER TABLE hq.plan_flags ENABLE ROW LEVEL SECURITY;
 CREATE POLICY parent_scope ON hq.plan_flags
   USING(plan_id IN (SELECT id FROM hq.plans WHERE parent_id = hq.my_parent()));
-GRANT SELECT ON hq.plan_flags TO hq_api;
+-- The API flags plans when a profile edit removes a routine cue.
+GRANT SELECT, INSERT ON hq.plan_flags TO hq_api;
 GRANT INSERT, UPDATE ON hq.plan_flags TO hq_worker;
 
 -- Anonymised unmatched concern phrases; no child or household identifiers.

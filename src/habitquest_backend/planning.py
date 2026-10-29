@@ -288,11 +288,7 @@ def validate_picks(
     covered = covered_goals([scored for scored, _ in chosen], list(short), lists)
     covered |= {g for h in (carried or []) if h["habit_id"] not in displaced for g in h.get("covers", [])}
     required = {goal for goal in short if goal not in template.unresolved and goal not in paused_goal_ids}
-    if (
-        effective_active > max_active
-        or effective_minutes > available_minutes
-        or not required <= covered
-    ):
+    if effective_active > max_active or effective_minutes > available_minutes or not required <= covered:
         raise ValueError("Picks exceed limits or drop a goal the reviewed template covers")
     return chosen
 
@@ -439,10 +435,7 @@ def build_proposal(
             }
             for (s, lv), pick in zip(chosen, draft.selection_picks)
         ]
-        + [
-            {"op": "pause_goal", "goal_id": pg.goal_id, "reason": pg.reason}
-            for pg in draft.selection_paused
-        ],
+        + [{"op": "pause_goal", "goal_id": pg.goal_id, "reason": pg.reason} for pg in draft.selection_paused],
         "active": draft.carried
         + [
             {
@@ -597,7 +590,11 @@ def plan_with_agents(draft: Draft, common: dict, saver, thread_id, resume_thread
                 carried=draft.carried,
             )
             draft_with_sel = Draft(
-                **{f: getattr(draft, f) for f in draft.__dataclass_fields__ if f not in ("selection_picks", "selection_paused", "paused_goal_ids")},
+                **{
+                    f: getattr(draft, f)
+                    for f in draft.__dataclass_fields__
+                    if f not in ("selection_picks", "selection_paused", "paused_goal_ids")
+                },
                 selection_picks=selection.picks,
                 selection_paused=selection.paused_goals,
                 paused_goal_ids=frozenset(pg.goal_id for pg in selection.paused_goals),
@@ -700,7 +697,11 @@ def generate(
     if not template.active:
         capped = bool(carried) and not context["max_active_habits"]
         empty_draft = Draft(
-            **{f: getattr(draft, f) for f in draft.__dataclass_fields__ if f not in ("selection_picks", "selection_paused", "paused_goal_ids")},
+            **{
+                f: getattr(draft, f)
+                for f in draft.__dataclass_fields__
+                if f not in ("selection_picks", "selection_paused", "paused_goal_ids")
+            },
             selection_picks=[],
             selection_paused=[],
             paused_goal_ids=frozenset(),
@@ -717,9 +718,15 @@ def generate(
         return plan_with_agents(draft, common, saver, thread_id, resume_thread, record)
     except ValueError as exc:
         record("fallback", {"reason": str(exc)[:200]})
-        fallback_picks = [Pick(habit_id=s.candidate.habit.id, level=s.candidate.level.level) for s in template.active]
+        fallback_picks = [
+            Pick(habit_id=s.candidate.habit.id, level=s.candidate.level.level) for s in template.active
+        ]
         fallback_draft = Draft(
-            **{f: getattr(draft, f) for f in draft.__dataclass_fields__ if f not in ("selection_picks", "selection_paused", "paused_goal_ids")},
+            **{
+                f: getattr(draft, f)
+                for f in draft.__dataclass_fields__
+                if f not in ("selection_picks", "selection_paused", "paused_goal_ids")
+            },
             selection_picks=fallback_picks,
             selection_paused=[],
             paused_goal_ids=frozenset(),
