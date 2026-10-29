@@ -56,13 +56,13 @@ def token(settings, user=PARENT, **overrides):
 def db(settings):
     with psycopg.connect(settings.database_url, autocommit=True) as conn:
         conn.execute(
-            "TRUNCATE hq.households,hq.memberships,hq.children,hq.sessions,hq.jobs,hq.proposals,hq.plans,hq.preferences,hq.events CASCADE"
+            "TRUNCATE hq.households,hq.memberships,hq.children,hq.sessions,hq.jobs,hq.proposals,hq.plans,hq.preferences,hq.child_goals,hq.events CASCADE"
         )
         conn.execute("TRUNCATE hq.catalog,hq.chapters,hq.policy")
         conn.execute(
             "TRUNCATE hq.release_items,hq.catalog_releases,hq.habit_variants,hq.habit_tags,hq.habit_prereqs,"
             "hq.habit_goals,hq.habit_levels,hq.habit_versions,hq.habits,hq.concern_goals,hq.concerns,"
-            "hq.goals,hq.chapter_templates"
+            "hq.goals,hq.chapter_templates CASCADE"
         )
         conn.execute((Path(__file__).parents[1] / "supabase/seed.sql").read_text())
         conn.execute("INSERT INTO hq.policy VALUES('onboarding',1,3)")
