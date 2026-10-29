@@ -3,7 +3,7 @@
 import json
 import re
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 from deepagents import (
@@ -36,7 +36,7 @@ from habitquest_backend.catalog.scoring import (
     shortlists,
     template_plan,
 )
-from habitquest_backend.schemas import GoalMapping, MappedGoal, PlannerSelection, Review
+from habitquest_backend.schemas import GoalMapping, MappedGoal, PausedGoal, Pick, PlannerSelection, Review
 
 PROMPT_VERSION = "2026-10-29.1"
 TEMPLATE_RATIONALE = (
@@ -185,7 +185,11 @@ class BoundedChat(BaseChatModel):
             return AIMessage(
                 content=json.dumps(
                     {
-                        "picks": self.context["template_picks"],
+                        "picks": [
+                            {"habit_id": p["habit_id"], "level": p["level"], "op": "add"}
+                            for p in self.context["template_picks"]
+                        ],
+                        "paused_goals": [],
                         "rationale": "Selected the reviewed baseline habits within the parent's limits.",
                         "order_explanation": "Habits follow the parent's goal priorities.",
                     }
@@ -230,6 +234,9 @@ class Draft:
     carried: list[dict]
     carried_chapters: list[dict]
     carried_changes: list[dict]
+    selection_picks: list[Pick] = field(default_factory=list)
+    selection_paused: list[PausedGoal] = field(default_factory=list)
+    paused_goal_ids: frozenset = field(default_factory=frozenset)
 
 
 def prioritise(goals: list[MappedGoal], concerns: str) -> list[MappedGoal]:
@@ -251,26 +258,37 @@ def validate_picks(
     lists: dict[str, list[Scored]],
     max_active: int,
     available_minutes: int,
+    carried: list[dict] | None = None,
 ) -> list[tuple[Scored, Level]]:
     """Code, not the model, decides whether a selection is publishable."""
+    carried_ids = {h["habit_id"] for h in (carried or [])}
     listed = {s.candidate.habit.id: s for options in short.values() for s in options}
     ids = [pick.habit_id for pick in selection.picks]
     if len(ids) != len(set(ids)) or any(habit_id not in listed for habit_id in ids):
         raise ValueError("Pick outside the reviewed shortlist or duplicated")
+    displaced: set[str] = set()
     chosen = []
     for pick in selection.picks:
         scored = listed[pick.habit_id]
         level = next((lv for lv in scored.candidate.habit.levels if lv.level == pick.level), None)
         if level is None or scored.candidate.needs_cue:
             raise ValueError("Unknown level or habit without an agreed cue")
+        if pick.op in ("replace", "rotate_to_future"):
+            if not pick.replaces or pick.replaces not in carried_ids:
+                raise ValueError("replaces must name a currently carried habit id")
+            displaced.add(pick.replaces)
         chosen.append((scored, level))
+    paused_goal_ids = {pg.goal_id for pg in selection.paused_goals}
+    if not paused_goal_ids <= set(short):
+        raise ValueError("paused_goals contains an unknown goal_id not in the shortlists")
+    effective_active = len(chosen) + len(carried_ids) - len(displaced)
+    effective_minutes = sum(level.minutes for _, level in chosen) + sum(
+        h["minutes"] for h in (carried or []) if h["habit_id"] not in displaced
+    )
     covered = covered_goals([scored for scored, _ in chosen], list(short), lists)
-    required = {goal for goal in short if goal not in template.unresolved}
-    if (
-        len(chosen) > max_active
-        or sum(level.minutes for _, level in chosen) > available_minutes
-        or not required <= covered
-    ):
+    covered |= {g for h in (carried or []) if h["habit_id"] not in displaced for g in h.get("covers", [])}
+    required = {goal for goal in short if goal not in template.unresolved and goal not in paused_goal_ids}
+    if effective_active > max_active or effective_minutes > available_minutes or not required <= covered:
         raise ValueError("Picks exceed limits or drop a goal the reviewed template covers")
     return chosen
 
@@ -395,7 +413,13 @@ def build_proposal(
                 "evidence_span": goal.evidence_span,
                 "confidence": goal.confidence,
                 "suggested_not_stated": goal.suggested_not_stated,
-                "status": "covered" if goal.goal_id in covered else unresolved.get(goal.goal_id, "deferred"),
+                "status": "covered"
+                if goal.goal_id in covered
+                else (
+                    "paused"
+                    if goal.goal_id in draft.paused_goal_ids
+                    else unresolved.get(goal.goal_id, "deferred")
+                ),
             }
             for goal in draft.goals
         ],
@@ -403,13 +427,15 @@ def build_proposal(
         "changes": draft.carried_changes
         + [
             {
-                "op": "add",
+                "op": pick.op,
                 "habit_id": s.candidate.habit.id,
                 "version": s.candidate.habit.version,
                 "level": lv.level,
+                **({"replaces": pick.replaces} if pick.op in ("replace", "rotate_to_future") else {}),
             }
-            for s, lv in chosen
-        ],
+            for (s, lv), pick in zip(chosen, draft.selection_picks)
+        ]
+        + [{"op": "pause_goal", "goal_id": pg.goal_id, "reason": pg.reason} for pg in draft.selection_paused],
         "active": draft.carried
         + [
             {
@@ -561,9 +587,20 @@ def plan_with_agents(draft: Draft, common: dict, saver, thread_id, resume_thread
                 lists=draft.lists,
                 max_active=context["max_active_habits"],
                 available_minutes=context["available_minutes"],
+                carried=draft.carried,
+            )
+            draft_with_sel = Draft(
+                **{
+                    f: getattr(draft, f)
+                    for f in draft.__dataclass_fields__
+                    if f not in ("selection_picks", "selection_paused", "paused_goal_ids")
+                },
+                selection_picks=selection.picks,
+                selection_paused=selection.paused_goals,
+                paused_goal_ids=frozenset(pg.goal_id for pg in selection.paused_goals),
             )
             candidate = build_proposal(
-                draft,
+                draft_with_sel,
                 chosen,
                 rationale=selection.rationale,
                 order=selection.order_explanation,
@@ -659,8 +696,18 @@ def generate(
     )
     if not template.active:
         capped = bool(carried) and not context["max_active_habits"]
+        empty_draft = Draft(
+            **{
+                f: getattr(draft, f)
+                for f in draft.__dataclass_fields__
+                if f not in ("selection_picks", "selection_paused", "paused_goal_ids")
+            },
+            selection_picks=[],
+            selection_paused=[],
+            paused_goal_ids=frozenset(),
+        )
         return build_proposal(
-            draft,
+            empty_draft,
             [],
             rationale=CAP_RATIONALE if capped else EMPTY_RATIONALE,
             order=TEMPLATE_ORDER,
@@ -671,8 +718,21 @@ def generate(
         return plan_with_agents(draft, common, saver, thread_id, resume_thread, record)
     except ValueError as exc:
         record("fallback", {"reason": str(exc)[:200]})
+        fallback_picks = [
+            Pick(habit_id=s.candidate.habit.id, level=s.candidate.level.level) for s in template.active
+        ]
+        fallback_draft = Draft(
+            **{
+                f: getattr(draft, f)
+                for f in draft.__dataclass_fields__
+                if f not in ("selection_picks", "selection_paused", "paused_goal_ids")
+            },
+            selection_picks=fallback_picks,
+            selection_paused=[],
+            paused_goal_ids=frozenset(),
+        )
         return build_proposal(
-            draft,
+            fallback_draft,
             [(s, s.candidate.level) for s in template.active],
             rationale=TEMPLATE_RATIONALE,
             order=TEMPLATE_ORDER,

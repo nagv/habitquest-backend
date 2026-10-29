@@ -1,6 +1,7 @@
 """Durable loopback/local worker. No API server process is required for execution."""
 
 import argparse
+import hashlib
 import threading
 import time
 from uuid import uuid4
@@ -18,6 +19,19 @@ from habitquest_backend.config import Settings
 from habitquest_backend.db import one, transaction
 from habitquest_backend.planning import BudgetExceeded, generate
 from habitquest_backend.service import current_version, validate_sources
+
+
+def store_catalog_requests(conn, unmatched_phrases: list[str]) -> None:
+    for phrase in unmatched_phrases:
+        normalized = " ".join(phrase.lower().split())
+        if not normalized:
+            continue
+        phrase_hash = hashlib.md5(normalized.encode()).hexdigest()
+        conn.execute(
+            "INSERT INTO hq.catalog_requests(phrase_hash,normalized_phrase) VALUES(%s,%s) "
+            "ON CONFLICT(phrase_hash) DO UPDATE SET count=hq.catalog_requests.count+1,last_seen=now()",
+            (phrase_hash, normalized),
+        )
 
 
 def claim(settings):
@@ -119,6 +133,7 @@ def run_once(settings: Settings) -> bool:
             ).fetchone()
             release = load_release(conn)
             policy = one(conn, "SELECT * FROM hq.policy WHERE name='onboarding'")
+        store_feedback = bool(intake["data"].get("store_feedback"))
         context = {
             "concerns": intake["data"]["concerns"],
             "available_minutes": intake["data"]["available_minutes"],
@@ -182,6 +197,8 @@ def run_once(settings: Settings) -> bool:
                     Jsonb(data),
                 ),
             )
+            if store_feedback and data.get("unmatched_phrases"):
+                store_catalog_requests(conn, data["unmatched_phrases"])
             updated = conn.execute(
                 "UPDATE hq.jobs SET status='ready',lease_token=NULL,lease_until=NULL,error=NULL WHERE id=%s AND deadline>clock_timestamp() RETURNING id",
                 (job["id"],),

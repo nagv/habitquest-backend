@@ -1,4 +1,4 @@
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Union
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -64,6 +64,7 @@ class ProfileUpdate(ChildInput):
 class IntakeInput(StrictModel):
     concerns: str = Field(min_length=5, max_length=4000)
     available_minutes: int = Field(default=10, ge=1, le=60)
+    store_feedback: bool = False
 
 
 class Confirmation(StrictModel):
@@ -89,10 +90,18 @@ class GoalMapping(StrictModel):
 class Pick(StrictModel):
     habit_id: str = Field(min_length=1, max_length=60)
     level: LevelName
+    op: Literal["add", "replace", "rotate_to_future"] = "add"
+    replaces: str | None = None
+
+
+class PausedGoal(StrictModel):
+    goal_id: str = Field(min_length=1, max_length=60)
+    reason: str = Field(min_length=1, max_length=200)
 
 
 class PlannerSelection(StrictModel):
     picks: list[Pick] = Field(max_length=6)
+    paused_goals: list[PausedGoal] = Field(default_factory=list, max_length=4)
     rationale: str = Field(min_length=5, max_length=500)
     order_explanation: str = Field(min_length=5, max_length=500)
 
@@ -100,3 +109,68 @@ class PlannerSelection(StrictModel):
 class Review(StrictModel):
     accepted: bool
     reason: str = Field(max_length=200)
+
+
+class RemoveGoalEdit(StrictModel):
+    op: Literal["remove_goal"]
+    goal_id: str = Field(min_length=1, max_length=60)
+
+
+class ReorderGoalsEdit(StrictModel):
+    op: Literal["reorder_goals"]
+    goal_ids: list[str] = Field(min_length=1, max_length=8)
+
+
+class SwapHabitEdit(StrictModel):
+    op: Literal["swap_habit"]
+    old_habit_id: str = Field(min_length=1, max_length=60)
+    new_habit_id: str = Field(min_length=1, max_length=60)
+    level: LevelName
+
+
+class ChangeLevelEdit(StrictModel):
+    op: Literal["change_level"]
+    habit_id: str = Field(min_length=1, max_length=60)
+    level: LevelName
+
+
+class ChangeScheduleEdit(StrictModel):
+    op: Literal["change_schedule"]
+    habit_id: str = Field(min_length=1, max_length=60)
+    cue: str = Field(pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
+    days: list[Day] = Field(min_length=1, max_length=7)
+
+    @field_validator("days")
+    @classmethod
+    def unique_days(cls, value: list[Day]) -> list[Day]:
+        return unique(value)
+
+
+class PromoteFutureEdit(StrictModel):
+    op: Literal["promote_future"]
+    habit_id: str = Field(min_length=1, max_length=60)
+    level: LevelName
+
+
+class DemoteActiveEdit(StrictModel):
+    op: Literal["demote_active"]
+    habit_id: str = Field(min_length=1, max_length=60)
+
+
+ProposalEditOp = Annotated[
+    Union[
+        RemoveGoalEdit,
+        ReorderGoalsEdit,
+        SwapHabitEdit,
+        ChangeLevelEdit,
+        ChangeScheduleEdit,
+        PromoteFutureEdit,
+        DemoteActiveEdit,
+    ],
+    Field(discriminator="op"),
+]
+
+
+class ProposalPatch(StrictModel):
+    edit: ProposalEditOp
+    expected_proposal_version: int = Field(ge=1)

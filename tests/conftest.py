@@ -56,8 +56,9 @@ def token(settings, user=PARENT, **overrides):
 def db(settings):
     with psycopg.connect(settings.database_url, autocommit=True) as conn:
         conn.execute(
-            "TRUNCATE hq.households,hq.memberships,hq.children,hq.intakes,hq.jobs,hq.proposals,hq.plans,hq.child_goals,hq.events CASCADE"
+            "TRUNCATE hq.households,hq.memberships,hq.children,hq.intakes,hq.jobs,hq.proposals,hq.plans,hq.child_goals,hq.plan_flags,hq.events CASCADE"
         )
+        conn.execute("TRUNCATE hq.catalog_requests")
         conn.execute("TRUNCATE hq.policy")
         conn.execute(
             "TRUNCATE hq.release_items,hq.catalog_releases,hq.habit_variants,hq.habit_tags,hq.habit_prereqs,"
