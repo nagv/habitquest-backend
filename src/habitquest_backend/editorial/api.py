@@ -25,6 +25,7 @@ from habitquest_backend.editorial.schemas import (
 )
 
 KindName = Literal["habits", "goals", "concerns", "chapters"]
+Status = Literal["draft", "in_review", "approved", "rejected"]
 EntityId = Annotated[str, Path(pattern=r"^[a-z][a-z0-9-]*$", max_length=60)]
 
 
@@ -292,6 +293,18 @@ def router(settings: Settings) -> APIRouter:
             return conn.execute(
                 "SELECT normalized_phrase,count,first_seen,last_seen FROM hq.catalog_requests "
                 "ORDER BY count DESC,last_seen DESC LIMIT 200"
+            ).fetchall()
+
+    # Registered last: "/{kind_name}" would otherwise capture "/releases" and "/catalog-requests".
+    @api.get("/{kind_name}")
+    def list_versions(kind_name: KindName, user: Editor, status: Status | None = None):
+        """Versions of one kind, e.g. `?status=in_review` for the review queue, oldest entity first."""
+        kind = KINDS[kind_name]
+        with transaction(settings, editor=user) as conn:
+            return conn.execute(
+                f"SELECT * FROM hq.{kind.view} WHERE %s::text IS NULL OR status=%s "
+                f"ORDER BY {kind.id_column},version",
+                (status, status),
             ).fetchall()
 
     return api

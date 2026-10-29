@@ -218,6 +218,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 (child_id,),
             ).fetchall()
 
+    @application.post("/v1/plan-flags/{flag_id}/resolve")
+    def resolve_flag(flag_id: UUID, user: Parent):
+        """Mark a flag reviewed; resolving an already resolved flag returns it unchanged."""
+        with transaction(settings, user) as conn:
+            resolved = conn.execute(
+                "UPDATE hq.plan_flags SET resolved_at=now() WHERE id=%s AND resolved_at IS NULL RETURNING *",
+                (flag_id,),
+            ).fetchone()
+            return resolved or one(conn, "SELECT * FROM hq.plan_flags WHERE id=%s", (flag_id,))
+
     application.include_router(editorial_router(settings))
     return application
 

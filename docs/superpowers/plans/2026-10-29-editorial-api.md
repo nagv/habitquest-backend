@@ -24,6 +24,8 @@
 7. `withdraw_habit` withdraws every approved version, audits each, and flags each child's current plan that uses the habit with a fixed parent-facing reason. It replaces the plan 2b Python helper.
 8. Concern labels describe parents' problems, so they are not linted.
 
+9. Follow-up: `GET /v1/editor/{kind}?status=` lists versions for the review queue; parents resolve plan flags with `POST /v1/plan-flags/{id}/resolve` (migration `202610290007_resolve_plan_flags.sql`), and confirming a newer plan resolves the flags on the plans it supersedes. An API test covers a release published while a proposal is open (`409 replan_required`).
+
 ## File structure
 
 | File | Change |

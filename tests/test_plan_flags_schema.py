@@ -1,7 +1,7 @@
 """Smoke tests for the plan_flags migration (DB-only checks, skipped without a DB)."""
 
 import pytest
-from conftest import ALEX, CONFIRM, queued
+from conftest import ALEX, CONFIRM, OTHER, queued, token
 
 from habitquest_backend import worker
 from habitquest_backend.service import flag_plan
@@ -75,6 +75,43 @@ def test_profile_edit_removing_cue_flags_plan(client, settings, db):
     assert client.patch(f"/v1/children/{child['id']}", json=body).status_code == 200, body
     flags = client.get(f"/v1/children/{child['id']}/plan-flags").json()
     assert sorted(f["habit_id"] for f in flags if f["kind"] == "cue_removed") == bedtime
+
+
+def test_parent_resolves_flag_once(client, settings, db):
+    child, _, run = _ready(client, settings)
+    assert client.post(f"/v1/proposals/{run}/confirm", json=CONFIRM).status_code == 200
+    (plan_id,) = db.execute("SELECT id FROM hq.plans WHERE child_id=%s", (child["id"],)).fetchone()
+    flag_plan(db, plan_id, "habit_withdrawn", "bedtime-prep", "test withdrawal")
+    (flag,) = client.get(f"/v1/children/{child['id']}/plan-flags").json()
+
+    other = {"Authorization": "Bearer " + token(settings, OTHER)}
+    assert client.post(f"/v1/plan-flags/{flag['id']}/resolve", headers=other).status_code == 404
+    resolved = client.post(f"/v1/plan-flags/{flag['id']}/resolve").json()
+    assert resolved["resolved_at"] is not None
+    assert client.post(f"/v1/plan-flags/{flag['id']}/resolve").json() == resolved
+    assert client.get(f"/v1/children/{child['id']}/plan-flags").json() == []
+    assert client.post("/v1/plan-flags/00000000-0000-0000-0000-000000000000/resolve").status_code == 404
+
+
+def test_confirming_a_newer_plan_resolves_older_flags(client, settings, db):
+    child, _, run = _ready(client, settings)
+    assert client.post(f"/v1/proposals/{run}/confirm", json=CONFIRM).status_code == 200
+    (plan_id,) = db.execute("SELECT id FROM hq.plans WHERE child_id=%s", (child["id"],)).fetchone()
+    flag_plan(db, plan_id, "habit_withdrawn", "bedtime-prep", "test withdrawal")
+    intake = client.post(
+        f"/v1/children/{child['id']}/intakes",
+        json={"concerns": "Mornings are rushed.", "available_minutes": 20},
+    ).json()
+    second = client.post(
+        f"/v1/intakes/{intake['id']}/plan-runs", headers={"Idempotency-Key": "second"}
+    ).json()
+    worker.run_once(settings)
+    assert len(client.get(f"/v1/children/{child['id']}/plan-flags").json()) == 1
+    confirm = client.post(
+        f"/v1/proposals/{second['run_id']}/confirm", json={**CONFIRM, "expected_plan_version": 1}
+    )
+    assert confirm.status_code == 200, confirm.text
+    assert client.get(f"/v1/children/{child['id']}/plan-flags").json() == []
 
 
 def _ready(client, settings):
