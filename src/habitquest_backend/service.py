@@ -4,10 +4,12 @@ from uuid import UUID, uuid4
 from fastapi import HTTPException
 from psycopg.types.json import Jsonb
 
-from habitquest_backend.catalog.models import Release
+from habitquest_backend.catalog.models import ChildProfile, Habit, Level, Release
 from habitquest_backend.catalog.repository import load_release
 from habitquest_backend.catalog.revalidation import stale_references
+from habitquest_backend.catalog.scoring import PRIMARY_STRENGTH
 from habitquest_backend.db import one
+from habitquest_backend.planning import entry
 
 
 def current_version(conn, child_id: UUID) -> int:
@@ -116,101 +118,194 @@ def confirm(conn, proposal_id: UUID, expected_plan: int, expected_proposal: int)
     return plan
 
 
-def apply_patch(data: dict, edit: dict, release: Release) -> dict:
-    """Pure dict transform; raises ValueError (→ 422) for invalid edits."""
+def released(release: Release, habit_id: str, version: int) -> Habit:
+    problems = stale_references(release, [(habit_id, version)], [])
+    if problems:
+        raise ValueError(f"stale: {problems[0]}; start a new plan run")
+    return release.habits[habit_id]
+
+
+def level_of(habit: Habit, name: str) -> Level:
+    level = next((lv for lv in habit.levels if lv.level == name), None)
+    if level is None:
+        raise ValueError(f"level: {habit.id!r} has no {name!r} level")
+    return level
+
+
+def built_entry(habit: Habit, goal_ids: list[str], level: Level, profile: ChildProfile, **fields) -> dict:
+    """An active entry rebuilt from the reviewed release, as the planner would have written it."""
+    if habit.routine_anchor not in profile.routine_schedule:
+        raise ValueError(
+            f"needs_cue: add a {habit.routine_anchor} cue to the profile before adding {habit.id!r}"
+        )
+    return {**entry(habit, goal_ids, level, profile), **fields}
+
+
+def strong_goals(habit: Habit, goal_ids: list[str]) -> list[str]:
+    return [goal for goal in goal_ids if habit.goals.get(goal, 0) >= PRIMARY_STRENGTH]
+
+
+def find(entries: list[dict], habit_id: str, op: str, where: str) -> dict:
+    found = next((h for h in entries if h["habit_id"] == habit_id), None)
+    if found is None:
+        raise ValueError(f"{op}: {habit_id!r} is not {where}")
+    return found
+
+
+def edited(data: dict, edit: dict, release: Release, profile: ChildProfile, plan_version: int) -> dict:
     data = copy.deepcopy(data)
     op = edit["op"]
-    active = data["active"]
-    future = data["future"]
-    goals = data["goals"]
-    shortlists = data.get("shortlists", {})
-
+    active, future, goals = data["active"], data["future"], data["goals"]
+    goal_ids = [g["goal_id"] for g in goals]
     if op == "remove_goal":
-        gid = edit["goal_id"]
-        data["goals"] = [g for g in goals if g["goal_id"] != gid]
-        return data
-
-    if op == "reorder_goals":
-        ordered = edit["goal_ids"]
+        data["goals"] = [g for g in goals if g["goal_id"] != edit["goal_id"]]
+    elif op == "reorder_goals":
         by_id = {g["goal_id"]: g for g in goals}
-        if sorted(ordered) != sorted(by_id):
+        if sorted(edit["goal_ids"]) != sorted(by_id):
             raise ValueError("reorder_goals: goal_ids must list every proposal goal exactly once")
-        data["goals"] = [by_id[gid] for gid in ordered]
-        return data
-
-    if op == "change_level":
-        hid, new_level = edit["habit_id"], edit["level"]
-        entry = next((h for h in active if h["habit_id"] == hid), None)
-        if entry is None:
-            raise ValueError(f"change_level: {hid!r} is not an active habit")
-        entry["level"] = new_level
-        return data
-
-    if op == "change_schedule":
-        hid = edit["habit_id"]
-        entry = next((h for h in active if h["habit_id"] == hid), None)
-        if entry is None:
-            raise ValueError(f"change_schedule: {hid!r} is not an active habit")
-        entry["cue"] = edit["cue"]
-        entry["days"] = edit["days"]
-        return data
-
-    if op == "swap_habit":
-        old_id, new_id, new_level = edit["old_habit_id"], edit["new_habit_id"], edit["level"]
-        old = next((h for h in active if h["habit_id"] == old_id), None)
-        if old is None:
-            raise ValueError(f"swap_habit: {old_id!r} is not active")
-        goal_ids = old["goal_ids"]
-        in_shortlist = any(o["habit_id"] == new_id for g in goal_ids for o in shortlists.get(g, []))
-        if not in_shortlist:
-            raise ValueError(f"swap_habit: {new_id!r} is not in the shortlist for goals {goal_ids}")
-        idx = next(i for i, h in enumerate(active) if h["habit_id"] == old_id)
-        active[idx] = {**old, "habit_id": new_id, "level": new_level}
-        return data
-
-    if op == "demote_active":
-        hid = edit["habit_id"]
-        entry = next((h for h in active if h["habit_id"] == hid), None)
-        if entry is None:
-            raise ValueError(f"demote_active: {hid!r} is not an active habit")
-        data["active"] = [h for h in active if h["habit_id"] != hid]
-        data["future"].append(
-            {
-                "habit_id": hid,
-                "version": entry.get("version", 1),
-                "goal_ids": entry["goal_ids"],
-                "score": 0,
-            }
+        data["goals"] = [by_id[gid] for gid in edit["goal_ids"]]
+    elif op == "change_level":
+        old = find(active, edit["habit_id"], op, "an active habit")
+        habit = released(release, old["habit_id"], old["version"])
+        rebuilt = built_entry(
+            habit,
+            old["goal_ids"],
+            level_of(habit, edit["level"]),
+            profile,
+            cue=old["cue"],
+            days=old["days"],
+            covers=old["covers"],
+            added_in_plan_version=old["added_in_plan_version"],
         )
-        return data
-
-    if op == "promote_future":
-        hid, new_level = edit["habit_id"], edit["level"]
-        entry = next((h for h in future if h["habit_id"] == hid), None)
-        if entry is None:
-            raise ValueError(f"promote_future: {hid!r} is not in future candidates")
-        problems = stale_references(release, [(hid, entry["version"])], [])
-        if problems:
-            raise ValueError(f"promote_future: candidate is stale ({problems[0]})")
-        level_obj = next((lv for lv in release.habits[hid].levels if lv.level == new_level), None)
-        if level_obj is None:
-            raise ValueError(f"promote_future: {hid!r} has no {new_level!r} level")
-        data["future"] = [h for h in future if h["habit_id"] != hid]
-        data["active"].append(
-            {
-                "habit_id": hid,
-                "version": entry["version"],
-                "goal_ids": entry["goal_ids"],
-                "level": new_level,
-                "minutes": level_obj.minutes,
-                "covers": entry["goal_ids"],
-                "cue": "",
-                "days": [],
-            }
+        active[active.index(old)] = rebuilt
+    elif op == "change_schedule":
+        old = find(active, edit["habit_id"], op, "an active habit")
+        old["cue"], old["days"] = edit["cue"], edit["days"]
+    elif op == "swap_habit":
+        old = find(active, edit["old_habit_id"], op, "an active habit")
+        new_id = edit["new_habit_id"]
+        served = [
+            g for g in old["covers"] if any(o["habit_id"] == new_id for o in data["shortlists"].get(g, []))
+        ]
+        if not served:
+            raise ValueError(f"swap_habit: {new_id!r} is not in the shortlist for goals {old['covers']}")
+        if any(h["habit_id"] == new_id for h in active):
+            raise ValueError(f"swap_habit: {new_id!r} is already active")
+        current = release.habits.get(new_id)
+        habit = released(release, new_id, current.version if current else 0)
+        goals_served = [g for g in goal_ids if g in habit.goals]
+        rebuilt = built_entry(
+            habit,
+            goals_served,
+            level_of(habit, edit["level"]),
+            profile,
+            covers=sorted(set(served) | set(strong_goals(habit, goals_served))),
+            added_in_plan_version=old["added_in_plan_version"],
         )
-        return data
+        active[active.index(old)] = rebuilt
+        future[:] = [h for h in future if h["habit_id"] != new_id]
+        future.append(
+            {"habit_id": old["habit_id"], "version": old["version"], "goal_ids": old["goal_ids"], "score": 0}
+        )
+    elif op == "demote_active":
+        old = find(active, edit["habit_id"], op, "an active habit")
+        active.remove(old)
+        future.append(
+            {"habit_id": old["habit_id"], "version": old["version"], "goal_ids": old["goal_ids"], "score": 0}
+        )
+    elif op == "promote_future":
+        candidate = find(future, edit["habit_id"], op, "a future candidate")
+        habit = released(release, candidate["habit_id"], candidate["version"])
+        rebuilt = built_entry(
+            habit,
+            candidate["goal_ids"],
+            level_of(habit, edit["level"]),
+            profile,
+            covers=strong_goals(habit, [g for g in candidate["goal_ids"] if g in goal_ids]),
+            added_in_plan_version=plan_version,
+        )
+        future.remove(candidate)
+        active.append(rebuilt)
+    else:
+        raise ValueError(f"Unknown patch op: {op!r}")
+    return data
 
-    raise ValueError(f"Unknown patch op: {op!r}")
+
+def apply_patch(
+    data: dict,
+    edit: dict,
+    release: Release,
+    profile: ChildProfile,
+    *,
+    max_active: int,
+    available_minutes: int,
+    plan_version: int,
+) -> dict:
+    """Apply one parent edit and re-run the publication rules; raises ValueError (→ 422) naming the rule.
+    Limits are the child's daily totals; `plan_version` is the version confirmation would create."""
+    after = edited(data, edit, release, profile, plan_version)
+    active = after["active"]
+    if len(active) > max_active:
+        raise ValueError(
+            f"max_active_habits: a plan holds at most {max_active} active habits; demote one first"
+        )
+    minutes = sum(h["minutes"] for h in active)
+    if minutes > available_minutes:
+        raise ValueError(f"available_minutes: {minutes} minutes exceeds the daily {available_minutes}")
+    # Strict coverage: a weak link covers a goal only while no cue-ready alternative for it is left
+    # inactive, whether shortlisted or a future candidate (a demoted habit returns to future).
+    active_ids = {h["habit_id"] for h in active}
+    cue_ready = {
+        f["habit_id"]
+        for f in after["future"]
+        if f["habit_id"] in release.habits
+        and release.habits[f["habit_id"]].routine_anchor in profile.routine_schedule
+    }
+
+    def alternatives(goal: str) -> set[str]:
+        listed = {o["habit_id"] for o in after["shortlists"].get(goal, [])}
+        return listed | {
+            f["habit_id"] for f in after["future"] if f["habit_id"] in cue_ready and goal in f["goal_ids"]
+        }
+
+    for h in active:
+        habit = release.habits.get(h["habit_id"])
+        h["covers"] = [
+            goal
+            for goal in h["covers"]
+            if habit is None
+            or habit.goals.get(goal, 0) >= PRIMARY_STRENGTH
+            or alternatives(goal) <= active_ids
+        ]
+    covered = {goal for h in active for goal in h["covers"]}
+    kept = {g["goal_id"] for g in after["goals"]}
+    lost = [
+        g["goal_id"] for g in data["goals"] if g["status"] == "covered" and g["goal_id"] in kept - covered
+    ]
+    if lost:
+        raise ValueError(
+            f"coverage: {lost} would no longer be covered; remove the goal or swap within it instead"
+        )
+    for goal in after["goals"]:
+        if goal["goal_id"] in covered:
+            goal["status"] = "covered"
+    after["unresolved"] = {g: r for g, r in after["unresolved"].items() if g in kept and g not in covered}
+    chapters = [c for c in after["chapters"] if c["goal_id"] in covered]
+    for goal in after["goals"]:
+        if goal["goal_id"] in covered and not any(c["goal_id"] == goal["goal_id"] for c in chapters):
+            chapter = release.chapters.get((after["world"], goal["goal_id"]))
+            if chapter is None:
+                raise ValueError(f"chapter: no approved {after['world']} chapter for {goal['goal_id']!r}")
+            chapters.append(
+                {
+                    "id": chapter.id,
+                    "version": chapter.version,
+                    "goal_id": chapter.goal_id,
+                    "title": chapter.title,
+                }
+            )
+    after["chapters"] = chapters
+    return after
 
 
 def flag_plan(conn, plan_id: UUID, kind: str, habit_id: str, reason: str) -> None:

@@ -1,5 +1,5 @@
 import pytest
-from conftest import CONFIRM, queued
+from conftest import ALEX, CONFIRM, queued
 
 from habitquest_backend import worker
 
@@ -16,19 +16,44 @@ def patch(client, run, op_body, *, version=1):
     return client.patch(f"/v1/proposals/{run}", json=body)
 
 
-def test_change_level_updates_proposal_version(client, settings):
+def test_edit_increments_proposal_version(client, settings):
     _, _, run = ready(client, settings)
-    proposal = client.get(f"/v1/proposals/{run}").json()
-    first_active = proposal["data"]["active"][0]
-    current_level = first_active["level"]
-    new_level = "simple" if current_level != "simple" else "standard"
-    resp = patch(
-        client, run, {"op": "change_level", "habit_id": first_active["habit_id"], "level": new_level}
-    )
+    habit_id = client.get(f"/v1/proposals/{run}").json()["data"]["active"][0]["habit_id"]
+    days = ["mon", "wed"]
+    resp = patch(client, run, {"op": "change_schedule", "habit_id": habit_id, "cue": "19:45", "days": days})
     assert resp.status_code == 200, resp.text
-    updated = resp.json()
-    assert updated["version"] == 2
-    assert any(h["level"] == new_level for h in updated["data"]["active"])
+    assert resp.json()["version"] == 2
+    assert (resp.json()["data"]["active"][0]["cue"], resp.json()["data"]["active"][0]["days"]) == (
+        "19:45",
+        days,
+    )
+
+
+def test_change_level_rejects_levels_the_habit_lacks(client, settings):
+    _, _, run = ready(client, settings)
+    resp = patch(client, run, {"op": "change_level", "habit_id": "bedtime-prep", "level": "simple"})
+    assert (resp.status_code, resp.json()["detail"]) == (422, "level: 'bedtime-prep' has no 'simple' level")
+
+
+def test_promote_is_checked_against_cues_and_limits(client, settings):
+    """The local walk-through: pack-bag needs an evening cue Alex does not have, and the plan is full."""
+    _, _, run = ready(client, settings)
+    data = client.get(f"/v1/proposals/{run}").json()["data"]
+    assert [h["habit_id"] for h in data["future"]] == ["pack-bag", "morning-ready"]
+    resp = patch(client, run, {"op": "promote_future", "habit_id": "pack-bag", "level": "standard"})
+    assert resp.status_code == 422
+    assert resp.json()["detail"].startswith("needs_cue: add a evening cue")
+    resp = patch(client, run, {"op": "promote_future", "habit_id": "morning-ready", "level": "standard"})
+    assert resp.status_code == 422 and resp.json()["detail"].startswith("needs_cue: add a morning cue")
+
+
+def test_edit_after_profile_change_returns_409(client, settings):
+    child, _, run = ready(client, settings)
+    profile = client.get(f"/v1/children/{child['id']}").json()
+    body = {**ALEX, "expected_profile_version": profile["profile_version"]}
+    assert client.patch(f"/v1/children/{child['id']}", json=body).status_code == 200
+    resp = patch(client, run, {"op": "remove_goal", "goal_id": "meals"})
+    assert resp.status_code == 409
 
 
 def test_stale_version_returns_409(client, settings):
@@ -64,7 +89,14 @@ def test_demote_active_moves_habit_to_future(client, settings):
     data = client.get(f"/v1/proposals/{run}").json()["data"]
     active_id = data["active"][0]["habit_id"]
     resp = patch(client, run, {"op": "demote_active", "habit_id": active_id})
-    assert resp.status_code == 200
+    assert resp.status_code == 422 and resp.json()["detail"].startswith("coverage:")
+    covered = data["active"][0]["covers"]
+    for version, goal_id in enumerate(covered, start=1):
+        assert (
+            patch(client, run, {"op": "remove_goal", "goal_id": goal_id}, version=version).status_code == 200
+        )
+    resp = patch(client, run, {"op": "demote_active", "habit_id": active_id}, version=len(covered) + 1)
+    assert resp.status_code == 200, resp.text
     result = resp.json()["data"]
     assert not any(h["habit_id"] == active_id for h in result["active"])
     assert any(h["habit_id"] == active_id for h in result["future"])

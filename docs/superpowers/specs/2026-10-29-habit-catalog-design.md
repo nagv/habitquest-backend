@@ -219,3 +219,8 @@ Daily occurrences, rewards and Spark ledger, parent notifications, AI-drafted ca
 - Release builds take the latest approved, non-withdrawn version of each entity; rollback copies a published release's items without withdrawn habit versions. Validation also reports withdrawn habits and habits without levels.
 - Withdrawal flags only each child's current plan, with a fixed parent-facing reason.
 
+## 12. Implementation refinements (local flow fixes)
+
+- Parent edits rebuild entries from the current release and profile and re-run limits, cue availability and strict coverage; `422` details start with the violated rule's name. Removing coverage of a goal requires `remove_goal` first.
+- Eligibility uses the child's daily `available_minutes`; habits that fit the day but not the remaining time are `deferred` and remain future candidates.
+
