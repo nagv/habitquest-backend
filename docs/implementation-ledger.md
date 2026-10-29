@@ -40,3 +40,12 @@ Ruling: Stage files in the chat's writable working directory, then copy only pro
 - Added `habitquest_backend.catalog`: release loading, deterministic eligibility, scoring (`RANKING_VERSION 2026-10-29.1`), per-goal shortlists and template plan, with Hypothesis invariants.
 - Planning still uses `hq.catalog`; plan 2 switches it and removes the old tables. Open for plan 2/3: publish-time release validation (dangling goal/entity references, habits without levels) and clearing the previous current release before setting a new one.
 - Final review follow-up: `score` and `eligible` de-duplicate goal ids and tolerate candidate goals outside the priority list. Carried to plan 2: a tested `(habit_id, version)` revalidation helper for confirmation (not in release / superseded / withdrawn); `load_release` should reject unpublished or unknown release ids instead of returning an empty release; distinguish "already covered by an active habit" from `no_catalog_entry`; compute `needs_cue` over all candidates rather than the top-3 shortlist; LLM-facing shortlist serialisation and code-enforced pick validation; read the release in one snapshot.
+
+## Intake and catalog-backed planning (plan 2a)
+
+- Child profile (interests, accessibility, opted-in topics, preferred world, routine schedule, household timezone) with versioned updates; repeatable intakes replace sessions and goal confirmation; preferences migrated into the profile; old catalog tables and analysis jobs retired.
+- Planning job: LLM mapping to release goal IDs, deterministic eligibility/scoring/template, Planner tool scoped to server-built shortlists, code-enforced pick validation, mandatory review, template fallback.
+- Confirmation locks and revalidates active habits and chapters against the current release (`replan_required`), writes `release_id`, and records active goals in `child_goals`.
+- Implementation deviations: the household upsert in `POST /v1/children` became insert, membership, then update, because an upsert's new row must pass the household SELECT policy before the membership exists; fixture TRUNCATE of catalog tables uses CASCADE now that proposals and plans reference releases.
+- Not run on this host: pgTAP `supabase/tests/rls.sql` (needs the Supabase stack) and `scripts/demo.py` (needs a running API). Intermittent timing-test failures were observed under heavy machine load; each passed when rerun alone.
+- Remaining for plan 2b: proposal edits, replace/rotate/pause change sets, plan flags, catalog requests, concern dataset.

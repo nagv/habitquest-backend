@@ -196,3 +196,13 @@ The 100% owned statement and branch coverage gate remains.
 ## 9. Out of scope
 
 Daily occurrences, rewards and Spark ledger, parent notifications, AI-drafted catalog entries, pgvector or embedding retrieval, multi-caregiver households.
+
+## 10. Implementation refinements (plan 2a)
+
+- The scripted fake model remains in `src` because `MODEL_MODE=fake` is a supported runtime mode.
+- Intake creation returns the intake; cue and clarification questions arrive with the proposal.
+- Confirmation revalidates active habits and chapters; future candidates are revalidated when promoted.
+- Budget, deadline, lease and cancellation failures fail the run. Invalid selections after one revision and rejected reviews publish the template with `fallback: true`. A goal mapping outside the release fails the run.
+- Template coverage: a habit satisfies the goal it was picked for and goals it serves with strength ≥ 0.8; a weaker link satisfies a goal only when no other unpicked option exists.
+- Second intakes carry the current plan's active habits forward and add habits; `max_active_habits` counts carried habits. Replace, rotate and pause come in plan 2b.
+- The household timezone is set through the child profile endpoints. Legacy plans keep `release_id = NULL` and carry nothing forward.
