@@ -94,20 +94,23 @@ def test_available_minutes_is_the_daily_total(client, settings):
         available_minutes=12,
     )
     data = client.get(f"/v1/proposals/{run}").json()["data"]
-    # 12 - 10 carried leaves 2 minutes: only clear-plate (2) fits; join-meal (5) is not eligible, so the
-    # weak meals link of clear-plate has no remaining dedicated alternative and covers meals.
+    # 12 - 10 carried leaves 2 minutes: only clear-plate (2) fits today. join-meal (5) fits the child's day,
+    # so it stays a deferred, promotable alternative and clear-plate's weak meals link does not cover meals.
     assert [(h["habit_id"], h["added_in_plan_version"]) for h in data["active"]] == [
         ("bedtime-prep", 1),
         ("clear-plate", 2),
     ]
     assert data["changes"] == [{"op": "add", "habit_id": "clear-plate", "version": 1, "level": "standard"}]
-    assert data["active"][1]["covers"] == ["meals", "responsibility"]
+    assert data["active"][1]["covers"] == ["responsibility"]
     assert {g["goal_id"]: g["status"] for g in data["goals"]} == {
         "responsibility": "covered",
-        "meals": "covered",
+        "meals": "deferred",
     }
-    assert "join-meal" not in {h["habit_id"] for h in data["future"]}
+    assert "join-meal" in {h["habit_id"] for h in data["future"]}
     assert sum(h["minutes"] for h in data["active"]) == 12
+    # Pick validation counts carried habits against the daily totals, so the Planner's pick is accepted
+    # rather than replaced by the template.
+    assert data["fallback"] is False
 
 
 def test_profile_change_invalidates_the_proposal(client, settings):

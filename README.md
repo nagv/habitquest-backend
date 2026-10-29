@@ -49,13 +49,31 @@ The bootstrap creates a loopback-only, password-authenticated cluster under `.lo
 pg_ctl -D .local/postgres -w stop
 ```
 
-With the API running, the complete synthetic demonstration invokes separate worker processes itself:
+With the API running, the synthetic demonstration invokes separate worker processes itself and checks every response:
 
 ```powershell
-uv run python scripts/demo.py
+uv run python scripts/demo.py --scenario all
 ```
 
-Do not run an additional continuously polling worker during this demo. For manual `/docs` usage, run `uv run python scripts/local_token.py` and paste its short-lived native-local token into Authorize. These token utilities require `LOCAL_DEMO_AUTH=true` and are not for hosted services.
+| Scenario | What it walks through |
+|---|---|
+| `basic` (default) | Onboard a child, describe pain points, review the suggested habits, goals and questions, confirm plan v1 |
+| `edits` | Review-screen edits: a schedule change, then the refusals (`needs_cue`, `level`, `coverage`), removing a goal, demoting a habit, confirming |
+| `second-round` | Answer the morning cue question in the profile, a new intake while the plan is full (`max_active_habits`), rotate a habit out and the morning habit in, confirm plan v2 |
+| `editor` | Two editors: draft, lint refusal, review queue, self-approval refused, approval, release build/diff/validate, self-publication refused, publication, withdrawal |
+
+Each step prints `ok` with its status, or stops with `FAIL` and the response body. Expectations assume the seeded catalog and `MODEL_MODE=fake`; the editor scenario publishes and then withdraws a uniquely named demo habit, so it can be rerun. Do not run an additional continuously polling worker during the demo.
+
+For manual `/docs` usage, paste a short-lived native-local token into Authorize:
+
+```powershell
+uv run python scripts/local_token.py              # the demo parent
+uv run python scripts/local_token.py --editor     # editor 1: drafts, submits, builds releases
+uv run python scripts/local_token.py --reviewer   # editor 2: approves and publishes
+uv run python scripts/local_token.py --sub 22222222-2222-2222-2222-222222222222  # a second parent
+```
+
+`--minutes` sets the lifetime (1-60, default 15). The two editor identities exist because a reviewer must differ from the author and a publisher from the release builder. These token utilities require `LOCAL_DEMO_AUTH=true` and are not for hosted services.
 
 ## Real local inference
 
@@ -74,9 +92,10 @@ Set `MODEL_MODE=ollama` in `.env` for both API and worker. The fake path needs n
 3. `POST /v1/children/{id}/intakes` with `concerns` (free text) and `available_minutes` for this round. Add a new intake whenever the parent has new pain points.
 4. `POST /v1/intakes/{id}/plan-runs` with an `Idempotency-Key` header; poll `/v1/plan-runs/{run_id}`.
 5. `GET /v1/proposals/{run_id}`: goals mapped from the concerns (with the quoted evidence, confidence and a `suggested_not_stated` flag), active habits with cue and days, future candidates, shortlists with score breakdowns, routine links, chapter outline, unresolved goals (`needs_cue`, `no_catalog_entry`, `deferred`), questions, rationale and review. `fallback: true` means the reviewed deterministic template was used.
-6. `POST /v1/proposals/{run_id}/confirm` with `expected_plan_version` and `expected_proposal_version`. Confirmation revalidates every active habit and chapter against the current catalog release; a withdrawn or superseded item returns `409 replan_required`.
-7. `GET /v1/children/{id}/plan` and `GET /v1/children/{id}/goals`.
-8. `GET /v1/children/{id}/plan-flags` lists open flags on confirmed plans (a removed routine cue, a withdrawn habit). `POST /v1/plan-flags/{id}/resolve` marks one reviewed; confirming a newer plan resolves the older plan's flags.
+6. Optional edits: `PATCH /v1/proposals/{run_id}` with one `edit` (`remove_goal`, `reorder_goals`, `change_level`, `change_schedule`, `swap_habit`, `demote_active`, `promote_future`) and `expected_proposal_version`. Each edit is rebuilt from the reviewed release and re-checked: at most `max_active_habits` active habits, total minutes within the intake's `available_minutes`, a cue for every active habit's anchor, and no covered goal left uncovered. A violation returns `422` naming the rule (`max_active_habits:`, `available_minutes:`, `needs_cue:`, `coverage:`, `level:`, `stale:`, `chapter:`). A goal that fits the child's day but not the space left is `deferred` and its habit stays in `future`, so it can be promoted after demoting another.
+7. `POST /v1/proposals/{run_id}/confirm` with `expected_plan_version` and `expected_proposal_version`. Confirmation revalidates every active habit and chapter against the current catalog release; a withdrawn or superseded item returns `409 replan_required`.
+8. `GET /v1/children/{id}/plan` and `GET /v1/children/{id}/goals`.
+9. `GET /v1/children/{id}/plan-flags` lists open flags on confirmed plans (a removed routine cue, a withdrawn habit). `POST /v1/plan-flags/{id}/resolve` marks one reviewed; confirming a newer plan resolves the older plan's flags.
 
 The planning job: the mapper model turns concerns into goal IDs from the current catalog release; deterministic eligibility and scoring build per-goal shortlists and a template plan; the Director/Planner pick from the shortlists; code validates every pick; the Reviewer must accept the final version. Invalid picks get one revision, then the reviewed template is published. Budget, deadline, cancellation and unsafe requests fail explicitly.
 

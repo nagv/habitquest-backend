@@ -7,6 +7,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from psycopg.types.json import Jsonb
 
 from habitquest_backend.auth import verify_token
+from habitquest_backend.catalog.models import profile_from_row
 from habitquest_backend.catalog.repository import load_release
 from habitquest_backend.config import Settings
 from habitquest_backend.db import one, transaction
@@ -175,10 +176,25 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 raise HTTPException(409, "Proposal is confirmed or expired")
             if proposal["version"] != body.expected_proposal_version:
                 raise HTTPException(409, "Proposal version changed; reload before editing")
-            release = load_release(conn)
-            edit = body.edit.model_dump(mode="json")
+            child = one(conn, "SELECT * FROM hq.children WHERE id=%s", (proposal["child_id"],))
+            if proposal["data"]["profile_version"] != child["profile_version"]:
+                raise HTTPException(409, "Profile changed; request a new proposal")
+            intake = one(
+                conn,
+                "SELECT i.data FROM hq.jobs j JOIN hq.intakes i ON i.id=j.intake_id WHERE j.id=%s",
+                (proposal_id,),
+            )
+            policy = one(conn, "SELECT max_active_habits FROM hq.policy WHERE name='onboarding'")
             try:
-                new_data = apply_patch(proposal["data"], edit, release)
+                new_data = apply_patch(
+                    proposal["data"],
+                    body.edit.model_dump(mode="json"),
+                    load_release(conn),
+                    profile_from_row(child),
+                    max_active=policy["max_active_habits"],
+                    available_minutes=intake["data"]["available_minutes"],
+                    plan_version=proposal["base_plan_version"] + 1,
+                )
             except ValueError as exc:
                 raise HTTPException(422, str(exc)) from exc
             return one(

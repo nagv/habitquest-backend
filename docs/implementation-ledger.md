@@ -49,7 +49,7 @@ Ruling: Stage files in the chat's writable working directory, then copy only pro
 - Implementation deviations: the household upsert in `POST /v1/children` became insert, membership, then update, because an upsert's new row must pass the household SELECT policy before the membership exists; fixture TRUNCATE of catalog tables uses CASCADE now that proposals and plans reference releases.
 - Not run on this host: pgTAP `supabase/tests/rls.sql` (needs the Supabase stack) and `scripts/demo.py` (needs a running API). Intermittent timing-test failures were observed under heavy machine load; each passed when rerun alone.
 - Review fixes: strict goal coverage (`covered_goals`) in pick validation and the proposal, with per-habit `covers`; template prefers dedicated habits and defers weakly served goals; Planner shortlists of cue-ready options plus template picks; mapper quotes must be substrings of the concerns; carried habits revalidated (drop/upgrade changes, `added_in_plan_version`); `available_minutes` is the daily total including carried habits; `profile_version` checked at publication and confirmation; the checked release id is recorded on proposals and plans; `child_goals` reactivated when raised again; legacy plans (`release_id IS NULL`) carry nothing; cap rationale when carried habits fill the limit.
-- Known, not fixed: a non-owner household member's timezone handling can return 500 (no multi-member households exist yet). When the remaining daily minutes are 0, goals report `no_catalog_entry` rather than `deferred` because nothing is eligible.
+- Known, not fixed: a non-owner household member's timezone handling can return 500 (no multi-member households exist yet). (The `no_catalog_entry`-instead-of-`deferred` issue is fixed; see the local flow fixes below.)
 - Remaining for plan 2b: proposal edits, replace/rotate/pause change sets, plan flags, catalog requests, concern dataset.
 
 ## Editorial API (plan 3)
@@ -61,3 +61,13 @@ Ruling: Stage files in the chat's writable working directory, then copy only pro
 - Decisions: rejection returns the version to `draft` (audited with the reason) rather than leaving it `rejected`; one open draft per entity; linked goals must exist in any status at submit, and the release validation catches references outside the release; concern labels are parent descriptions of problems and are not linted.
 - Known limits: release validation runs in the API before `publish_release`, so a direct database caller with the `hq_editor` role could publish an invalid release; the optional LLM lint is not implemented; parent notification of plan flags is a later slice; pgTAP additions in `supabase/tests/rls.sql` were not run on this host.
 - Follow-up: review-queue listing `GET /v1/editor/{kind}?status=`; parent flag resolution `POST /v1/plan-flags/{id}/resolve` (idempotent; `hq_api` may update only `resolved_at`) and automatic resolution of superseded plans' flags at confirmation; API test for a release published mid-proposal. Still open: pgTAP in CI and database-side release validation.
+
+## Local flow fixes (after plan 3)
+
+Found by running the parent flow against a live API and worker on a fresh database.
+
+- Proposal edits re-run the publication rules (spec 4.4). Promoted, swapped and re-levelled habits are rebuilt from the current release and the child's profile (title, instruction, cue, days, minutes); each edit rejects with `422` naming the rule: `max_active_habits`, `available_minutes`, `needs_cue`, `coverage` (a covered goal may not become uncovered; remove it first), `level`, `stale` or `chapter`. Goal statuses, `unresolved` and the chapter outline are recomputed; weak links cover a goal only while no cue-ready alternative (shortlisted or future) is inactive. `PATCH` returns `409` when the profile changed since the proposal.
+- Before: promoting `pack-bag` for a child without an evening cue confirmed a plan with four habits, 22 of 20 minutes and an empty cue.
+- Eligibility uses the child's daily minutes; the template applies what is left. A goal whose habit fits the day but not the remaining time is now `deferred` with the habit in `future`, instead of `no_catalog_entry` with the habit hidden.
+- Pick validation counts carried habits against the daily totals; it previously received the remaining limits and counted carried habits again, so valid second-intake picks fell back to the template.
+

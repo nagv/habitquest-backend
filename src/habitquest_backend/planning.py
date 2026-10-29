@@ -234,6 +234,7 @@ class Draft:
     carried: list[dict]
     carried_chapters: list[dict]
     carried_changes: list[dict]
+    daily_limits: tuple[int, int]  # (max active habits, minutes) for the whole day, carried habits included
     selection_picks: list[Pick] = field(default_factory=list)
     selection_paused: list[PausedGoal] = field(default_factory=list)
     paused_goal_ids: frozenset = field(default_factory=frozenset)
@@ -585,8 +586,8 @@ def plan_with_agents(draft: Draft, common: dict, saver, thread_id, resume_thread
                 draft.short,
                 draft.template,
                 lists=draft.lists,
-                max_active=context["max_active_habits"],
-                available_minutes=context["available_minutes"],
+                max_active=draft.daily_limits[0],
+                available_minutes=draft.daily_limits[1],
                 carried=draft.carried,
             )
             draft_with_sel = Draft(
@@ -648,9 +649,12 @@ def generate(
         list(base.get("active", [])), release, profile, base_version=context["base_plan_version"]
     )
     context["model"] = "fake" if settings.model_mode == "fake" else f"ollama:{settings.ollama_model}"
-    # Both limits are the child's daily totals; kept carried habits use part of them.
-    context["max_active_habits"] = max(context["max_active_habits"] - len(carried), 0)
-    context["available_minutes"] = max(context["available_minutes"] - sum(h["minutes"] for h in carried), 0)
+    # Both limits are the child's daily totals; kept carried habits use part of them. Eligibility and pick
+    # validation (which counts carried habits itself) use the totals, so a habit that fits the child's day
+    # but not what is left stays visible as `deferred` and promotable; the template uses what is left.
+    daily_active, daily_minutes = context["max_active_habits"], context["available_minutes"]
+    context["max_active_habits"] = max(daily_active - len(carried), 0)
+    context["available_minutes"] = max(daily_minutes - sum(h["minutes"] for h in carried), 0)
     common = {
         "settings": settings,
         "context": context,
@@ -665,7 +669,7 @@ def generate(
         release,
         profile,
         goal_ids,
-        available_minutes=context["available_minutes"],
+        available_minutes=daily_minutes,
         active_habit_ids=frozenset(h["habit_id"] for h in carried),
     )
     ranked = score(candidates, goal_ids, profile.interests)
@@ -693,6 +697,7 @@ def generate(
         carried=carried,
         carried_chapters=list(base.get("chapters", [])) if carried else [],
         carried_changes=carried_changes,
+        daily_limits=(daily_active, daily_minutes),
     )
     if not template.active:
         capped = bool(carried) and not context["max_active_habits"]
