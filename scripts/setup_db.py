@@ -36,7 +36,7 @@ with psycopg.connect(url) as conn:
             if not applied:
                 conn.execute(text)
             conn.execute("INSERT INTO public.hq_migrations VALUES(%s,%s)", (file.name, digest))
-    conn.execute("GRANT hq_api,hq_worker TO CURRENT_USER")
+    conn.execute("GRANT hq_api,hq_worker,hq_editor TO CURRENT_USER")
     conn.execute((root / "supabase/seed.sql").read_text(encoding="utf-8"))
 with PostgresSaver.from_conn_string(make_conninfo(url, options="-c search_path=hq_checkpoint")) as saver:
     saver.setup()

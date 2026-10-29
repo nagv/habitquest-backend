@@ -6,7 +6,8 @@ from fastapi import HTTPException
 from habitquest_backend.config import Settings
 
 
-def verify_token(token: str, settings: Settings) -> UUID:
+def verify_token(token: str, settings: Settings, *, hq_role: str | None = None) -> UUID:
+    """Verify the JWT; with `hq_role`, also require the admin-assigned `app_metadata.hq_role` claim."""
     try:
         if settings.jwt_secret:
             key = settings.jwt_secret.get_secret_value()
@@ -24,6 +25,9 @@ def verify_token(token: str, settings: Settings) -> UUID:
         )
         if claims.get("role") != "authenticated":
             raise ValueError("Parent authentication required")
-        return UUID(claims["sub"])
+        user = UUID(claims["sub"])
     except (jwt.PyJWTError, ValueError, TypeError) as exc:
         raise HTTPException(401, "Invalid or expired parent token") from exc
+    if hq_role is not None and (claims.get("app_metadata") or {}).get("hq_role") != hq_role:
+        raise HTTPException(403, f"{hq_role.capitalize()} role required")
+    return user

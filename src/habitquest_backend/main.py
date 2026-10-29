@@ -10,6 +10,7 @@ from habitquest_backend.auth import verify_token
 from habitquest_backend.catalog.repository import load_release
 from habitquest_backend.config import Settings
 from habitquest_backend.db import one, transaction
+from habitquest_backend.editorial.api import router as editorial_router
 from habitquest_backend.schemas import ChildInput, Confirmation, IntakeInput, ProfileUpdate, ProposalPatch
 from habitquest_backend.service import apply_patch, confirm, cue_loss_habits, enqueue, flag_plan
 
@@ -217,6 +218,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 (child_id,),
             ).fetchall()
 
+    application.include_router(editorial_router(settings))
     return application
 
 
