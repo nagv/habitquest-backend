@@ -22,7 +22,9 @@ from langchain_core.utils.function_calling import convert_to_openai_tool
 from langchain_ollama import ChatOllama
 from pydantic import Field
 
-from habitquest_backend.schemas import GoalAnalysis, Review, Selection
+from habitquest_backend.catalog.models import Level
+from habitquest_backend.catalog.scoring import Scored, TemplatePlan
+from habitquest_backend.schemas import GoalAnalysis, MappedGoal, PlannerSelection, Review, Selection
 from habitquest_backend.service import questions
 
 
@@ -313,3 +315,45 @@ def generate(
         if review.accepted:
             return {**candidate, "review": review.model_dump()}
     raise ValueError("Final content review rejected the revised proposal")
+
+
+def prioritise(goals: list[MappedGoal], concerns: str) -> list[MappedGoal]:
+    """Highest confidence first, then the order in which the parent mentioned them."""
+    text = concerns.lower()
+
+    def position(goal: MappedGoal) -> int:
+        index = text.find(goal.evidence_span.lower())
+        return index if index >= 0 else len(text)
+
+    return sorted(goals, key=lambda goal: (-goal.confidence, position(goal)))
+
+
+def validate_picks(
+    selection: PlannerSelection,
+    short: dict[str, list[Scored]],
+    template: TemplatePlan,
+    *,
+    max_active: int,
+    available_minutes: int,
+) -> list[tuple[Scored, Level]]:
+    """Code, not the model, decides whether a selection is publishable."""
+    listed = {s.candidate.habit.id: s for options in short.values() for s in options}
+    ids = [pick.habit_id for pick in selection.picks]
+    if len(ids) != len(set(ids)) or any(habit_id not in listed for habit_id in ids):
+        raise ValueError("Pick outside the reviewed shortlist or duplicated")
+    chosen = []
+    for pick in selection.picks:
+        scored = listed[pick.habit_id]
+        level = next((lv for lv in scored.candidate.habit.levels if lv.level == pick.level), None)
+        if level is None or scored.candidate.needs_cue:
+            raise ValueError("Unknown level or habit without an agreed cue")
+        chosen.append((scored, level))
+    covered = {goal for scored, _ in chosen for goal in scored.candidate.goal_ids}
+    required = {goal for goal in short if goal not in template.unresolved}
+    if (
+        len(chosen) > max_active
+        or sum(level.minutes for _, level in chosen) > available_minutes
+        or not required <= covered
+    ):
+        raise ValueError("Picks exceed limits or drop a goal the reviewed template covers")
+    return chosen

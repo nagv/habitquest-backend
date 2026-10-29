@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Annotated, Literal
 from uuid import UUID
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
@@ -70,3 +70,32 @@ class PreferenceInput(StrictModel):
     kind: Literal["routine_times", "world"]
     value: dict[str, str] | str
     source_id: UUID
+
+
+LevelName = Literal["simple", "standard", "stretch"]
+
+
+class MappedGoal(StrictModel):
+    goal_id: str = Field(min_length=1, max_length=60)
+    evidence_span: str = Field(max_length=300)
+    confidence: float = Field(ge=0, le=1)
+    suggested_not_stated: bool = False
+
+
+class GoalMapping(StrictModel):
+    goals: list[MappedGoal] = Field(max_length=8)
+    unmatched_phrases: list[Annotated[str, Field(max_length=200)]] = Field(
+        default_factory=list, max_length=10
+    )
+    explanation: str = Field(min_length=5, max_length=500)
+
+
+class Pick(StrictModel):
+    habit_id: str = Field(min_length=1, max_length=60)
+    level: LevelName
+
+
+class PlannerSelection(StrictModel):
+    picks: list[Pick] = Field(max_length=6)
+    rationale: str = Field(min_length=5, max_length=500)
+    order_explanation: str = Field(min_length=5, max_length=500)
