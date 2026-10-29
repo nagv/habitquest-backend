@@ -24,11 +24,14 @@ from langchain_ollama import ChatOllama
 from pydantic import Field
 
 from habitquest_backend.catalog.eligibility import eligible
-from habitquest_backend.catalog.models import ChildProfile, Level, Release
+from habitquest_backend.catalog.models import ChildProfile, Habit, Level, Release
 from habitquest_backend.catalog.scoring import (
     RANKING_VERSION,
     Scored,
     TemplatePlan,
+    covered_goals,
+    habit_covers,
+    planner_shortlists,
     score,
     shortlists,
     template_plan,
@@ -41,6 +44,7 @@ TEMPLATE_RATIONALE = (
 )
 TEMPLATE_ORDER = "Goals follow the priority of the concerns you described; habits follow that order."
 EMPTY_RATIONALE = "No approved habit fits yet; please see the questions."
+CAP_RATIONALE = "Your plan already has the maximum number of active habits; new goals are listed for later."
 MAPPER_PROMPT = (
     "Map the parent's concerns to goal IDs from the supplied catalog only. Return only JSON "
     '{goals:[{goal_id,evidence_span,confidence,suggested_not_stated}],unmatched_phrases:[],explanation:"..."}. '
@@ -221,9 +225,11 @@ class Draft:
     goals: list[MappedGoal]
     ranked: list[Scored]
     short: dict[str, list[Scored]]
+    lists: dict[str, list[Scored]]
     template: TemplatePlan
     carried: list[dict]
     carried_chapters: list[dict]
+    carried_changes: list[dict]
 
 
 def prioritise(goals: list[MappedGoal], concerns: str) -> list[MappedGoal]:
@@ -242,6 +248,7 @@ def validate_picks(
     short: dict[str, list[Scored]],
     template: TemplatePlan,
     *,
+    lists: dict[str, list[Scored]],
     max_active: int,
     available_minutes: int,
 ) -> list[tuple[Scored, Level]]:
@@ -257,7 +264,7 @@ def validate_picks(
         if level is None or scored.candidate.needs_cue:
             raise ValueError("Unknown level or habit without an agreed cue")
         chosen.append((scored, level))
-    covered = {goal for scored, _ in chosen for goal in scored.candidate.goal_ids}
+    covered = covered_goals([scored for scored, _ in chosen], list(short), lists)
     required = {goal for goal in short if goal not in template.unresolved}
     if (
         len(chosen) > max_active
@@ -284,14 +291,13 @@ def option_view(scored: Scored, interests: frozenset[str]) -> dict:
     }
 
 
-def entry(scored: Scored, level: Level, profile: ChildProfile) -> dict:
-    habit = scored.candidate.habit
+def entry(habit: Habit, goal_ids, level: Level, profile: ChildProfile) -> dict:
     title, instruction = habit.presented(profile.interests)
     slot = profile.routine_schedule[habit.routine_anchor]
     return {
         "habit_id": habit.id,
         "version": habit.version,
-        "goal_ids": list(scored.candidate.goal_ids),
+        "goal_ids": list(goal_ids),
         "level": level.level,
         "minutes": level.minutes,
         "points": level.points,
@@ -301,6 +307,46 @@ def entry(scored: Scored, level: Level, profile: ChildProfile) -> dict:
         "cue": slot.cue,
         "days": list(slot.days),
     }
+
+
+def revalidate_carried(
+    carried: list[dict], release: Release, profile: ChildProfile, *, base_version: int
+) -> tuple[list[dict], list[dict]]:
+    """Rebuild carried habits from the current release and profile; drop what can no longer run."""
+    kept, changes = [], []
+    for old in carried:
+        habit = release.habits.get(old["habit_id"])
+        level = next((lv for lv in habit.levels if lv.level == old["level"]), None) if habit else None
+        if habit is None:
+            reason = "not_in_release"
+        elif habit.withdrawn:
+            reason = "withdrawn"
+        elif level is None:
+            reason = "level_removed"
+        elif habit.routine_anchor not in profile.routine_schedule:
+            reason = "needs_cue"
+        else:
+            if habit.version != old["version"]:
+                changes.append(
+                    {
+                        "op": "upgrade",
+                        "habit_id": habit.id,
+                        "from_version": old["version"],
+                        "to_version": habit.version,
+                    }
+                )
+            kept.append(
+                {
+                    **entry(habit, old["goal_ids"], level, profile),
+                    "covers": old.get("covers", old["goal_ids"]),
+                    "added_in_plan_version": old.get("added_in_plan_version", base_version),
+                }
+            )
+            continue
+        changes.append(
+            {"op": "drop", "habit_id": old["habit_id"], "version": old["version"], "reason": reason}
+        )
+    return kept, changes
 
 
 def build_proposal(
@@ -316,8 +362,8 @@ def build_proposal(
     world = context["world"]
     ids = [goal.goal_id for goal in draft.goals]
     picked = {scored.candidate.habit.id for scored, _ in chosen}
-    covered = {goal for scored, _ in chosen for goal in scored.candidate.goal_ids}
-    covered |= {goal for carried in draft.carried for goal in carried["goal_ids"]}
+    covered = covered_goals([scored for scored, _ in chosen], ids, draft.lists)
+    covered |= {goal for carried in draft.carried for goal in carried["covers"]}
     if any(goal in covered and (world, goal) not in release.chapters for goal in ids):
         raise ValueError("No approved chapter for a covered goal")
     unresolved = {goal: reason for goal, reason in draft.template.unresolved.items() if goal not in covered}
@@ -341,6 +387,7 @@ def build_proposal(
         "policy_version": context["policy_version"],
         "world": world,
         "timezone": context["timezone"],
+        "profile_version": context["profile_version"],
         "goals": [
             {
                 "goal_id": goal.goal_id,
@@ -353,7 +400,8 @@ def build_proposal(
             for goal in draft.goals
         ],
         "unmatched_phrases": list(draft.mapping.unmatched_phrases),
-        "changes": [
+        "changes": draft.carried_changes
+        + [
             {
                 "op": "add",
                 "habit_id": s.candidate.habit.id,
@@ -362,7 +410,15 @@ def build_proposal(
             }
             for s, lv in chosen
         ],
-        "active": draft.carried + [entry(s, lv, draft.profile) for s, lv in chosen],
+        "active": draft.carried
+        + [
+            {
+                **entry(s.candidate.habit, s.candidate.goal_ids, lv, draft.profile),
+                "covers": sorted(habit_covers(s, picked, draft.lists)),
+                "added_in_plan_version": context["base_plan_version"] + 1,
+            }
+            for s, lv in chosen
+        ],
         "future": [
             {
                 "habit_id": s.candidate.habit.id,
@@ -421,6 +477,10 @@ def map_concerns(common: dict, release: Release) -> GoalMapping:
     ids = [goal.goal_id for goal in mapping.goals]
     if len(ids) != len(set(ids)) or not set(ids) <= set(release.goals):
         raise ValueError("Goal mapping outside the current release")
+    text = common["context"]["concerns"].lower()
+    quotes = [goal.evidence_span for goal in mapping.goals] + list(mapping.unmatched_phrases)
+    if not all(quote and quote.lower() in text for quote in quotes):
+        raise ValueError("Mapping text not found in the concerns")
     return mapping
 
 
@@ -498,6 +558,7 @@ def plan_with_agents(draft: Draft, common: dict, saver, thread_id, resume_thread
                 selection,
                 draft.short,
                 draft.template,
+                lists=draft.lists,
                 max_active=context["max_active_habits"],
                 available_minutes=context["available_minutes"],
             )
@@ -546,9 +607,13 @@ def generate(
 ):
     if unsafe(context["concerns"]):
         raise ValueError("Unsafe request; parent clarification required")
-    carried = list(base.get("active", []))
+    carried, carried_changes = revalidate_carried(
+        list(base.get("active", [])), release, profile, base_version=context["base_plan_version"]
+    )
     context["model"] = "fake" if settings.model_mode == "fake" else f"ollama:{settings.ollama_model}"
+    # Both limits are the child's daily totals; kept carried habits use part of them.
     context["max_active_habits"] = max(context["max_active_habits"] - len(carried), 0)
+    context["available_minutes"] = max(context["available_minutes"] - sum(h["minutes"] for h in carried), 0)
     common = {
         "settings": settings,
         "context": context,
@@ -567,8 +632,9 @@ def generate(
         active_habit_ids=frozenset(h["habit_id"] for h in carried),
     )
     ranked = score(candidates, goal_ids, profile.interests)
+    lists = shortlists(ranked, goal_ids, size=None)
     template = template_plan(
-        shortlists(ranked, goal_ids, size=None),
+        lists,
         goal_ids,
         max_active=context["max_active_habits"],
         available_minutes=context["available_minutes"],
@@ -578,20 +644,28 @@ def generate(
         {"habit_id": s.candidate.habit.id, "level": s.candidate.level.level} for s in template.active
     ]
     draft = Draft(
-        release,
-        profile,
-        context,
-        mapping,
-        goals,
-        ranked,
-        shortlists(ranked, goal_ids),
-        template,
-        carried,
-        list(base.get("chapters", [])) if carried else [],
+        release=release,
+        profile=profile,
+        context=context,
+        mapping=mapping,
+        goals=goals,
+        ranked=ranked,
+        short=planner_shortlists(ranked, goal_ids, template),
+        lists=lists,
+        template=template,
+        carried=carried,
+        carried_chapters=list(base.get("chapters", [])) if carried else [],
+        carried_changes=carried_changes,
     )
     if not template.active:
+        capped = bool(carried) and not context["max_active_habits"]
         return build_proposal(
-            draft, [], rationale=EMPTY_RATIONALE, order=TEMPLATE_ORDER, review=None, fallback=False
+            draft,
+            [],
+            rationale=CAP_RATIONALE if capped else EMPTY_RATIONALE,
+            order=TEMPLATE_ORDER,
+            review=None,
+            fallback=False,
         )
     try:
         return plan_with_agents(draft, common, saver, thread_id, resume_thread, record)

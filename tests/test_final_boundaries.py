@@ -19,9 +19,10 @@ def test_content_edit_waits_until_confirmation_commits(client, settings, db, mon
     original = service.validate_sources
 
     def pause(conn, data):
-        original(conn, data)
+        checked = original(conn, data)
         validated.set()
         assert release.wait(5)
+        return checked
 
     monkeypatch.setattr(service, "validate_sources", pause)
     with ThreadPoolExecutor(max_workers=2) as pool:
@@ -46,8 +47,9 @@ def test_publication_rolls_back_when_deadline_passes_after_source_check(client, 
     original = worker.validate_sources
 
     def expire(conn, data):
-        original(conn, data)
+        checked = original(conn, data)
         conn.execute("UPDATE hq.jobs SET deadline=clock_timestamp()-interval '1 second'")
+        return checked
 
     monkeypatch.setattr(worker, "validate_sources", expire)
     worker.run_once(settings)

@@ -6,7 +6,14 @@ from hypothesis import strategies as st
 
 from habitquest_backend.catalog.eligibility import Candidate, eligible
 from habitquest_backend.catalog.models import ChildProfile, Level, RoutineSlot
-from habitquest_backend.catalog.scoring import PRIMARY_STRENGTH, score, shortlists, template_plan
+from habitquest_backend.catalog.scoring import (
+    PRIMARY_STRENGTH,
+    covered_goals,
+    planner_shortlists,
+    score,
+    shortlists,
+    template_plan,
+)
 
 PROFILE = ChildProfile(
     age_band="6-9",
@@ -104,6 +111,77 @@ def test_weak_link_does_not_block_a_dedicated_habit():
     assert [s.candidate.habit.id for s in plan.active] == ["plate", "meal"]
 
 
+def test_template_prefers_a_dedicated_habit_over_a_weak_link_for_its_goal():
+    # Both score 1.0 for ["meals", "resp"]; the tie would otherwise pick the weak "clear" for meals.
+    clear = make_habit("clear", goals={"meals": 0.5, "resp": 1.0}, levels=(Level("standard", 2, 1),))
+    meal = make_habit("meal", goals={"meals": 1.0}, levels=(Level("standard", 5, 1),))
+    goals = ["meals", "resp"]
+    lists = shortlists(
+        score([candidate(clear, ("meals", "resp")), candidate(meal, ("meals",))], goals, frozenset()),
+        goals,
+        size=None,
+    )
+    plan = template_plan(lists, goals, max_active=3, available_minutes=10)
+    assert [s.candidate.habit.id for s in plan.active] == ["meal", "clear"]
+    assert plan.unresolved == {}
+    assert covered_goals(list(plan.active), goals, lists) == {"meals", "resp"}
+
+
+def test_template_defers_a_goal_only_weakly_served_while_a_dedicated_habit_remains():
+    clear = make_habit("clear", goals={"meals": 0.5}, levels=(Level("standard", 2, 1),))
+    meal = make_habit("meal", goals={"meals": 1.0}, levels=(Level("standard", 9, 1),))
+    goals = ["meals"]
+    lists = shortlists(
+        score([candidate(clear, ("meals",)), candidate(meal, ("meals",))], goals, frozenset()),
+        goals,
+        size=None,
+    )
+    plan = template_plan(lists, goals, max_active=3, available_minutes=5)
+    assert [s.candidate.habit.id for s in plan.active] == ["clear"]
+    assert plan.unresolved == {"meals": "deferred"}
+
+
+def coverage_lists(*extra):
+    plate = make_habit("plate", goals={"resp": 1.0, "meals": 0.5})
+    habits = [candidate(plate, ("resp", "meals")), *extra]
+    ranked = score(habits, ["resp", "meals"], frozenset())
+    return ranked, shortlists(ranked, ["resp", "meals"], size=None)
+
+
+def test_covered_goals_strong_link():
+    ranked, lists = coverage_lists()
+    assert covered_goals(ranked, ["resp"], lists) == {"resp"}
+
+
+def test_covered_goals_weak_link_with_a_dedicated_alternative_is_not_covered():
+    meal = make_habit("meal", goals={"meals": 1.0})
+    ranked, lists = coverage_lists(candidate(meal, ("meals",)))
+    plate = [s for s in ranked if s.candidate.habit.id == "plate"]
+    assert covered_goals(plate, ["resp", "meals"], lists) == {"resp"}
+    assert covered_goals(ranked, ["resp", "meals"], lists) == {"resp", "meals"}
+
+
+def test_covered_goals_weak_link_without_a_usable_alternative_is_covered():
+    cue = make_habit("cue", goals={"meals": 1.0})
+    ranked, lists = coverage_lists(candidate(cue, ("meals",), needs_cue=True))
+    plate = [s for s in ranked if s.candidate.habit.id == "plate"]
+    assert covered_goals(plate, ["resp", "meals"], lists) == {"resp", "meals"}
+    assert covered_goals([], ["resp", "meals"], lists) == set()
+
+
+def test_planner_shortlists_skip_cue_options_and_include_template_picks():
+    cues = [candidate(make_habit(f"c{i}"), needs_cue=True) for i in range(3)]
+    ready = [candidate(make_habit(f"r{i}", levels=(Level("stretch", 5, 1),))) for i in range(4)]
+    ranked = score(cues + ready, ["g"], frozenset())
+    assert [s.candidate.habit.id for s in ranked][:3] == ["c0", "c1", "c2"]
+    pick = next(s for s in ranked if s.candidate.habit.id == "r3")
+    template = template_plan({"g": [pick]}, ["g"], max_active=3, available_minutes=10)
+    short = planner_shortlists(ranked, ["g", "none"], template)
+    assert [s.candidate.habit.id for s in short["g"]] == ["r0", "r1", "r2", "r3"]
+    assert short["none"] == []
+    assert len(planner_shortlists(ranked, ["g"], template, size=5)["g"]) == 4
+
+
 GOALS = ["a", "b", "c", "d"]
 ANCHORS = ["morning", "after_school", "evening", "bedtime"]
 habits = st.lists(
@@ -143,4 +221,5 @@ def test_template_plan_invariants(habit_list, goals, max_active, minutes):
     assert set(goals) <= served | set(plan.unresolved)
     assert primary.isdisjoint(plan.unresolved)
     assert not set(active_ids) & {s.candidate.habit.id for s in plan.future}
+    assert set(goals) - set(plan.unresolved) <= covered_goals(list(plan.active), goals, lists)
     assert plan == template_plan(lists, goals, max_active=max_active, available_minutes=minutes)

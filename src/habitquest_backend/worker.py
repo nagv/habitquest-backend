@@ -114,7 +114,8 @@ def run_once(settings: Settings) -> bool:
             if intake["version"] != job["intake_version"]:
                 raise ValueError("Intake changed")
             base = conn.execute(
-                "SELECT data FROM hq.plans WHERE child_id=%s ORDER BY version DESC LIMIT 1", (child["id"],)
+                "SELECT data,release_id FROM hq.plans WHERE child_id=%s ORDER BY version DESC LIMIT 1",
+                (child["id"],),
             ).fetchone()
             release = load_release(conn)
             policy = one(conn, "SELECT * FROM hq.policy WHERE name='onboarding'")
@@ -127,6 +128,8 @@ def run_once(settings: Settings) -> bool:
             "interests": sorted(child["interests"]),
             "policy_version": policy["version"],
             "max_active_habits": policy["max_active_habits"],
+            "profile_version": child["profile_version"],
+            "base_plan_version": job["base_plan_version"],
         }
         with psycopg.connect(
             settings.database_url, autocommit=True, prepare_threshold=0, row_factory=dict_row
@@ -139,7 +142,8 @@ def run_once(settings: Settings) -> bool:
                     context,
                     profile_from_row(child),
                     release,
-                    base["data"] if base else {},
+                    # Legacy plans (no release) carry nothing forward.
+                    base["data"] if base and base["release_id"] is not None else {},
                     PostgresSaver(cp),
                     job["checkpoint_thread"],
                     charge,
@@ -153,7 +157,7 @@ def run_once(settings: Settings) -> bool:
                 "SELECT id FROM hq.jobs WHERE id=%s AND lease_token=%s AND status='running' AND lease_until>now() AND deadline>now() FOR UPDATE",
                 (job["id"], job["lease_token"]),
             )
-            one(conn, "SELECT id FROM hq.children WHERE id=%s", (job["child_id"],))
+            child = one(conn, "SELECT profile_version FROM hq.children WHERE id=%s", (job["child_id"],))
             conn.execute("SELECT pg_advisory_xact_lock(hashtextextended(%s,1))", (str(job["child_id"]),))
             conn.execute("SELECT hq.lock_intake(%s)", (job["intake_id"],))
             intake = one(conn, "SELECT version FROM hq.intakes WHERE id=%s", (job["intake_id"],))
@@ -162,7 +166,9 @@ def run_once(settings: Settings) -> bool:
                 or current_version(conn, job["child_id"]) != job["base_plan_version"]
             ):
                 raise ValueError("State changed while planning")
-            validate_sources(conn, data)
+            if child["profile_version"] != data["profile_version"]:
+                raise ValueError("Profile changed while planning")
+            data["release_id"] = validate_sources(conn, data)
             conn.execute(
                 "INSERT INTO hq.proposals(id,child_id,parent_id,base_plan_version,intake_version,release_id,data) "
                 "VALUES(%s,%s,%s,%s,%s,%s,%s) ON CONFLICT(id) DO NOTHING",

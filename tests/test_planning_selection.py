@@ -22,8 +22,9 @@ def options():
         Candidate(CUE, ("y",), CUE.levels[0], True),
     ]
     ranked = score(candidates, GOALS, frozenset())
-    template = template_plan(shortlists(ranked, GOALS, size=None), GOALS, max_active=3, available_minutes=20)
-    return shortlists(ranked, GOALS), template
+    lists = shortlists(ranked, GOALS, size=None)
+    template = template_plan(lists, GOALS, max_active=3, available_minutes=20)
+    return shortlists(ranked, GOALS), template, lists
 
 
 def selection(*picks):
@@ -35,9 +36,14 @@ def selection(*picks):
 
 
 def test_alternative_valid_picks_are_accepted():
-    short, template = options()
+    short, template, lists = options()
     chosen = validate_picks(
-        selection(("c", "standard"), ("b", "standard")), short, template, max_active=3, available_minutes=20
+        selection(("c", "standard"), ("b", "standard")),
+        short,
+        template,
+        lists=lists,
+        max_active=3,
+        available_minutes=20,
     )
     assert [(s.candidate.habit.id, level.level) for s, level in chosen] == [
         ("c", "standard"),
@@ -58,9 +64,36 @@ def test_alternative_valid_picks_are_accepted():
     ],
 )
 def test_invalid_picks_are_rejected(picks, max_active, minutes, message):
-    short, template = options()
+    short, template, lists = options()
     with pytest.raises(ValueError, match=message):
-        validate_picks(selection(*picks), short, template, max_active=max_active, available_minutes=minutes)
+        validate_picks(
+            selection(*picks), short, template, lists=lists, max_active=max_active, available_minutes=minutes
+        )
+
+
+def test_weak_link_pick_that_drops_a_dedicated_habit_is_rejected():
+    plate = make_habit("plate", goals={"resp": 1.0, "meals": 0.5}, levels=(Level("standard", 2, 1),))
+    meal = make_habit("meal", goals={"meals": 1.0})
+    goals = ["resp", "meals"]
+    ranked = score(
+        [
+            Candidate(plate, ("resp", "meals"), plate.levels[0], False),
+            Candidate(meal, ("meals",), meal.levels[0], False),
+        ],
+        goals,
+        frozenset(),
+    )
+    lists = shortlists(ranked, goals, size=None)
+    template = template_plan(lists, goals, max_active=3, available_minutes=20)
+    assert [s.candidate.habit.id for s in template.active] == ["plate", "meal"]
+    short = shortlists(ranked, goals)
+    kwargs = {"lists": lists, "max_active": 3, "available_minutes": 20}
+    assert (
+        len(validate_picks(selection(("plate", "standard"), ("meal", "standard")), short, template, **kwargs))
+        == 2
+    )
+    with pytest.raises(ValueError, match="drop a goal"):
+        validate_picks(selection(("plate", "standard")), short, template, **kwargs)
 
 
 def test_prioritise_by_confidence_then_position():

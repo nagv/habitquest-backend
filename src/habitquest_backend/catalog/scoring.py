@@ -47,11 +47,41 @@ def shortlists(scored: list[Scored], goal_ids: list[str], size: int | None = 3) 
     return {goal: [s for s in scored if goal in s.candidate.goal_ids][:size] for goal in goal_ids}
 
 
+def planner_shortlists(
+    scored: list[Scored], goal_ids: list[str], template: TemplatePlan, size: int = 3
+) -> dict[str, list[Scored]]:
+    """Per goal, the top cue-ready options plus any template pick for that goal, so the Planner can
+    always reproduce the reviewed baseline."""
+    result = {}
+    for goal in goal_ids:
+        options = [s for s in scored if goal in s.candidate.goal_ids and not s.candidate.needs_cue][:size]
+        options += [s for s in template.active if goal in s.candidate.goal_ids and s not in options]
+        result[goal] = options
+    return result
+
+
+def habit_covers(scored: Scored, chosen_ids: set[str], lists: dict[str, list[Scored]]) -> set[str]:
+    """Goals a chosen habit covers: served strongly, or served at all once every cue-ready option for the
+    goal is chosen (no unpicked dedicated alternative remains)."""
+    return {
+        goal
+        for goal in scored.candidate.goal_ids
+        if scored.candidate.habit.goals[goal] >= PRIMARY_STRENGTH
+        or all(s.candidate.habit.id in chosen_ids for s in lists.get(goal, []) if not s.candidate.needs_cue)
+    }
+
+
+def covered_goals(chosen: list[Scored], goal_ids: list[str], lists: dict[str, list[Scored]]) -> set[str]:
+    ids = {s.candidate.habit.id for s in chosen}
+    return {goal for s in chosen for goal in habit_covers(s, ids, lists) if goal in goal_ids}
+
+
 def template_plan(
     lists: dict[str, list[Scored]], goal_ids: list[str], *, max_active: int, available_minutes: int
 ) -> TemplatePlan:
-    """Top fitting habit per goal within the limits; one habit counts once and weak links never block a
-    dedicated habit."""
+    """Top fitting habit per goal within the limits, preferring one that serves the goal strongly; one habit
+    counts once and weak links never block a dedicated habit. A goal left only weakly served while a
+    dedicated option remains unpicked is deferred, so the template always passes strict coverage."""
     active: list[Scored] = []
     covered: set[str] = set()
     unresolved: dict[str, str] = {}
@@ -69,8 +99,10 @@ def template_plan(
         elif not options:
             unresolved[goal] = "needs_cue"
         else:
+            fitting = [s for s in options if minutes + s.candidate.level.minutes <= available_minutes]
             pick = next(
-                (s for s in options if minutes + s.candidate.level.minutes <= available_minutes), None
+                (s for s in fitting if s.candidate.habit.goals[goal] >= PRIMARY_STRENGTH),
+                fitting[0] if fitting else None,
             )
             if pick is None or len(active) >= max_active:
                 unresolved[goal] = "deferred"
@@ -81,6 +113,10 @@ def template_plan(
             covered.update(served | {goal})
             for resolved in served:
                 unresolved.pop(resolved, None)
+    strict = covered_goals(active, goal_ids, lists)
+    for goal in goal_ids:
+        if goal not in strict:
+            unresolved.setdefault(goal, "deferred")
     seen = {s.candidate.habit.id for s in active}
     future = []
     for goal in goal_ids:

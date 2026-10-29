@@ -92,9 +92,11 @@ def test_second_intake_carries_the_confirmed_plan(client, settings):
     data = proposal["data"]
     assert proposal["base_plan_version"] == 1 and data["changes"] == []
     assert [h["habit_id"] for h in data["active"]] == ["bedtime-prep", "clear-plate", "join-meal"]
+    assert data["rationale"] == planning.CAP_RATIONALE
+    # The 17 carried minutes exceed the 10-minute daily total, so no new habit is eligible at all.
     assert {g["goal_id"]: g["status"] for g in data["goals"]} == {
         "bedtime": "covered",
-        "morning": "needs_cue",
+        "morning": "no_catalog_entry",
     }
     plan = client.post(
         f"/v1/proposals/{run2}/confirm", json={"expected_plan_version": 1, "expected_proposal_version": 1}

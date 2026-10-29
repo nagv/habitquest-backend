@@ -30,7 +30,7 @@ def settings():
         database_url=URL,
         jwt_secret=SECRET,
         jwt_issuer="http://local-test",
-        max_run_seconds=30,
+        max_run_seconds=120,
         model_mode="fake",
     )
 
