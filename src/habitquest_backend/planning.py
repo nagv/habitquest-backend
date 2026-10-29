@@ -20,6 +20,7 @@ from langchain_core.outputs import ChatGeneration, ChatResult
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 from langchain_core.utils.function_calling import convert_to_openai_tool
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_ollama import ChatOllama
 from pydantic import Field
 
@@ -133,8 +134,22 @@ class BoundedChat(BaseChatModel):
             "tools": [convert_to_openai_tool(t) for t in self.tool_specs],
         }
         self.charge(self.role, len(json.dumps(request, ensure_ascii=False).encode("utf-8")) + 2048)
-        if self.settings.model_mode == "ollama":
-            model: Any = ChatOllama(
+        if self.settings.model_mode == "google":
+            key = self.settings.google_api_key
+            assert key is not None  # Settings rejects MODEL_MODE=google without a key
+            model: Any = ChatGoogleGenerativeAI(
+                model=self.settings.google_model,
+                google_api_key=key.get_secret_value(),
+                temperature=0,
+                max_output_tokens=1024,
+                timeout=remaining,
+                max_retries=1,
+            )
+            if self.tool_specs:
+                model = model.bind_tools(self.tool_specs)
+            message = model.invoke(messages)
+        elif self.settings.model_mode == "ollama":
+            model = ChatOllama(
                 model=self.settings.ollama_model,
                 base_url=self.settings.ollama_base_url,
                 temperature=0,
@@ -648,7 +663,11 @@ def generate(
     carried, carried_changes = revalidate_carried(
         list(base.get("active", [])), release, profile, base_version=context["base_plan_version"]
     )
-    context["model"] = "fake" if settings.model_mode == "fake" else f"ollama:{settings.ollama_model}"
+    context["model"] = {
+        "fake": "fake",
+        "ollama": f"ollama:{settings.ollama_model}",
+        "google": f"google:{settings.google_model}",
+    }[settings.model_mode]
     # Both limits are the child's daily totals; kept carried habits use part of them. Eligibility and pick
     # validation (which counts carried habits itself) use the totals, so a habit that fits the child's day
     # but not what is left stays visible as `deferred` and promotable; the template uses what is left.

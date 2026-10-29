@@ -1,5 +1,5 @@
 version = 1
-revision = 5
+revision = 3
 requires-python = ">=3.12"
 resolution-markers = [
     "python_full_version >= '3.15'",
@@ -881,6 +881,7 @@ dependencies = [
     { name = "httpx" },
     { name = "langchain" },
     { name = "langchain-core" },
+    { name = "langchain-google-genai" },
     { name = "langchain-ollama" },
     { name = "langgraph" },
     { name = "langgraph-checkpoint-postgres" },
@@ -910,6 +911,7 @@ requires-dist = [
     { name = "httpx", specifier = ">=0.28.1" },
     { name = "langchain", specifier = ">=1.4.7" },
     { name = "langchain-core", specifier = ">=1.7.1" },
+    { name = "langchain-google-genai", specifier = ">=4.4.2" },
     { name = "langchain-ollama", specifier = ">=1.1.0" },
     { name = "langgraph", specifier = ">=1.2.18" },
     { name = "langgraph-checkpoint-postgres", specifier = ">=3.2.0" },
