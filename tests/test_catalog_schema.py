@@ -172,6 +172,7 @@ def test_published_release_is_frozen(db, statement):
 
 def test_published_release_notes_and_current_flag_stay_editable(db):
     published_release(db)
+    db.execute("UPDATE hq.catalog_releases SET is_current=false WHERE id=1")
     db.execute("UPDATE hq.catalog_releases SET notes='Updated' WHERE id=20")
     db.execute("UPDATE hq.catalog_releases SET is_current=true WHERE id=20")
     assert db.execute("SELECT notes,is_current FROM hq.catalog_releases WHERE id=20").fetchone() == (
@@ -223,3 +224,37 @@ def test_cannot_add_details_to_approved_version(db, statement):
     approve_habit(db)
     with pytest.raises(psycopg.errors.InsufficientPrivilege):
         db.execute(statement)
+
+
+GOALS = {"bedtime", "morning", "bedtime-mornings", "meals", "responsibility"}
+
+
+def test_release_one_is_current_and_complete(db):
+    assert db.execute("SELECT id FROM hq.current_release").fetchall() == [(1,)]
+    habits = dict(db.execute("SELECT habit_id, goals FROM hq.released_habits WHERE release_id=1").fetchall())
+    assert set(habits) == {"bedtime-prep", "morning-ready", "join-meal", "clear-plate", "pack-bag"}
+    assert habits["clear-plate"] == {"responsibility": 1.0, "meals": 0.5}
+    goals = {row[0] for row in db.execute("SELECT goal_id FROM hq.released_goals WHERE release_id=1")}
+    assert goals == GOALS
+    chapters = db.execute(
+        "SELECT goal_id, count(*) FROM hq.released_chapters WHERE release_id=1 GROUP BY goal_id"
+    ).fetchall()
+    assert dict(chapters) == {goal: 3 for goal in GOALS}
+    concern_goals = {
+        goal
+        for (row,) in db.execute("SELECT goals FROM hq.released_concerns WHERE release_id=1")
+        for goal in row
+    }
+    assert {goal for row in habits.values() for goal in row} | concern_goals <= GOALS
+
+
+@pytest.mark.parametrize("role", ["hq_api", "hq_worker"])
+def test_service_roles_see_only_published_approved_habits(db, role):
+    draft_habit(db, "draft-habit")
+    db.execute("INSERT INTO hq.catalog_releases(id,built_by) VALUES(2,%s)", (AUTHOR,))
+    db.execute("INSERT INTO hq.release_items VALUES(2,'habit','draft-habit',1),(2,'habit','bedtime-prep',1)")
+    with db.transaction():
+        db.execute(f"SET LOCAL ROLE {role}")
+        rows = db.execute("SELECT release_id, habit_id FROM hq.released_habits").fetchall()
+    assert {release for release, _ in rows} == {1}
+    assert "draft-habit" not in {habit for _, habit in rows}
