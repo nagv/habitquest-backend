@@ -98,6 +98,12 @@ def confirm(conn, proposal_id: UUID, expected_plan: int, expected_proposal: int)
         ),
     )
     conn.execute("UPDATE hq.proposals SET confirmed=true WHERE id=%s", (proposal_id,))
+    # The new plan answers every flag on the plans it supersedes.
+    conn.execute(
+        "UPDATE hq.plan_flags SET resolved_at=now() WHERE resolved_at IS NULL AND plan_id IN "
+        "(SELECT id FROM hq.plans WHERE child_id=%s AND id<>%s)",
+        (proposal["child_id"], plan["id"]),
+    )
     for goal in proposal["data"]["goals"]:
         if goal["status"] == "covered":
             conn.execute(

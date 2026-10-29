@@ -328,3 +328,40 @@ def test_in_review_details_are_frozen(raw):
     ):
         with pytest.raises(psycopg.errors.ObjectNotInPrerequisiteState):
             raw.execute(statement)
+
+
+def test_release_published_mid_proposal_requires_replan(client, settings, editors):
+    _, _, run = queued(client)
+    worker.run_once(settings)
+    proposal = client.get(f"/v1/proposals/{run}").json()
+    assert proposal["release_id"] == 1
+    active = proposal["data"]["active"][0]["habit_id"]
+    current = editors("author", "GET", f"/habits/{active}/versions/1").json()
+    body = {
+        **HABIT,
+        "title": current["title"] + " (revised)",
+        "routine_anchor": current["routine_anchor"],
+        "goals": current["goals"],
+        "prepares": [],
+        "variants": {},
+    }
+    approved(editors, "habits", active, body)
+    release_id = editors("author", "POST", "/releases", json={}).json()["id"]
+    assert editors("reviewer", "POST", f"/releases/{release_id}/publish").status_code == 200
+
+    response = client.post(f"/v1/proposals/{run}/confirm", json=CONFIRM)
+    assert response.status_code == 409
+    assert response.json()["detail"] == f"replan_required: {active}: version_superseded"
+
+
+def test_review_queue_lists_versions_by_status(editors):
+    editors("author", "POST", "/habits/tidy-desk/versions", json=HABIT)
+    editors("author", "POST", "/habits/tidy-desk/versions/1/submit")
+    editors("author", "POST", "/habits/sort-socks/versions", json={**HABIT, "title": "Sort socks"})
+    queue = editors("reviewer", "GET", "/habits", params={"status": "in_review"}).json()
+    assert [(v["habit_id"], v["version"], v["created_by"]) for v in queue] == [("tidy-desk", 1, str(AUTHOR))]
+    drafts = editors("reviewer", "GET", "/habits", params={"status": "draft"}).json()
+    assert [v["habit_id"] for v in drafts] == ["sort-socks"]
+    goals = editors("reviewer", "GET", "/goals").json()
+    assert [g["id"] for g in goals] == ["bedtime", "bedtime-mornings", "meals", "morning", "responsibility"]
+    assert editors("reviewer", "GET", "/goals", params={"status": "pending"}).status_code == 422
