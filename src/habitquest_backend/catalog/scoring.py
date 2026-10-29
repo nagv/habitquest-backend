@@ -8,6 +8,8 @@ RANKING_VERSION = "2026-10-29.1"
 INTEREST_BONUS = 0.5
 PREREQ_BONUS = 0.3
 LEVEL_PENALTY = {"simple": 0.0, "standard": 0.1, "stretch": 0.3}
+# A habit fully satisfies a goal it serves at least this strongly; weaker links are secondary.
+PRIMARY_STRENGTH = 0.8
 
 
 @dataclass(frozen=True)
@@ -41,14 +43,15 @@ def score(candidates: list[Candidate], goal_ids: list[str], interests: frozenset
     return sorted(result, key=lambda s: (-s.score, s.candidate.habit.id))
 
 
-def shortlists(scored: list[Scored], goal_ids: list[str], size: int = 3) -> dict[str, list[Scored]]:
+def shortlists(scored: list[Scored], goal_ids: list[str], size: int | None = 3) -> dict[str, list[Scored]]:
     return {goal: [s for s in scored if goal in s.candidate.goal_ids][:size] for goal in goal_ids}
 
 
 def template_plan(
     lists: dict[str, list[Scored]], goal_ids: list[str], *, max_active: int, available_minutes: int
 ) -> TemplatePlan:
-    """Top fitting habit per goal, within the active-habit and minutes limits; one habit counts once."""
+    """Top fitting habit per goal within the limits; one habit counts once and weak links never block a
+    dedicated habit."""
     active: list[Scored] = []
     covered: set[str] = set()
     unresolved: dict[str, str] = {}
@@ -56,22 +59,28 @@ def template_plan(
     for goal in goal_ids:
         if goal in covered:
             continue
-        options = [s for s in lists.get(goal, []) if not s.candidate.needs_cue]
+        chosen = {s.candidate.habit.id for s in active}
+        pending = [s for s in lists.get(goal, []) if s.candidate.habit.id not in chosen]
+        options = [s for s in pending if not s.candidate.needs_cue]
         if not lists.get(goal):
             unresolved[goal] = "no_catalog_entry"
-            continue
-        if not options:
+        elif not pending:
+            covered.add(goal)  # only weakly served by an already active habit
+        elif not options:
             unresolved[goal] = "needs_cue"
-            continue
-        pick = next((s for s in options if minutes + s.candidate.level.minutes <= available_minutes), None)
-        if pick is None or len(active) >= max_active:
-            unresolved[goal] = "deferred"
-            continue
-        active.append(pick)
-        minutes += pick.candidate.level.minutes
-        covered.update(pick.candidate.goal_ids)
-        for served in pick.candidate.goal_ids:
-            unresolved.pop(served, None)
+        else:
+            pick = next(
+                (s for s in options if minutes + s.candidate.level.minutes <= available_minutes), None
+            )
+            if pick is None or len(active) >= max_active:
+                unresolved[goal] = "deferred"
+                continue
+            active.append(pick)
+            minutes += pick.candidate.level.minutes
+            served = {g for g in pick.candidate.goal_ids if pick.candidate.habit.goals[g] >= PRIMARY_STRENGTH}
+            covered.update(served | {goal})
+            for resolved in served:
+                unresolved.pop(resolved, None)
     seen = {s.candidate.habit.id for s in active}
     future = []
     for goal in goal_ids:

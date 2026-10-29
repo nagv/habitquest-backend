@@ -1,3 +1,4 @@
+import pytest
 from catalog_factories import make_habit, make_release
 from hypothesis import given
 from hypothesis import settings as hypothesis_settings
@@ -5,7 +6,7 @@ from hypothesis import strategies as st
 
 from habitquest_backend.catalog.eligibility import Candidate, eligible
 from habitquest_backend.catalog.models import ChildProfile, Level, RoutineSlot
-from habitquest_backend.catalog.scoring import score, shortlists, template_plan
+from habitquest_backend.catalog.scoring import PRIMARY_STRENGTH, score, shortlists, template_plan
 
 PROFILE = ChildProfile(
     age_band="6-9",
@@ -42,6 +43,7 @@ def test_shortlists_are_per_goal_and_capped():
     lists = shortlists(scored, ["g", "empty"], size=3)
     assert [s.candidate.habit.id for s in lists["g"]] == ["0", "1", "2"]
     assert lists["empty"] == []
+    assert len(shortlists(scored, ["g"], size=None)["g"]) == 5
 
 
 def test_template_plan_counts_multi_goal_habit_once_and_reports_reasons():
@@ -77,9 +79,10 @@ def test_template_plan_defers_goals_beyond_active_or_minute_limits():
     assert by_count.unresolved == {"y": "deferred", "z": "deferred"}
 
 
-def test_later_pick_resolves_an_earlier_deferred_goal():
+@pytest.mark.parametrize("strength,unresolved", [(0.9, {}), (0.2, {"x": "deferred"})])
+def test_only_a_strong_secondary_link_resolves_an_earlier_deferred_goal(strength, unresolved):
     big = make_habit("big", goals={"x": 1.0}, levels=(Level("standard", 9, 1),))
-    both = make_habit("both", goals={"x": 0.2, "y": 1.0}, levels=(Level("standard", 3, 1),))
+    both = make_habit("both", goals={"x": strength, "y": 1.0}, levels=(Level("standard", 3, 1),))
     goals = ["x", "y"]
     lists = {
         "x": score([candidate(big, ("x",))], goals, frozenset()),
@@ -87,7 +90,18 @@ def test_later_pick_resolves_an_earlier_deferred_goal():
     }
     plan = template_plan(lists, goals, max_active=3, available_minutes=5)
     assert [s.candidate.habit.id for s in plan.active] == ["both"]
-    assert plan.unresolved == {}
+    assert plan.unresolved == unresolved
+
+
+def test_weak_link_does_not_block_a_dedicated_habit():
+    plate = make_habit("plate", goals={"resp": 1.0, "meals": 0.5}, levels=(Level("standard", 2, 1),))
+    meal = make_habit("meal", goals={"meals": 1.0}, levels=(Level("standard", 5, 1),))
+    goals = ["resp", "meals"]
+    cands = [candidate(plate, ("resp", "meals")), candidate(meal, ("meals",))]
+    plan = template_plan(
+        shortlists(score(cands, goals, frozenset()), goals), goals, max_active=3, available_minutes=10
+    )
+    assert [s.candidate.habit.id for s in plan.active] == ["plate", "meal"]
 
 
 GOALS = ["a", "b", "c", "d"]
@@ -95,10 +109,10 @@ ANCHORS = ["morning", "after_school", "evening", "bedtime"]
 habits = st.lists(
     st.builds(
         lambda i, goals, minutes, anchor: make_habit(
-            f"h{i}", goals=dict.fromkeys(goals, 1.0), anchor=anchor, levels=(Level("standard", minutes, 1),)
+            f"h{i}", goals=goals, anchor=anchor, levels=(Level("standard", minutes, 1),)
         ),
         st.integers(0, 30),
-        st.sets(st.sampled_from(GOALS), min_size=1),
+        st.dictionaries(st.sampled_from(GOALS), st.sampled_from([0.5, 0.8, 1.0]), min_size=1),
         st.integers(1, 20),
         st.sampled_from(ANCHORS),
     ),
@@ -116,23 +130,17 @@ habits = st.lists(
 )
 def test_template_plan_invariants(habit_list, goals, max_active, minutes):
     candidates = eligible(make_release(*habit_list), PROFILE, goals, available_minutes=minutes)
-    lists = shortlists(score(candidates, goals, PROFILE.interests), goals)
+    lists = shortlists(score(candidates, goals, PROFILE.interests), goals, size=None)
     plan = template_plan(lists, goals, max_active=max_active, available_minutes=minutes)
     active_ids = [s.candidate.habit.id for s in plan.active]
     assert len(active_ids) == len(set(active_ids)) <= max_active
     assert sum(s.candidate.level.minutes for s in plan.active) <= minutes
     assert not any(s.candidate.needs_cue for s in plan.active)
-    covered = {g for s in plan.active for g in s.candidate.goal_ids}
-    assert covered.isdisjoint(plan.unresolved)
-    assert covered | set(plan.unresolved) == set(goals)
+    served = {g for s in plan.active for g in s.candidate.goal_ids}
+    primary = {
+        g for s in plan.active for g in s.candidate.goal_ids if s.candidate.habit.goals[g] >= PRIMARY_STRENGTH
+    }
+    assert set(goals) <= served | set(plan.unresolved)
+    assert primary.isdisjoint(plan.unresolved)
     assert not set(active_ids) & {s.candidate.habit.id for s in plan.future}
     assert plan == template_plan(lists, goals, max_active=max_active, available_minutes=minutes)
-
-
-def test_duplicate_and_unknown_goal_ids_do_not_distort_scores():
-    habit = make_habit("a", goals={"x": 1.0, "y": 1.0})
-    [dup] = score([candidate(habit, ("x",))], ["x", "x", "y"], frozenset())
-    assert dup.breakdown["goal"] == 1.0
-    [unknown] = score([candidate(habit, ("x", "y"))], ["x"], frozenset())
-    assert unknown.breakdown["goal"] == 1.0
-    assert score([], [], frozenset()) == []

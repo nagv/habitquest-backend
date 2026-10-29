@@ -8,6 +8,8 @@ def load_release(conn: Any, release_id: int | None = None) -> Release:
     """Load a published release through the read-only released_* views."""
     if release_id is None:
         release_id = one(conn, "SELECT id FROM hq.current_release")["id"]
+    else:
+        one(conn, "SELECT id FROM hq.published_releases WHERE id=%s", (release_id,))
     params = (release_id,)
     goals = {
         row["goal_id"]: Goal(row["goal_id"], row["version"], row["title"], row["description"])

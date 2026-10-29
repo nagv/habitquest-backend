@@ -42,3 +42,13 @@ def test_presented_wording_prefers_matching_interest_variant(settings, db):
         habit = load_release(conn).habits["bedtime-prep"]
     assert habit.presented(frozenset({"animals", "space"}))[0] == "Prepare for Night Docking"
     assert habit.presented(frozenset({"animals"})) == (habit.title, habit.instruction)
+
+
+def test_unpublished_or_unknown_release_is_rejected(settings, db):
+    db.execute(
+        "INSERT INTO hq.catalog_releases(id,built_by) VALUES(5,'00000000-0000-0000-0000-0000000000a1')"
+    )
+    with transaction(settings, worker=True) as conn:
+        for release_id in (5, 99):
+            with pytest.raises(HTTPException):
+                load_release(conn, release_id)
