@@ -22,6 +22,7 @@ from langchain_core.tools import tool
 from langchain_core.utils.function_calling import convert_to_openai_tool
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_ollama import ChatOllama
+from langchain_openai import ChatOpenAI
 from pydantic import Field
 
 from habitquest_backend.catalog.eligibility import eligible
@@ -142,6 +143,21 @@ class BoundedChat(BaseChatModel):
                 google_api_key=key.get_secret_value(),
                 temperature=0,
                 max_output_tokens=1024,
+                timeout=remaining,
+                max_retries=1,
+            )
+            if self.tool_specs:
+                model = model.bind_tools(self.tool_specs)
+            message = model.invoke(messages)
+        elif self.settings.model_mode == "openai":
+            key = self.settings.openai_api_key
+            assert key is not None  # Settings rejects MODEL_MODE=openai without a key
+            model = ChatOpenAI(
+                model=self.settings.openai_model,
+                base_url=self.settings.openai_base_url,
+                api_key=key,
+                temperature=0,
+                max_completion_tokens=1024,
                 timeout=remaining,
                 max_retries=1,
             )
@@ -667,6 +683,7 @@ def generate(
         "fake": "fake",
         "ollama": f"ollama:{settings.ollama_model}",
         "google": f"google:{settings.google_model}",
+        "openai": f"openai:{settings.openai_model}",
     }[settings.model_mode]
     # Both limits are the child's daily totals; kept carried habits use part of them. Eligibility and pick
     # validation (which counts carried habits itself) use the totals, so a habit that fits the child's day

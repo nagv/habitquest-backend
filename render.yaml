@@ -43,10 +43,16 @@ envVarGroups:
   - name: habitquest-settings
     envVars:
       - key: MODEL_MODE
-        value: fake            # google once GOOGLE_MODEL and GOOGLE_API_KEY are set
+        value: fake            # google or openai once that provider's values below are set
       - key: GOOGLE_MODEL
         sync: false
       - key: GOOGLE_API_KEY
+        sync: false
+      - key: OPENAI_BASE_URL   # any OpenAI-compatible endpoint, e.g. Nebius
+        sync: false
+      - key: OPENAI_MODEL      # must support tool calling
+        sync: false
+      - key: OPENAI_API_KEY
         sync: false
       - key: JWT_SECRET
         generateValue: true    # dev tokens only; switch to Supabase Auth (JWT_JWKS_URL) for real users
