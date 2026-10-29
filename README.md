@@ -85,6 +85,27 @@ ollama pull qwen3:8b
 
 Set `MODEL_MODE=ollama` in `.env` for both API and worker. The fake path needs no download or paid API key. Model/network errors have bounded retries; invalid selections and rejected reviews fall back to the reviewed deterministic template (`fallback: true`); budget, deadline, cancellation and unsafe requests fail explicitly. No unreviewed generated content is published.
 
+## Deploying to Render
+
+`render.yaml` is a Blueprint for one free web service plus Render Postgres in `virginia`:
+
+- Build: `uv export` of the lockfile, installed with `pip` into Render's own environment (no `uv` at runtime).
+- Start: `scripts/render_start.sh` applies pending migrations (idempotent and advisory-locked), then starts uvicorn on `$PORT`.
+- `RUN_WORKER_IN_API=true` runs the planning worker on a thread inside the API process, so a single free service is enough. A free service sleeps when idle and stops the worker with it. For production, set it to `false` and enable the commented `worker` service, which needs a paid instance.
+- Health check: `/health/ready`.
+
+Environment (the `habitquest-settings` group):
+
+| Variable | Value |
+|---|---|
+| `MODEL_MODE` | `fake`, or `google` with `GOOGLE_MODEL` (a Gemini model id your key can use) and `GOOGLE_API_KEY` (a secret, set in the dashboard) |
+| `JWT_SECRET`, `JWT_ISSUER` | Dev HS256 tokens. Mint them locally with `scripts/local_token.py`, using the same values in your local `.env` plus `LOCAL_DEMO_AUTH=true`. For real users, use Supabase Auth instead: `JWT_ISSUER=https://<project>.supabase.co/auth/v1`, `JWT_JWKS_URL=.../.well-known/jwks.json`, no `JWT_SECRET`, and editors get `app_metadata.hq_role = "editor"` |
+| `LOCAL_DEMO_AUTH` | Always `false` on the server |
+
+Check a deployment with `uv run python scripts/demo.py --remote --base-url https://<service>.onrender.com --scenario all`. `--remote` polls for results instead of running a local worker. The first request after an idle period waits for the free service to wake up.
+
+The migrations create the `hq_api`, `hq_worker` and `hq_editor` roles, so the database user needs `CREATEROLE`. Treat a hosted deployment as test data only until family deletion, retention and model-quality checks exist.
+
 ## API walkthrough
 
 1. `POST /v1/children` with a profile: `name`, `age_band` (`6-9` or `10-13`), optional `interests`, `accessibility`, `opted_in_topics`, `preferred_world` (`space`, `forest`, `city`), `timezone` (IANA, stored on the household) and `routine_schedule`, e.g. `{"bedtime": {"cue": "20:00", "days": ["mon","tue","wed","thu","fri","sat","sun"]}}`. Anchors: `morning`, `after_school`, `evening`, `bedtime`.

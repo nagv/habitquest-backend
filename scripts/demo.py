@@ -8,6 +8,7 @@ continuously polling worker at the same time (each scenario runs `worker --once`
     uv run python scripts/demo.py --scenario second-round
     uv run python scripts/demo.py --scenario editor     # two-person review, release, withdrawal
     uv run python scripts/demo.py --scenario all
+    uv run python scripts/demo.py --remote --base-url https://<service>.onrender.com
 
 Expectations assume the seeded release 1 catalog and the fake model (MODEL_MODE=fake).
 """
@@ -16,6 +17,7 @@ import argparse
 import json
 import subprocess
 import sys
+import time
 import uuid
 
 import httpx
@@ -62,8 +64,23 @@ class Session:
         return data
 
 
+# Set by --remote: the server runs its own worker (e.g. Render with RUN_WORKER_IN_API), so poll instead.
+REMOTE = False
+
+
 def work():
-    subprocess.run([sys.executable, "-m", "habitquest_backend.worker", "--once"], check=True)
+    if not REMOTE:
+        subprocess.run([sys.executable, "-m", "habitquest_backend.worker", "--once"], check=True)
+
+
+def finished(parent, status_url, timeout=180):
+    """Poll until the run leaves queued/running; a remote worker may be waking from sleep."""
+    deadline = time.monotonic() + timeout
+    while True:
+        status = parent.client.get(status_url).json()
+        if status["status"] not in ("queued", "running") or not REMOTE or time.monotonic() > deadline:
+            return status
+        time.sleep(2)
 
 
 def plan(parent, child, concerns=CONCERNS, minutes=20):
@@ -79,7 +96,8 @@ def plan(parent, child, concerns=CONCERNS, minutes=20):
         "start plan run", "POST", f"/v1/intakes/{intake['id']}/plan-runs", 202, key=str(uuid.uuid4())
     )
     work()
-    status = parent.call("plan run status", "GET", run["status_url"], 200)
+    status = finished(parent, run["status_url"])
+    print(f"  ok [{parent.name}] plan run finished -> {status['status']}")
     if status["status"] != "ready":
         raise SystemExit(f"FAIL plan run did not finish: {status}")
     return parent.call("read proposal", "GET", f"/v1/proposals/{run['run_id']}", 200)
@@ -228,7 +246,14 @@ def main():
         "--scenario", choices=["basic", "edits", "second-round", "editor", "all"], default="basic"
     )
     parser.add_argument("--base-url", default="http://127.0.0.1:8000")
+    parser.add_argument(
+        "--remote",
+        action="store_true",
+        help="the server runs its own worker (e.g. on Render); poll for results",
+    )
     args = parser.parse_args()
+    global REMOTE
+    REMOTE = args.remote
     load_dotenv()
     settings = demo_settings()
     # A fresh parent per run keeps runs independent; editors keep stable ids for the audit trail.

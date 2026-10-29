@@ -71,3 +71,8 @@ Found by running the parent flow against a live API and worker on a fresh databa
 - Eligibility uses the child's daily minutes; the template applies what is left. A goal whose habit fits the day but not the remaining time is now `deferred` with the habit in `future`, instead of `no_catalog_entry` with the habit hidden.
 - Pick validation counts carried habits against the daily totals; it previously received the remaining limits and counted carried habits again, so valid second-intake picks fell back to the template.
 
+## Hosting on Render and the Google model
+
+- `MODEL_MODE=google` uses `langchain-google-genai` (`GOOGLE_MODEL`, `GOOGLE_API_KEY`) through the same bounded adapter: temperature 0, 1024 output tokens, the remaining run time as timeout, one retry. Settings refuse the mode without both values. Not yet exercised against the real Google API.
+- `RUN_WORKER_IN_API` runs `worker.serve` on a daemon thread from the FastAPI lifespan; a failed pass is logged and retried. `render.yaml` and `scripts/render_start.sh` deploy one service. A rehearsal from a clean pip install against a fresh database passed `demo.py --remote --scenario all` at about 143 MB resident.
+

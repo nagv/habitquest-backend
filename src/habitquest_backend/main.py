@@ -1,3 +1,5 @@
+import threading
+from contextlib import asynccontextmanager
 from typing import Annotated
 from uuid import UUID, uuid4
 
@@ -14,6 +16,7 @@ from habitquest_backend.db import one, transaction
 from habitquest_backend.editorial.api import router as editorial_router
 from habitquest_backend.schemas import ChildInput, Confirmation, IntakeInput, ProfileUpdate, ProposalPatch
 from habitquest_backend.service import apply_patch, confirm, cue_loss_habits, enqueue, flag_plan
+from habitquest_backend.worker import serve
 
 PROFILE_COLUMNS = "name,age_band,interests,accessibility,opted_in_topics,preferred_world,routine_schedule"
 
@@ -41,7 +44,20 @@ def child_view(conn, child_id: UUID) -> dict:
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or Settings()
-    application = FastAPI(title="HabitQuest onboarding backend", version="0.2.0")
+
+    @asynccontextmanager
+    async def lifespan(_: FastAPI):
+        # Single-service hosting: the planning worker polls on a thread beside the API.
+        stop = threading.Event()
+        thread = threading.Thread(target=serve, args=(settings, stop), name="plan-worker", daemon=True)
+        if settings.run_worker_in_api:
+            thread.start()
+        yield
+        stop.set()
+        if thread.is_alive():
+            thread.join(timeout=settings.max_run_seconds)
+
+    application = FastAPI(title="HabitQuest onboarding backend", version="0.2.0", lifespan=lifespan)
     bearer = HTTPBearer(auto_error=False)
 
     def parent(credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)]) -> UUID:

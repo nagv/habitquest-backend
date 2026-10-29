@@ -1,0 +1,60 @@
+# Render Blueprint. The free single-service layout runs the worker inside the API
+# (RUN_WORKER_IN_API=true). For production, set it to false and uncomment the worker,
+# which needs a paid instance type.
+services:
+  - type: web
+    name: habitquest-api
+    runtime: python
+    region: virginia
+    plan: free
+    branch: main
+    buildCommand: pip install uv==0.12.23 && uv export --frozen --no-dev --no-emit-project -o requirements.txt && pip install -r requirements.txt && pip install --no-deps .
+    startCommand: sh scripts/render_start.sh
+    healthCheckPath: /health/ready
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: DATABASE_URL
+        fromDatabase: {name: habitquest-db, property: connectionString}
+      - key: RUN_WORKER_IN_API
+        value: "true"
+      - fromGroup: habitquest-settings
+  # - type: worker
+  #   name: habitquest-worker
+  #   runtime: python
+  #   region: virginia
+  #   plan: starter
+  #   branch: main
+  #   buildCommand: pip install uv==0.12.23 && uv export --frozen --no-dev --no-emit-project -o requirements.txt && pip install -r requirements.txt && pip install --no-deps .
+  #   startCommand: python -m habitquest_backend.worker
+  #   envVars:
+  #     - key: PYTHON_VERSION
+  #       value: 3.12.8
+  #     - key: DATABASE_URL
+  #       fromDatabase: {name: habitquest-db, property: connectionString}
+  #     - fromGroup: habitquest-settings
+
+databases:
+  - name: habitquest-db
+    region: virginia
+    plan: free
+
+envVarGroups:
+  - name: habitquest-settings
+    envVars:
+      - key: MODEL_MODE
+        value: fake            # google once GOOGLE_MODEL and GOOGLE_API_KEY are set
+      - key: GOOGLE_MODEL
+        sync: false
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true    # dev tokens only; switch to Supabase Auth (JWT_JWKS_URL) for real users
+      - key: JWT_ISSUER
+        value: https://habitquest-api.onrender.com/dev
+      - key: LOCAL_DEMO_AUTH
+        value: "false"
+      - key: LANGSMITH_TRACING
+        value: "false"
+      - key: LANGCHAIN_TRACING_V2
+        value: "false"

@@ -2,6 +2,7 @@
 
 import argparse
 import hashlib
+import logging
 import threading
 import time
 from uuid import uuid4
@@ -222,6 +223,18 @@ def run_once(settings: Settings) -> bool:
         stop.set()
         thread.join(timeout=1)
     return True
+
+
+def serve(settings: Settings, stop: threading.Event) -> None:
+    """Poll for plan runs until `stop` is set; one failed pass is logged and retried, never fatal."""
+    while not stop.is_set():
+        try:
+            worked = run_once(settings)
+        except Exception:
+            logging.getLogger(__name__).exception("Worker pass failed")
+            worked = False
+        if not worked:
+            stop.wait(1)
 
 
 def main():
