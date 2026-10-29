@@ -49,13 +49,31 @@ The bootstrap creates a loopback-only, password-authenticated cluster under `.lo
 pg_ctl -D .local/postgres -w stop
 ```
 
-With the API running, the complete synthetic demonstration invokes separate worker processes itself:
+With the API running, the synthetic demonstration invokes separate worker processes itself and checks every response:
 
 ```powershell
-uv run python scripts/demo.py
+uv run python scripts/demo.py --scenario all
 ```
 
-Do not run an additional continuously polling worker during this demo. For manual `/docs` usage, run `uv run python scripts/local_token.py` and paste its short-lived native-local token into Authorize. These token utilities require `LOCAL_DEMO_AUTH=true` and are not for hosted services.
+| Scenario | What it walks through |
+|---|---|
+| `basic` (default) | Onboard a child, describe pain points, review the suggested habits, goals and questions, confirm plan v1 |
+| `edits` | Review-screen edits: a schedule change, then the refusals (`needs_cue`, `level`, `coverage`), removing a goal, demoting a habit, confirming |
+| `second-round` | Answer the morning cue question in the profile, a new intake while the plan is full (`max_active_habits`), rotate a habit out and the morning habit in, confirm plan v2 |
+| `editor` | Two editors: draft, lint refusal, review queue, self-approval refused, approval, release build/diff/validate, self-publication refused, publication, withdrawal |
+
+Each step prints `ok` with its status, or stops with `FAIL` and the response body. Expectations assume the seeded catalog and `MODEL_MODE=fake`; the editor scenario publishes and then withdraws a uniquely named demo habit, so it can be rerun. Do not run an additional continuously polling worker during the demo.
+
+For manual `/docs` usage, paste a short-lived native-local token into Authorize:
+
+```powershell
+uv run python scripts/local_token.py              # the demo parent
+uv run python scripts/local_token.py --editor     # editor 1: drafts, submits, builds releases
+uv run python scripts/local_token.py --reviewer   # editor 2: approves and publishes
+uv run python scripts/local_token.py --sub 22222222-2222-2222-2222-222222222222  # a second parent
+```
+
+`--minutes` sets the lifetime (1-60, default 15). The two editor identities exist because a reviewer must differ from the author and a publisher from the release builder. These token utilities require `LOCAL_DEMO_AUTH=true` and are not for hosted services.
 
 ## Real local inference
 
