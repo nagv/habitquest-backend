@@ -5,10 +5,10 @@ from uuid import UUID, uuid4
 
 import psycopg
 from fastapi import Depends, FastAPI, Header, HTTPException
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi.security import OAuth2PasswordRequestForm
 from psycopg.types.json import Jsonb
 
-from habitquest_backend.auth import verify_token
+from habitquest_backend.auth import TOKEN_URL, bearer_token, dev_login, issue_token, verify_token
 from habitquest_backend.catalog.models import profile_from_row
 from habitquest_backend.catalog.repository import load_release
 from habitquest_backend.config import Settings
@@ -48,8 +48,9 @@ the parent to edit and confirm. Catalog staff maintain that catalog through a tw
 process.
 
 **Authentication.** Every `/v1` endpoint needs a bearer token. Parent routes accept any authenticated user;
-`/v1/editor` routes also need `app_metadata.hq_role = "editor"`. Click **Authorize** and paste the token
-(locally: `uv run python scripts/local_token.py`, with `--editor` or `--reviewer` for editors).
+`/v1/editor` routes also need `app_metadata.hq_role = "editor"`. Click **Authorize**: when the development
+login is enabled, enter username `parent`, `editor` or `reviewer` and the shared password; otherwise paste a
+token (locally: `uv run python scripts/local_token.py`, with `--editor` or `--reviewer` for editors).
 
 **Parent flow.** Onboard a child → describe pain points (intake) → start planning → poll the run → review
 and optionally edit the proposal → confirm it as a plan. Repeat with a new intake for new pain points.
@@ -59,6 +60,7 @@ validate → publish by a second editor. Withdraw a habit in an emergency.
 """
 TAGS = [
     {"name": "Health", "description": "Liveness and readiness probes for hosting."},
+    {"name": "Auth", "description": "Development login (only when `DEV_LOGIN=true`)."},
     {
         "name": "Children",
         "description": "Child profiles: durable facts and the routine schedule habits are tied to.",
@@ -105,12 +107,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         openapi_tags=TAGS,
         lifespan=lifespan,
     )
-    bearer = HTTPBearer(auto_error=False)
 
-    def parent(credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)]) -> UUID:
-        if credentials is None:
+    def parent(token: Annotated[str | None, Depends(bearer_token(settings))]) -> UUID:
+        if token is None:
             raise HTTPException(401, "Parent authentication required")
-        return verify_token(credentials.credentials, settings)
+        return verify_token(token, settings)
 
     Parent = Annotated[UUID, Depends(parent)]
     Key = Annotated[str, Header(alias="Idempotency-Key", min_length=1, max_length=100)]
@@ -131,6 +132,23 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         except psycopg.Error as exc:
             raise HTTPException(503, "Database or migrations unavailable") from exc
         return {"status": "ready"}
+
+    if settings.dev_login:
+
+        @application.post(TOKEN_URL, tags=["Auth"], summary="Development login")
+        def login(form: Annotated[OAuth2PasswordRequestForm, Depends()]) -> dict:
+            """Exchanges a username and the shared `DEV_LOGIN_PASSWORD` for a 60-minute bearer token.
+            Usernames: `parent`, `parent:<any label>` (a separate parent per label), `editor`, `reviewer`.
+            Only exists when `DEV_LOGIN=true`; real users sign in through Supabase Auth instead.
+            In /docs, use **Authorize** → the password form; Swagger then sends the token for you.
+            """
+            sub, editor = dev_login(settings, form.username, form.password)
+            minutes = 60
+            return {
+                "access_token": issue_token(settings, sub, editor=editor, minutes=minutes),
+                "token_type": "bearer",
+                "expires_in": minutes * 60,
+            }
 
     @application.post("/v1/children", status_code=201, tags=["Children"], summary="Onboard a child")
     def add_child(body: ChildInput, user: Parent):

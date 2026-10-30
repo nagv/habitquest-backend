@@ -64,7 +64,9 @@ uv run python scripts/demo.py --scenario all
 
 Each step prints `ok` with its status, or stops with `FAIL` and the response body. Expectations assume the seeded catalog and `MODEL_MODE=fake`; the editor scenario publishes and then withdraws a uniquely named demo habit, so it can be rerun. Do not run an additional continuously polling worker during the demo.
 
-For manual `/docs` usage, paste a short-lived native-local token into Authorize:
+For manual `/docs` usage, the simplest route is the development login: add `DEV_LOGIN=true` and `DEV_LOGIN_PASSWORD=<12+ characters>` to `.env` (it needs `JWT_SECRET`, which the bootstrap writes), restart the API, click **Authorize**, and in the **OAuth2PasswordBearer** form enter username `parent`, `editor` or `reviewer` with that password (leave `client_id` and `client_secret` empty). Swagger fetches a 60-minute token from `POST /v1/auth/token` and sends it with every call. `parent:<any label>` logs in as a separate parent, e.g. to check that households are isolated.
+
+Or paste a short-lived native-local token into the **HTTPBearer** field:
 
 ```powershell
 uv run python scripts/local_token.py              # the demo parent
@@ -100,9 +102,10 @@ Environment (the `habitquest-settings` group):
 |---|---|
 | `MODEL_MODE` | `fake`; `google` with `GOOGLE_MODEL` (a Gemini model id your key can use) and `GOOGLE_API_KEY`; or `openai` for any OpenAI-compatible provider such as Nebius, with `OPENAI_BASE_URL` (the provider's endpoint), `OPENAI_MODEL` (a model that supports tool calling) and `OPENAI_API_KEY`. Keys are secrets: set them in the dashboard. Proposals record the model as `<mode>:<model id>`; `fallback: true` means the model's picks failed validation or review and the reviewed template was used |
 | `JWT_SECRET`, `JWT_ISSUER` | Dev HS256 tokens. Mint them locally with `scripts/local_token.py`, using the same values in your local `.env` plus `LOCAL_DEMO_AUTH=true`. For real users, use Supabase Auth instead: `JWT_ISSUER=https://<project>.supabase.co/auth/v1`, `JWT_JWKS_URL=.../.well-known/jwks.json`, no `JWT_SECRET`, and editors get `app_metadata.hq_role = "editor"` |
+| `DEV_LOGIN`, `DEV_LOGIN_PASSWORD` | `true` and a shared password of 12+ characters (set the password in the dashboard). Testers then log in from `/docs` → **Authorize** with username `parent`, `parent:<label>`, `editor` or `reviewer`; no secret leaves Render. Remove both (and `JWT_SECRET`) when switching to Supabase Auth: anyone with the password can act as any development identity |
 | `LOCAL_DEMO_AUTH` | Always `false` on the server |
 
-Check a deployment with `uv run python scripts/demo.py --remote --base-url https://<service>.onrender.com --scenario all`. `--remote` polls for results instead of running a local worker. The first request after an idle period waits for the free service to wake up.
+Check a deployment with `DEV_LOGIN_PASSWORD=<password> uv run python scripts/demo.py --remote --base-url https://<service>.onrender.com --scenario all`; with `DEV_LOGIN_PASSWORD` set, the demo logs in through `POST /v1/auth/token` instead of minting tokens. `--remote` polls for results instead of running a local worker. The first request after an idle period waits for the free service to wake up.
 
 The migrations create the `hq_api`, `hq_worker` and `hq_editor` roles, so the database user needs `CREATEROLE`. Treat a hosted deployment as test data only until family deletion, retention and model-quality checks exist.
 

@@ -22,5 +22,5 @@ def test_local_tokens_require_demo_mode(settings, monkeypatch):
     monkeypatch.delenv("LOCAL_DEMO_AUTH", raising=False)
     with pytest.raises(SystemExit, match="LOCAL_DEMO_AUTH=true"):
         demo_settings()
-    with pytest.raises(ValueError, match="JWT_SECRET"):
+    with pytest.raises(ValueError, match="JWT_SECRET is required"):
         local_token(settings.model_copy(update={"jwt_secret": None}), PARENT)
