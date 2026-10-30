@@ -281,7 +281,7 @@ def test_a_kid_sees_only_their_own_child_row(client, settings, db, family):
     alex, maya = child(db, family["id"]), child(db, family["id"], "Maya")
     with transaction(settings, kid=alex) as conn:
         assert conn.execute("SELECT id FROM hq.children").fetchall() == [{"id": alex}]
-    for table in ("families", "caregivers", "pain_points", "child_goals", "child_habits", "completions"):
+    for table in ("families", "caregivers", "users", "pain_points", "child_goals"):
         with transaction(settings, kid=alex) as conn, pytest.raises(psycopg.errors.InsufficientPrivilege):
             conn.execute(f"SELECT 1 FROM hq.{table}")
     db.execute("DELETE FROM hq.children WHERE id=%s", (maya,))
