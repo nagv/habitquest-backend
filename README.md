@@ -5,12 +5,31 @@ child's pain points, and pick habits from a pre-approved catalog. Kids submit co
 them, and children earn **Sparks** (progress that is never spent) and **points** (spent on rewards the
 caregiver records).
 
-The MVP is being built in steps (see [docs/mvp-plan.md](docs/mvp-plan.md)). This release is step 1: the lean
-schema, the seeded catalog, catalog endpoints, health checks and the development login.
+The MVP is being built in steps (see [docs/mvp-plan.md](docs/mvp-plan.md)). Done so far: the lean schema,
+the seeded catalog and catalog endpoints (step 1), and accounts (step 2): Google sign-in, families with one or
+more caregivers, invite codes, the family PIN and kid mode.
 
 ## Stack
 
 Python 3.12, uv, FastAPI and Pydantic, PostgreSQL with row-level security, psycopg, PyJWT.
+
+## Accounts and kid mode
+
+1. **Sign in.** The frontend shows Google's sign-in button (client id `GOOGLE_CLIENT_ID`) and posts the ID
+   token it returns to `POST /v1/auth/google`. The backend checks Google's signature (keys fetched from
+   `https://www.googleapis.com/oauth2/v3/certs` and cached), the audience, the issuer and that the email is
+   verified, creates or refreshes the user, and returns our own bearer token, valid for 8 hours.
+2. **Family.** `GET /v1/me` lists the user's families. With none, the user creates one (`POST /v1/families`:
+   family name, time zone, four-digit PIN, and their own display name and role) or joins one with its invite
+   code (`POST /v1/families/join`). Roles: `father`, `mother`, `guardian`, `other`. Any caregiver can rename
+   the family, change its time zone or PIN, and replace the invite code.
+3. **Kid mode.** On a shared device a caregiver calls `POST /v1/children/{id}/kid-session` and gets a kid token
+   for that child (8 hours). Kid tokens work only on `/v1/kid/*` endpoints and run as the `hq_kid` database
+   role, which sees only that child. Leaving kid mode is guarded by the frontend with
+   `POST /v1/families/{id}/pin/verify`.
+
+Browsers may call the API from the origins in `CORS_ORIGINS` (comma-separated; the frontend's dev server
+`http://localhost:5180` by default).
 
 ## Data model
 
@@ -33,9 +52,11 @@ Eleven tables in the `hq` schema ([db/migrations](db/migrations)). There are no 
 Sparks are the number of approved completions; a child's level and unlocked habit tier follow from Sparks.
 Points are the sum of the ledger.
 
-**Access.** API requests run as the `hq_api` database role with the caller's user id. Row-level security
-limits every family table to the families the caller is a caregiver in. The catalog is read-only to the API,
-and the points ledger can only be added to.
+**Access.** Caregiver requests run as the `hq_api` database role with the caller's user id; row-level
+security limits every family table to the families the caller is a caregiver in. Kid requests run as `hq_kid`
+with the child's id and see only that child. The catalog is read-only to the API, and the points ledger can
+only be added to. Creating a Google user, creating a family and joining one go through `SECURITY DEFINER`
+functions, because the caller cannot yet see the rows involved.
 
 **Catalog.** [db/seed.sql](db/seed.sql) holds 7 goals and 36 habits taken from the frontend's quest library.
 It is applied on every start and upserts by id, so editing a row and redeploying updates it. To stop offering a
@@ -87,9 +108,10 @@ PostgreSQL 17.
 | Variable | Value |
 |---|---|
 | `JWT_SECRET`, `JWT_ISSUER` | Sign and check our access tokens |
-| `GOOGLE_CLIENT_ID` | The Google OAuth web client id, for Google sign-in (used from step 2) |
+| `GOOGLE_CLIENT_ID` | The Google OAuth web client id the frontend's sign-in button uses. Not a secret. Without it, `POST /v1/auth/google` returns 503 |
+| `CORS_ORIGINS` | Comma-separated browser origins allowed to call the API, e.g. the hosted frontend's address |
 | `DEV_LOGIN`, `DEV_LOGIN_PASSWORD` | `true` and a shared tester password of 12+ characters (set it in the dashboard). Setting `DEV_LOGIN=true` without a valid password stops the service from starting |
 
 The first migration replaces the earlier versioned schema: it drops the old `hq` and `hq_checkpoint` schemas and
-their data. The migration creates the `hq_api` role, so the database user needs `CREATEROLE`. Treat a hosted
+their data. The migrations create the `hq_api` and `hq_kid` roles, so the database user needs `CREATEROLE`. Treat a hosted
 deployment as test data only until family deletion and retention exist.
