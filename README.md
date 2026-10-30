@@ -7,7 +7,8 @@ caregiver records).
 
 The MVP is being built in steps (see [docs/mvp-plan.md](docs/mvp-plan.md)). Done so far: the lean schema,
 the seeded catalog and catalog endpoints (step 1); accounts (step 2): Google sign-in, families with one or
-more caregivers, invite codes, the family PIN and kid mode; and children and AI onboarding (step 3).
+more caregivers, invite codes, the family PIN and kid mode; children and AI onboarding (step 3); and the daily
+loop (step 4): kids submit, caregivers approve, children earn Sparks and points.
 
 ## Stack
 
@@ -51,6 +52,21 @@ Python 3.12, uv, FastAPI and Pydantic, PostgreSQL with row-level security, psyco
 
 The plan also reports the child's `progress`: Sparks, level (Sprout 0, Explorer 5, Adventurer 15, Hero 30,
 Legend 50) and the highest habit tier unlocked (tier 2 at Explorer, tier 3 at Adventurer).
+
+## The daily loop
+
+1. **Today.** `GET /v1/kid/today` (kid token) or `GET /v1/children/{id}/today` (caregiver) lists the child's
+   active habits scheduled for today, with "today" taken in the family's time zone, and each habit's status:
+   `todo`, `submitted`, `approved` or `rejected`. It also shows Sparks, level and spendable points.
+2. **"I did it!"** `POST /v1/kid/completions` with a `child_habit_id` from today's list. Tapping again changes
+   nothing; a rejected habit can be submitted again.
+3. **Approve.** `GET /v1/families/{id}/approvals` lists everything waiting, oldest first, across all children.
+   `POST /v1/completions/{id}/approve` gives one Spark and the habit's points (a ledger entry, exactly once);
+   `.../reject` means "not yet". The response carries the new progress, so the frontend can celebrate a
+   level-up.
+
+The database enforces the kid's side too: a kid token can only add or resubmit its own child's completions,
+only for today, only as `submitted`, and cannot touch points.
 
 Browsers may call the API from the origins in `CORS_ORIGINS` (comma-separated; the frontend's dev server
 `http://localhost:5180` by default).
