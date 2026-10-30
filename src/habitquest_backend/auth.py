@@ -10,45 +10,35 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer, OAuth2Pas
 
 from habitquest_backend.config import Settings
 
-# Fixed development identities; a reviewer must differ from the author, a publisher from the builder.
+# The fixed development parent; `parent:<label>` gives further parents with stable ids.
 PARENT = UUID("11111111-1111-1111-1111-111111111111")
-EDITOR = UUID("e0000000-0000-0000-0000-0000000000e1")
-REVIEWER = UUID("e0000000-0000-0000-0000-0000000000e2")
-DEV_USERS = {"parent": (PARENT, False), "editor": (EDITOR, True), "reviewer": (REVIEWER, True)}
 TOKEN_URL = "/v1/auth/token"
 
 
-def verify_token(token: str, settings: Settings, *, hq_role: str | None = None) -> UUID:
-    """Verify the JWT; with `hq_role`, also require the admin-assigned `app_metadata.hq_role` claim."""
+def verify_token(token: str, settings: Settings) -> UUID:
+    """Verify one of our HS256 access tokens and return its subject (hq.users.id)."""
     try:
-        if settings.jwt_secret:
-            key = settings.jwt_secret.get_secret_value()
-            algorithms = ["HS256"]
-        else:
-            key = jwt.PyJWKClient(settings.jwt_jwks_url).get_signing_key_from_jwt(token).key
-            algorithms = ["ES256", "RS256"]
+        if settings.jwt_secret is None:
+            raise ValueError("JWT_SECRET is not configured")
         claims = jwt.decode(
             token,
-            key,
-            algorithms=algorithms,
+            settings.jwt_secret.get_secret_value(),
+            algorithms=["HS256"],
             audience=settings.jwt_audience,
             issuer=settings.jwt_issuer,
             options={"require": ["exp", "sub", "iat"]},
         )
         if claims.get("role") != "authenticated":
             raise ValueError("Parent authentication required")
-        user = UUID(claims["sub"])
+        return UUID(claims["sub"])
     except (jwt.PyJWTError, ValueError, TypeError) as exc:
-        raise HTTPException(401, "Invalid or expired parent token") from exc
-    if hq_role is not None and (claims.get("app_metadata") or {}).get("hq_role") != hq_role:
-        raise HTTPException(403, f"{hq_role.capitalize()} role required")
-    return user
+        raise HTTPException(401, "Invalid or expired token") from exc
 
 
-def issue_token(settings: Settings, sub: UUID, *, editor: bool = False, minutes: int = 15) -> str:
-    """A short-lived HS256 token; `editor` adds the admin-assigned `app_metadata.hq_role` claim."""
+def issue_token(settings: Settings, sub: UUID, *, minutes: int = 15) -> str:
+    """A short-lived HS256 access token for `sub`."""
     if settings.jwt_secret is None:
-        raise ValueError("JWT_SECRET is required for development tokens")
+        raise ValueError("JWT_SECRET is required to issue tokens")
     now = datetime.now(UTC)
     claims = {
         "sub": str(sub),
@@ -58,22 +48,20 @@ def issue_token(settings: Settings, sub: UUID, *, editor: bool = False, minutes:
         "aud": settings.jwt_audience,
         "role": "authenticated",
     }
-    if editor:
-        claims["app_metadata"] = {"hq_role": "editor"}
     return jwt.encode(claims, settings.jwt_secret.get_secret_value(), algorithm="HS256")
 
 
-def dev_identity(username: str) -> tuple[UUID, bool] | None:
-    """`parent`, `editor`, `reviewer`, or `parent:<label>` for a separate parent with a stable id."""
-    if username in DEV_USERS:
-        return DEV_USERS[username]
+def dev_identity(username: str) -> UUID | None:
+    """`parent`, or `parent:<label>` for a separate parent with a stable id."""
+    if username == "parent":
+        return PARENT
     role, _, label = username.partition(":")
     if role == "parent" and label.strip():
-        return uuid5(NAMESPACE_URL, "habitquest-dev-parent:" + label.strip()), False
+        return uuid5(NAMESPACE_URL, "habitquest-dev-parent:" + label.strip())
     return None
 
 
-def dev_login(settings: Settings, username: str, password: str) -> tuple[UUID, bool]:
+def dev_login(settings: Settings, username: str, password: str) -> UUID:
     """Check the shared development password (constant time) and resolve the identity; 401 otherwise."""
     expected = settings.dev_login_password
     identity = dev_identity(username)

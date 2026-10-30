@@ -1,6 +1,4 @@
-# Render Blueprint. The free single-service layout runs the worker inside the API
-# (RUN_WORKER_IN_API=true). For production, set it to false and uncomment the worker,
-# which needs a paid instance type.
+# Render Blueprint: one free web service plus Render Postgres in virginia.
 services:
   - type: web
     name: habitquest-api
@@ -16,23 +14,7 @@ services:
         value: 3.12.8
       - key: DATABASE_URL
         fromDatabase: {name: habitquest-db, property: connectionString}
-      - key: RUN_WORKER_IN_API
-        value: "true"
       - fromGroup: habitquest-settings
-  # - type: worker
-  #   name: habitquest-worker
-  #   runtime: python
-  #   region: virginia
-  #   plan: starter
-  #   branch: main
-  #   buildCommand: pip install uv==0.12.23 && uv export --frozen --no-dev --no-emit-project -o requirements.txt && pip install -r requirements.txt && pip install --no-deps .
-  #   startCommand: python -m habitquest_backend.worker
-  #   envVars:
-  #     - key: PYTHON_VERSION
-  #       value: 3.12.8
-  #     - key: DATABASE_URL
-  #       fromDatabase: {name: habitquest-db, property: connectionString}
-  #     - fromGroup: habitquest-settings
 
 databases:
   - name: habitquest-db
@@ -42,29 +24,13 @@ databases:
 envVarGroups:
   - name: habitquest-settings
     envVars:
-      - key: MODEL_MODE
-        value: fake            # google or openai once that provider's values below are set
-      - key: GOOGLE_MODEL
-        sync: false
-      - key: GOOGLE_API_KEY
-        sync: false
-      - key: OPENAI_BASE_URL   # any OpenAI-compatible endpoint, e.g. Nebius
-        sync: false
-      - key: OPENAI_MODEL      # must support tool calling
-        sync: false
-      - key: OPENAI_API_KEY
-        sync: false
       - key: JWT_SECRET
-        generateValue: true    # dev tokens only; switch to Supabase Auth (JWT_JWKS_URL) for real users
+        generateValue: true    # signs our own access tokens
       - key: JWT_ISSUER
-        value: https://habitquest-api.onrender.com/dev
-      - key: DEV_LOGIN         # /docs username/password login; remove when using Supabase Auth
+        value: https://habitquest-api.onrender.com
+      - key: GOOGLE_CLIENT_ID  # Google sign-in (used from the accounts release on)
+        sync: false
+      - key: DEV_LOGIN         # /docs username/password login for testers
         value: "true"
       - key: DEV_LOGIN_PASSWORD  # shared tester password, 12+ characters
         sync: false
-      - key: LOCAL_DEMO_AUTH
-        value: "false"
-      - key: LANGSMITH_TRACING
-        value: "false"
-      - key: LANGCHAIN_TRACING_V2
-        value: "false"

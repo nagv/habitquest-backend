@@ -1,8 +1,0 @@
-{
-  "name": "habitquest-backend-tools",
-  "private": true,
-  "description": "Project-local Supabase CLI only; application runtime is Python",
-  "devDependencies": {
-    "supabase": "2.122.0"
-  }
-}
