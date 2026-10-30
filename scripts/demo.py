@@ -10,11 +10,15 @@ continuously polling worker at the same time (each scenario runs `worker --once`
     uv run python scripts/demo.py --scenario all
     uv run python scripts/demo.py --remote --base-url https://<service>.onrender.com
 
+Tokens: with DEV_LOGIN_PASSWORD in the environment, the demo logs in through POST /v1/auth/token (a
+deployment with DEV_LOGIN=true); otherwise it mints native-local tokens (LOCAL_DEMO_AUTH=true, JWT_SECRET).
+
 Expectations assume the seeded release 1 catalog and the fake model (MODEL_MODE=fake).
 """
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 import time
@@ -226,6 +230,29 @@ def editor(author, reviewer, parent):
     print("  catalog requests:", [(r["normalized_phrase"], r["count"]) for r in requests[:5]])
 
 
+def login(base_url: str, username: str, password: str) -> str:
+    response = httpx.post(
+        base_url + "/v1/auth/token", data={"username": username, "password": password}, timeout=180
+    )
+    if response.status_code != 200:
+        raise SystemExit(f"FAIL login as {username}: {response.status_code}\n{response.text}")
+    return response.json()["access_token"]
+
+
+def tokens(base_url: str) -> tuple[str, str, str]:
+    """Parent, editor and reviewer tokens. A fresh parent per run keeps runs independent."""
+    run = str(uuid.uuid4())
+    password = os.getenv("DEV_LOGIN_PASSWORD")
+    if password:
+        return tuple(login(base_url, name, password) for name in ("parent:" + run, "editor", "reviewer"))
+    settings = demo_settings()
+    return (
+        local_token(settings, uuid.UUID(run), minutes=30),
+        local_token(settings, EDITOR, editor=True, minutes=30),
+        local_token(settings, REVIEWER, editor=True, minutes=30),
+    )
+
+
 def promote(habit_id, name="standard"):
     return {"op": "promote_future", "habit_id": habit_id, "level": name}
 
@@ -255,11 +282,11 @@ def main():
     global REMOTE
     REMOTE = args.remote
     load_dotenv()
-    settings = demo_settings()
-    # A fresh parent per run keeps runs independent; editors keep stable ids for the audit trail.
-    parent = Session(args.base_url, local_token(settings, uuid.uuid4(), minutes=30), "parent")
-    author = Session(args.base_url, local_token(settings, EDITOR, editor=True, minutes=30), "editor")
-    reviewer = Session(args.base_url, local_token(settings, REVIEWER, editor=True, minutes=30), "reviewer")
+    # Editors keep stable ids for the audit trail.
+    parent_token, editor_token, reviewer_token = tokens(args.base_url)
+    parent = Session(args.base_url, parent_token, "parent")
+    author = Session(args.base_url, editor_token, "editor")
+    reviewer = Session(args.base_url, reviewer_token, "reviewer")
     scenarios = {
         "basic": (basic, (parent,)),
         "edits": (edits, (parent,)),

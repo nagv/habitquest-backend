@@ -5,11 +5,10 @@ from typing import Annotated, Literal, cast
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Path
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from psycopg import errors
 from pydantic import BaseModel
 
-from habitquest_backend.auth import verify_token
+from habitquest_backend.auth import bearer_token, verify_token
 from habitquest_backend.catalog.releases import diff_items, validate_release
 from habitquest_backend.catalog.repository import load_release
 from habitquest_backend.config import Settings
@@ -150,12 +149,11 @@ def release_items(conn, release_id: int) -> dict[tuple[str, str], int]:
 
 def router(settings: Settings) -> APIRouter:
     api = APIRouter(prefix="/v1/editor")
-    bearer = HTTPBearer(auto_error=False)
 
-    def editor(credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)]) -> UUID:
-        if credentials is None:
+    def editor(token: Annotated[str | None, Depends(bearer_token(settings))]) -> UUID:
+        if token is None:
             raise HTTPException(401, "Editor authentication required")
-        return verify_token(credentials.credentials, settings, hq_role="editor")
+        return verify_token(token, settings, hq_role="editor")
 
     Editor = Annotated[UUID, Depends(editor)]
 

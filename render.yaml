@@ -58,6 +58,10 @@ envVarGroups:
         generateValue: true    # dev tokens only; switch to Supabase Auth (JWT_JWKS_URL) for real users
       - key: JWT_ISSUER
         value: https://habitquest-api.onrender.com/dev
+      - key: DEV_LOGIN         # /docs username/password login; remove when using Supabase Auth
+        value: "true"
+      - key: DEV_LOGIN_PASSWORD  # shared tester password, 12+ characters
+        sync: false
       - key: LOCAL_DEMO_AUTH
         value: "false"
       - key: LANGSMITH_TRACING
