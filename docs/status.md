@@ -22,7 +22,10 @@ Also done:
 - **Google Cloud:** project "HabitQuest", consent screen in Testing, web client with the origins
   `http://localhost` and `http://localhost:5180`.
 - **Dev login** from `/docs` (`parent`, `parent:<label>` and the shared `DEV_LOGIN_PASSWORD`) for testing.
-- **Docs in the repo:** `README.md` (endpoints, rules, settings) and `docs/mvp-plan.md` (scope and steps), and this file.
+- **Docs in the repo:** `README.md` (endpoints, rules, settings), `CLAUDE.md` (guide for coding sessions:
+  conventions, checks, environment, decisions), `docs/mvp-plan.md` (scope and steps), `docs/frontend-integration.md`
+  (API contract for the frontend) and this file. The old generated `openwiki/` pages were removed; regenerate
+  them from `openwiki/INSTRUCTIONS.md`.
 
 ## Backend: settings to finish
 
