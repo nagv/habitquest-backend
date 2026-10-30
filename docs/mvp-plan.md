@@ -46,7 +46,7 @@ Each step is one pull request with tests at 100% coverage.
 3. **Children and AI onboarding (done):** child profiles; pain points mapped to goals with recommendations; habit
    picking by age and tier; plan activation; editing the plan.
 4. **Daily loop (done):** today's habits in the family's time zone, submit, approve or reject, Sparks, level, points.
-5. **Redemption:** record a redemption against the balance; points history.
+5. **Redemption (done):** record a redemption against the balance; points history.
 6. **Frontend wiring:** a typed API client in the frontend; Google sign-in, onboarding, kid mode and approvals
    on the API. Worlds, the treasure chest and check-ins stay in the browser for now.
 

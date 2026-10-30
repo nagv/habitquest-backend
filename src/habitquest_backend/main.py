@@ -6,7 +6,7 @@ from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 
-from habitquest_backend import accounts, daily, onboarding
+from habitquest_backend import accounts, daily, onboarding, rewards
 from habitquest_backend.auth import TOKEN_URL, dev_login, issue_token, signed_in
 from habitquest_backend.config import Settings
 from habitquest_backend.db import one, transaction
@@ -25,7 +25,8 @@ at `POST /v1/auth/google`. In /docs, click **Authorize**: when the development l
 (`POST /v1/children/{id}/pain-points`): AI maps it to pre-approved goals and recommends habits → pick habits and
 activate the plan (`PUT /v1/children/{id}/plan`). Each day the child taps "I did it!"
 (`POST /v1/kid/completions`) and a caregiver approves (`GET /v1/families/{id}/approvals`,
-`POST /v1/completions/{id}/approve`): one Spark and the habit's points. Kid mode: a caregiver gets a kid token for one child
+`POST /v1/completions/{id}/approve`): one Spark and the habit's points. A caregiver records what points were
+spent on (`POST /v1/children/{id}/redemptions`). Kid mode: a caregiver gets a kid token for one child
 (`POST /v1/children/{id}/kid-session`); kid endpoints accept only that token.
 """
 TAGS = [
@@ -45,6 +46,7 @@ TAGS = [
         "name": "Daily",
         "description": "Today's habits, completions waiting for approval, approving and rejecting.",
     },
+    {"name": "Points", "description": "Spending points on rewards, and the points history."},
     {"name": "Catalog", "description": "Pre-approved goals and the habits parents can pick for each goal."},
 ]
 GOAL_COLUMNS = "id,title,description"
@@ -141,6 +143,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.include_router(accounts.router(settings))
     application.include_router(onboarding.router(settings))
     application.include_router(daily.router(settings))
+    application.include_router(rewards.router(settings))
     return application
 
 
