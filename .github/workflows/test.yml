@@ -17,8 +17,6 @@ jobs:
     env:
       DATABASE_URL: postgresql://hq_dev:local-ci-only@127.0.0.1:55432/hq_test
       TEST_DATABASE_URL: postgresql://hq_dev:local-ci-only@127.0.0.1:55432/hq_test
-      LANGSMITH_TRACING: "false"
-      LANGCHAIN_TRACING_V2: "false"
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
