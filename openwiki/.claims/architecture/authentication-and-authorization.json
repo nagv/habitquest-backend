@@ -1,0 +1,382 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:9357f1d85f5b611cfdc3eabdfa57e3b802d8b971013de570887921d516307b2a",
+  "claims": [
+    {
+      "id": "claim_b32c262a4e514b5bbdec00351b677a73",
+      "statement": "`verify_token` selects its signing key by configuration: when `settings.jwt_secret` is set it verifies with HS256 using that shared secret, and when it is unset it resolves the key per call through `jwt.PyJWKClient(settings.jwt_jwks_url)` and accepts only ES256/RS256.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/auth.py#L9-L25",
+          "version": "repo-lines-v1:sha256:196bcd4ecaf773aa1bdd6f6775eed211b7fa099ae104bfb76d149058aab400be:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlMDBkMmE5ODYzZTVmNjE2MzU1N2MxNjFmMTBmNmJkZmFiYmVkZGQyZWY4OWNhOWJkYmVkN2YwMTUyYWFkZmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhOWY4YzJiYzdhMTQxYTAyMmFmM2ZlYjhhYjUwMDhlYzI1NzU3ZWYyNGFjZDA0OWY1MDg5YTc0YjdjOWFlODEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBiZDE0YjY2ODlhZTNlMWU1ZDNmZDE5Y2NlYmUyMDQ3YWI1MDljMjg5MzM5NDAxZGQ3NzkzM2I0MmUxM2M5ZjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM1ZjA5OTk2ZDRkNzFlNjQyZDZhNDc1OTEwYjIyZjY1NzFkODQxNmMwODExMzUzYTllMTE5M2I1ZmYyZWYzY2MifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/config.py#L23-L26",
+          "version": "repo-lines-v1:sha256:3bde15c4bba91df5cd7161108b27c63c815aed4858ff34894fe354d1f18b36d6:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjg5MjdhNTZmYzJmMWVkODA3MDYzYjZkZDg3Y2VkMGYwNWVmZmIxYzgzNGU5M2Y2YzI2OWE2NjhhMThhN2MzZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMzJlY2VkMjY3OGQ1M2MxN2MzMWY0NmU1ZTM2OTgzOGQ0NTdjZmQxMGE0NWE0ZjRiNTUzYTMyYTY0YjJiYzk2YyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZDcwNWM0Y2NiZjU1OTJkNzc1NWYyODVhOWFlNGI1MjVmNTVmZDY1Zjg0ZDFiOWRiYTg3NDQ1MTA4MWQ5YjM2YSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYmMxYWYyZDdjY2QyYzMxZTZiOWQ0OTczNTAzYWNkODk5MGFjOWNhN2NkYmY5YzQ3NWU2MDUxYWIzZTNkN2MzZiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_6fc7d0ee2bed46f28fa2cdff127727a9",
+      "statement": "Every token must satisfy `audience=settings.jwt_audience`, `issuer=settings.jwt_issuer`, required claims `exp`/`sub`/`iat`, a `role` claim equal to `authenticated`, and a `sub` that parses as a UUID; any signature, claim-shape, expiry or UUID failure is collapsed into HTTP 401 \"Invalid or expired parent token\", which refuses Supabase anon and service-role tokens.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/auth.py#L18-L30",
+          "version": "repo-lines-v1:sha256:5162cc3080df5bd1db75d6147eba4411ea5380f7c8ba244b6e8ced2316e4bc92:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE5MmMxNzBiZDBlNmEyNzM1ODI2YWEyNTI4YTA4OTE2YzI0MmY0ODg3MTU1ZDI1YTViNjAxMDZhMjYzMzdjNzIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE0MjE1ZTZlNDZmYWI4Y2I3YjU5NWQwOGU5ZmJmY2Q5NzQ3NmJlMjZmZWZiZjZiZWI3NDhkYzI5MDVlMTkzN2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImIyZTlhZmUxZGU1OGQ4OWM0MzBlYjM1ZmE5NzlkNTA0YWZjZGM0ZTQ3NWM3OWMzZDM2ZDRjZDU5MDFlODA3YmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdjYTczYjY4ZWNmZDcwNjM2OWZkNDI4MTZkMjdhMDdkYTM1OGM4NTcwNzk2YjZjMTc1MjliYWQyZWRjYmI1ZGIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8a5766cdff3740d898de8022931337a7",
+      "statement": "The editor/`hq_role` check is a separate assertion from authentication: with `hq_role` passed, `app_metadata.hq_role` must match it, otherwise HTTP 403 `f\"{hq_role.capitalize()} role required\"`. Because the claim is read from `app_metadata` (admin-writable) rather than `user_metadata` (user-writable), a parent cannot promote themselves.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/local_auth.py#L27-L42",
+          "version": "repo-lines-v1:sha256:cce5d6ebc08fe47729d698df4e707d95322e561dee7844ab0afbfb81780e453e:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRlYWNjZmYwNmNhODJkNTZkMDU0M2VkMjUxZGJhOWVlMDgwZTZmNDE1NDk0YzBhMzQyNDE2OWZhODNlMmY4ODgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgwYWQ0M2QyMzBlYmRkNmM1NmY3NjQ1MmM0YjZhZjM3MmMyZTE1OWJmMjJhMTFkYjgyNzU0MmY2ZGU2NjYxYmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAxZTRiNWY5YzZhNzg1MDliYjg0MjMyOTAwYjg4OTU5MGExMzcyYzI5NzI0ZjFlNjRlYWYyZmMyZTJlZDA3ZjEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/auth.py#L31-L33",
+          "version": "repo-lines-v1:sha256:7ca73b68ecfd706369fd42816d27a07da358c8570796b6c17529bad2edcbb5db:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMTA4OTRkNzEyNDFiNjE0MDFmMTdmYTg0YzVkMjY2OWI4ZjE5MGNiZmYyZjNiNmNhZGU3NDZmYTM2ZGI2ODkxMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiM2M3YTY1N2I2NjJlM2QxZTI3MTU2OWIyYjZjOGEwNTAzMTZmNjlmMGI3NGU0NDg3Yzg3ZjhlZjhkOWYxOGYzYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODgxYzFiMjQ3MjBlODE1MDY5YWQxNTBiZDA1ZTcxNDBlOThjZjIzMWQ3NmIxOTBlMWQzZWE5MDNlOTQ1ZTg3ZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_34a4f4c2422b4798ba183b8814b3992e",
+      "statement": "Two FastAPI dependencies gate the API: `parent` over `HTTPBearer(auto_error=False)` raises 401 when no credential is present and otherwise returns the verified UUID for all `/v1` parent routes, while the `/v1/editor` router's `editor` dependency additionally passes `hq_role=\"editor\"`; only `/health/live` and `/health/ready` are unauthenticated.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/editorial/api.py#L151-L160",
+          "version": "repo-lines-v1:sha256:19601d76ab78b4531b1f8c87149f41685cf871735c2c7034e0a1278c033a3854:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNmNDdmNTM0YWE3YTk4ODI5NzkxZTM0YmFhMTdmN2ZkZWM5MWFhZTUwMjZkMGU3MzY1YzA3YjFhMWIzMTk2OGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMxNjdhNDJmMzIyM2Y5NmFjMjQ4NDVhZDhiNGMyYzYyZjUyZTRhNWY4Mzk4M2ExZjc1OWY1ZjE2Yjg1Y2ZjODQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ0MzBhZTNkOGQ0NzY4ZmM0OTEzYTc2ZjhjYjhlMWNjNjA2MTEwMWM3NmJlZDA2MDA0ZWI3MTI5MDY0ZDgzN2QiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVjNzM1ZTcxZDUwNGE3OWIzNTA3MjFjMzUzYWI3Y2NjOTRlZDFhMDEzNjEyNmZmNTY3YjMyNjZiYjg3YzFhNDkifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/main.py#L108-L116",
+          "version": "repo-lines-v1:sha256:4882b203dde74d3657f8fa43ca82e9f7123704a92da680368fb08393373ecdf3:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTE3MWUwZGFkNTA0Nzg0NTQxMzFkYTVlNTgxNTIzYTdhMWJiYjY0Zjc3YWJiNWVjNzlkNzYyNGUyZjc5OTkwMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMGJiZWEzYzhmN2EzNTE1MGRhNWMzMjM1ODQ3ZWM0YTg1ZjRhYWMyYmNjMjYyY2UyZGRiYWQ2MmM0MGQ4YjMzZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMjhhNjYyNTQ5ZjhjZDE1YWJhZTYyNDYxMTIyYmRjNTgwZDAxMWE1NWRlZDE0NGFlMzExZWI3OWJkNmY0ZTA2YiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNGIyNTE3YWNhODJkYjFlNzM1ZTEzOGIyNzMwZTQzMTJiYjdmYzZiOTZhMjAyODg0N2VjZTZlN2YzYjhhYzJjNCJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/main.py#L118-L133",
+          "version": "repo-lines-v1:sha256:e56d048f31b129802946eeded33afca96fa59b42b949837b30fa0a484a6bcda3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJkMmRlYzc1NDc1ZDRiMDAxNjA4OWZhYTE4M2QwMTgyZmIwNTUyMDBiMGRlYmFhMjE0NDUzYzQ5MjdhYmFmZDAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg5MjUyYTJiZjYzODYwY2U5MWM0ODA1NDg0ZjFhM2IxOTYwODFiNGU5OGRlNDdmZTdhMWJmZmZhYWUwMTA4YjEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBhMDdjNTU5NTI5YTIxYzIxODBjYzkwNTI3YjU0NDAwNzI4YmU5ZjVkY2ZmNTVmY2RlY2UxNzJmMDZhZjc3MTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjIwNDNkOWQyMDdiY2Y3N2VlMjllOGUwOWQ3ZTIwMjExNjU0ZmViMWU1ZmU2N2Q4Y2I4NTc4ZDRkYzQ0MzgzZGMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_cf19555b87e54fbcbe69e91f5580b107",
+      "statement": "`transaction()` is the single chokepoint turning a caller into database identity: `editor` selects `hq_editor`, `worker=True` selects `hq_worker`, otherwise `hq_api`; it then runs `SET LOCAL ROLE`, `SET LOCAL statement_timeout='10s'`, and `set_config('app.parent_id',...)`/`set_config('app.editor_id',...)` with `is_local=true`, so role and identity cannot leak past the transaction.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/db.py#L11-L23",
+          "version": "repo-lines-v1:sha256:4459e0325d655c19c79d4a31916c591d67e14a8b99bfe26c5dc1ed509c5cfc27:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY5MzI0NThhYmVjMTk4MDUxZDE3ZGE0OTNhZjEzYjM0OGRmYWRjNzU0ZDgwODJiOWZjYWY1ZDczNzNkYWMzODgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBhNTUwOGJmNjJhOTcwZGVkOWZlNTU2OWZkY2FiNDk2NmJmMmQ3MzA3MTU5MjcxYTU4MzM0MjBhYTY2OGFhOGUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBiZDE0YjY2ODlhZTNlMWU1ZDNmZDE5Y2NlYmUyMDQ3YWI1MDljMjg5MzM5NDAxZGQ3NzkzM2I0MmUxM2M5ZjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRlY2FiNmMzY2Y2NWQyY2E0YWRmZGMxMTdiODY1MDhjYmVjZTFkMTZjMjU5MGQ1OWUyYjhiMzM3NDUyM2U3ZTcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ad1455cf99414bfd97c473ff0fcb8494",
+      "statement": "`hq.my_parent()` and `hq.my_editor()` convert the transaction-local settings into UUIDs with `NULLIF(current_setting(...,true),'')::uuid`, so an absent identity yields NULL and every policy comparison against it fails closed rather than matching rows.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/db.py#L19-L22",
+          "version": "repo-lines-v1:sha256:9d930a382787247c38571c7e37bd87641a7ddccbb655e98e863bfce4800ab763:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMmY1YTNjMDIyNGNlMmZmYzczY2M5ODM2NTNhYmM5MzBkYTdhNTc3YzA4OTc5MjY0NWI3YTc1MzA3ODk0NTRkZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMmE5ZjhjMmJjN2ExNDFhMDIyYWYzZmViOGFiNTAwOGVjMjU3NTdlZjI0YWNkMDQ5ZjUwODlhNzRiN2M5YWU4MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNWJlOTk1OTgwOGZiN2Q5ZDQ3ODhmYzY0NGYzNjEyYzdmNDVkYTliMGU2MmZhNmEzYTIyNmY4OWNlMDBkNDdkMSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjNiNTQzNWUzNTA0ZGExNmY4ZGM0NzRlNmM5OGFlMmNlYTViYzFjYTBjYjM1NzIyMDE0YWI3MjRlZjcxNzE1YiJ9"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610280001_onboarding.sql#L21-L21",
+          "version": "repo-lines-v1:sha256:7ad48fcb1138d5e984508223472ef0cfeb609cbc93692114378d0025945bd6ed:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiN2FkNDhmY2IxMTM4ZDVlOTg0NTA4MjIzNDcyZWYwY2ZlYjYwOWNiYzkzNjkyMTE0Mzc4ZDAwMjU5NDViZDZlZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiN2FkNDhmY2IxMTM4ZDVlOTg0NTA4MjIzNDcyZWYwY2ZlYjYwOWNiYzkzNjkyMTE0Mzc4ZDAwMjU5NDViZDZlZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZGUwNzMwNzIyZmY3NDIzOTFiMWYwMTM1M2YxNDQyMmZkNmRmNTY5Mzc2YTUxYzBiYjU2NTdlNDQ2ZDU0ODg0ZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMzQxYmJmMjcyYzk2OTY1YzQyYTgyMWM2ZjU4MTFkZTk2ODBmOTFhYmIzODNlMjU1N2ViNmZmYzZiOTdhY2I2YyJ9"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290006_editorial.sql#L9-L11",
+          "version": "repo-lines-v1:sha256:6b0a491a4fba3079b949155aa8a653ee4f884a24b706cf11964cd5cb3ed08dbc:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzU5ZDQ5ZTNiNjJhMjg0NjRiNWNjNTk3ZjhlYTE5MzBlNGUxYTJjM2Q5ODY4YjM2NTgzNDk4YmI4NDAxMmNiMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiN2ViNzAyNTc1OTNkYTA2ZjY4MmEzZGRkYTU0YTlkMjYwZDRmYzUxNGY2NDUyMzdmNWNhNzRiMDhmOGRhNjFhNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZjM1OTA0OGRmMzMyMmM4YzJhOGZkYzY1ZmRiYWVlNTk4NzAwNmI0YTEzZjQyNGZkMjdhNGM5ODBlM2RkNDJmOCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZDM3ODQ0MzNjMjM3OGMzZmU2YTkzN2Q1ODliNGE2MzAyYzU2MDE3MjY2NzI3Y2Q3YTFiNWEzZGUwYjIzMTkxMyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_07162a0146f9499897d54ddc1000e123",
+      "statement": "Household isolation is enforced by RLS policies keyed off `hq.my_parent()`: `own_membership`, `own_household` (membership-based USING, `id=hq.my_parent()` WITH CHECK), `own_child` (household descendants), a `parent_scope` policy on `hq.intakes`/`hq.jobs`/`hq.proposals`/`hq.plans`/`hq.child_goals`, `parent_scope` on `hq.plan_flags` via the owning plan, and `scoped_events` on `hq.events` via its job.",
+      "evidence": [
+        {
+          "resource": "repo://supabase/migrations/202610280001_onboarding.sql#L22-L36",
+          "version": "repo-lines-v1:sha256:cb6890630d1db092a2bce706f026aecc2083f4ca1f55811d94a5682f1db002a6:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRmMzlmYWM2NjZhOWVhMjg3NGQyMTM2MDRhODg3ZTI0MmM5NjgwMzA4YzJiMjEwOGYxMjgzNTljNDM2NTFmZTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MGM1OGU3MTJiYjhkM2QxYzIxNjY5Mzc5ZTFlNDhiOTlmM2Q2Y2I1ODQyNDNmMTg1ZThlYzIxNDQxMmE2NjMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM5OTlmMGY5ZTliM2I4MjIwM2Q2ZjlkZGY2NDI3MzVkZmQyMTI5ODQ1NmUzMTJhMDVmMjA5NDNjOWUyNWM3MTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImE4NDdhOWZlYWU3ZTQ0YzBkYzVlZGExN2RmOGIxMGRlNzdkY2JmZDkwNDliMWFlNDRiNWEyM2RhNzUzYzFhYmMifQ"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290003_profile.sql#L19-L22",
+          "version": "repo-lines-v1:sha256:bffdd277b7f6cedefe580c4bc6bcea4e5078ced623e76c09802a6429492cf26a:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjU1YzM3ZTg2NjRjZjhhN2NmZDQ4Mzc2MmQ3NjcwYjBhY2UwYmUxNTM2YTNkMTNjMDQ5YWJjZDBlYWMyZTNlOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjdiYWEzODRjNDQzMDNmZTVjMTg2MTBiYmNkZjE4OTQ3ZmViOThlZjg2ZjM2ZTY5YTMzZTc2MmJiMmJhZGU2MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOTkxNDM1MmU1Y2IyNWNhYzQzMmY4ZGJiNDUzMDZjZWQ5NmQ5ZmUxZTMwOTZlY2Y3MjA1MTA4MDVjNWE0M2ExNiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDI3MzkxYTJhN2Y3ZjkyYTcxNWM4NDE4NzQwYmJlMzg1YTk5YTZiZWRlMzczZjQwY2M5MjcyMmU5Y2Y2YjdkMiJ9"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290005_2b_schema.sql#L12-L14",
+          "version": "repo-lines-v1:sha256:2c8fa3d116b5ca7bc1e996546118c508cf63fdabd4abbe3cb699fc181459f96a:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNmE2MjdlODRmNTE0YWU4OWU3ZDJmOWE2MTFhMzZjNWY2NmJmOWMyYmU4YmE0NmVlZWIwNTdlYjczZmU1ZWE0MCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMTdhMDMyY2JjYWM4NWU5NmY2YmYxODdkYThkOTEwM2Q4NmQ2MzZkMGM3YmE0ZDAzYTVlMGUwMWMwYTIwM2RlMiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOTg3MGVmYTUwZGQ5N2I2MzNjM2QyYjliZWRjNWI0MWY5NGVlZjYzOTQ0MTFhMDk5YmE5ZGM3ZmM2MThmOGRjZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOTU5ZmYwN2ZmZDU1NzE3MGRmZjBlMDE1ZjY2OTMyOWE1MDk2YmUwZTg1NzFjZTkzOGY5NzA2ZGYwNjFhNTZmNSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_e8e8912c361e4fcc94026083776195ef",
+      "statement": "The `own_membership` policy's `WITH CHECK(parent_id=hq.my_parent() AND household_id=hq.my_parent())` is what stops a caller writing itself into another household: under `app.parent_id = parent`, `INSERT INTO hq.memberships VALUES(parent, other)` raises `InsufficientPrivilege`.",
+      "evidence": [
+        {
+          "resource": "repo://supabase/migrations/202610280004_publication_locks.sql#L4-L6",
+          "version": "repo-lines-v1:sha256:bcccff0eced5988d28fb9ff1f8df32bf6aac8964c51e30ea977322bf0d1e7331:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzM3OGQwNDM4ZTlhNWRmYmJhMDc0ZDU4NGM3MjE3MWZkYzU0MmY4NmYwN2JkYjhjMzIyYTZlMDRhMTdjMWFjZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjFiMjNlMzA1MmY4OWUyMjc2M2U4MTEyZTQwNjc0YTFmOWEzMDA0OWZjMDJlNThlNzA5M2UzZDlkMzg1YzBkMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMmZjOTA3OTE0NGNjNzAyNzllYjg3OTQ4MTcyMzc4ZmFiYmI0ODEyMjAyY2QyYjJiMWQ2ZDA3ZjNkYWU5Njk3YiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiM2NjNzEwNTU5N2NhOTg5NDU5YmMxNjUwYWVhZTE1NTQ2NjcyMmU5YWJjNDk4MjMzNTM3OTRiODQ5MWZjYWZiOSJ9"
+        },
+        {
+          "resource": "repo://tests/test_review_regressions.py#L28-L34",
+          "version": "repo-lines-v1:sha256:7971155f06e658c784a7deb4082d586cfd9be42d0fdad0f055b1b96e2859d23d:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDUxOGIxMTEzMDg5ZTk1Y2NlODE3ZWRhMjE2ZmVmMDkxNjllZjU0NDc2OTJhYmE0NjRkNGE0YTEwNzhmMGYwZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDc3ZjA4ZWZhZjY3YjYzYjBiMTJmNzc4MGE1MjAyMTc4YTZkODlkYzgwMWUyYTY5MDMwOTM5NmU1MGM1OGMxMiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMjQwMmYxZjY5OTNkNWIxOTEyZWQzYzY4OTcyNjk5NzE5NzcwYTY5NDIyNjJkZDMyOWUwYjczMTgwNGM4NTYyYiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZWZjOTM3MDM1ZGY5YjU0NWU3NTFiZDg2NjgxMGY4ODEyNDcyMmRkMTJhOTFiYmQ4ODY5YTI4NzU3ZmRhMzlkZSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_a264eaaac4934ebd9bff666c2ee527d3",
+      "statement": "Because RLS filters visibility instead of raising errors, out-of-scope rows are indistinguishable from missing ones: another household reading a run, proposal, confirmation or plan receives 404 rather than 403.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/db.py#L26-L32",
+          "version": "repo-lines-v1:sha256:0a4eca94a416675a3dd39af700ea81d74a2441d4d7379bea55643dae19a74681:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMmE0YmQ0YjU4YzkzOWE5OTM2MGRlYTZkOGUzMGE2YmViNzE0NWMyMDAxNGEwYzY3MmUyYzdlMzYxZDhjODBkYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNGQ0MmFjY2FhZTYyMzUxNjNmMDQxMTYzMDFiM2NjNDY1MmZjMjQyNmY5MDZkMmM3YjViZDExN2MyODBlNGIwNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYjNiNTQzNWUzNTA0ZGExNmY4ZGM0NzRlNmM5OGFlMmNlYTViYzFjYTBjYjM1NzIyMDE0YWI3MjRlZjcxNzE1YiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://tests/test_security_and_changes.py#L162-L168",
+          "version": "repo-lines-v1:sha256:9c63747ce8341f4b4bbd4e11639443550296749bb2c702e0e9de0ff24c0e66ae:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzNiZDMzODYxNzliNmRjZjE0YmNlYWFiZDFlZjUxYzViNTUwOWMyOTc3MGVlMGRiY2U3YjhmZGU0MmYyNGEwYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOGI4OTMxZTQ4YWM4MWRjOTZlMGJlYTAxYjlmMTFhZWQzZDZiYjJkMzFmYzg3OTA1ZTJjY2MyNDY1YmVjM2ZhNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzM5N2RjMGFiMjQ2YjdlYTA4ODgwYzlkNDNiYWZlMTNjMTg0YTcwYmU0NTFjM2Q2YTEzOTNjZmE3ZDE0ZDJlMyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiODQxMTAzYzJlNjRmZGY2ZjQ5ODQyNTZiYTE1MWM5NzdmNjQyZDFhYTNkYzkxZmY3MjJkMWUyZGU2ODgyODFkNCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_23a8f74a3bee42c98ccf09b7f070750f",
+      "statement": "`hq_worker` is deliberately outside the parent RLS model for one table only: `worker_queue ON hq.jobs TO hq_worker USING(true) WITH CHECK(true)` lets it claim and update jobs across households; the worker's other transactions supply the claimed job's `parent_id` so the remaining policies still apply.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/worker.py#L170-L180",
+          "version": "repo-lines-v1:sha256:7fbe0b9b5fb11f9a9523cd7bbfb5fa9a24d9a5752f65273d9d12c518fe409985:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ4NjMwMjRhNzJiYWVmM2JkZmI2NGNkZDM4NjZjMjFhZTcyNTdlZjY5MmQ4N2NhMGRjNTliZGYxNTdiNGRmY2UiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ5ZDc3YzhlMTA4MWEzNWEyZWU3Y2JkNjZhNGZmYTA1ZDQyZWEzNzk3NDJkODE4MmE0NmVlNDc2YzYyNGQ1ZmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEzNzcwMThhN2QwYTBkMTU2OWRhZmQwNTY2YzQ4NWFjNWI3YTJkZTZiYzQwYjcyN2MwMjM2ZTczMTdhNzVmNTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA4NDg4YjExNmQyNGVhNjRjOGYyYzRiZDljMmIzOTdmZjg0YTQ3ZjU5ZGI3NWYxZWRjNTFmZWQ2MjI0MjQ1NmQifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/worker.py#L38-L58",
+          "version": "repo-lines-v1:sha256:5b6e0a2091b83beec9ada826cad518842ce79bb9dd64c402652d34ee2694d95e:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE3ZjM1YjMwNzg1YzIzMGI2YjFkZmZiYmQyMTc2ZjhiMDUyZTA4ZTAyYWYzY2Y1ZmY4YmEyNmY3YmM3ODFiMzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhOWY4YzJiYzdhMTQxYTAyMmFmM2ZlYjhhYjUwMDhlYzI1NzU3ZWYyNGFjZDA0OWY1MDg5YTc0YjdjOWFlODEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI2YWQyMzM1ZDM5NGEwMTE2NjAyYjcyMGNiNzJjNDdmN2NiNDk5YTM3MzM0MzMzMmEwNGU4OTRjMDE3MjkxMmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImIzM2MxNmVhODlmYTFiZDVkNThiYmRlNTdmZDE4MmViMDY0ZmEyMjE2M2I0YzE5MTJhMGUyMjg3Zjc5MTVkOTMifQ"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610280001_onboarding.sql#L34-L34",
+          "version": "repo-lines-v1:sha256:c73cef3d32adcf2c7c536b54b56b5e898d2f2ed858f72f3b927a659b30f4f600:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzczY2VmM2QzMmFkY2YyYzdjNTM2YjU0YjU2YjVlODk4ZDJmMmVkODU4ZjcyZjNiOTI3YTY1OWIzMGY0ZjYwMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYzczY2VmM2QzMmFkY2YyYzdjNTM2YjU0YjU2YjVlODk4ZDJmMmVkODU4ZjcyZjNiOTI3YTY1OWIzMGY0ZjYwMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTQ2MzMyNjNkNmIwMjI3ODgwMTBiYjgwODg2YmQ0OGUzZTljNDg2Yjk3YWM5Mzg4OTdkNTA3MDI0NWY3MGY5MCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMWFjYzM3MzkyZjQwYjg1ZmRmYjAyZDU1ZGY1N2I5MzdhYWZjZWIxZTY0YzQ1NGIyNjY5ZmJkNWEzMmY2ZmVmZSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_541aa77d475045b8b5502f6b68741c96",
+      "statement": "`hq_editor` is created NOLOGIN with `USAGE` on schema `hq` and no grant on household tables, so an editor reading `hq.children` fails with SQLSTATE 42501 — the editor/parent separation is a role boundary, not a claim check alone.",
+      "evidence": [
+        {
+          "resource": "repo://supabase/migrations/202610290006_editorial.sql#L4-L7",
+          "version": "repo-lines-v1:sha256:a623c2e76b68abf2705474c9ee1eaba55c803c5b63cd62dd7e77c31eecacada1:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzZhODIxNTQ5MTNmNjEyMGMyNWVkMDVjYmViNzhhNjIzODdhNzEwYjVhMWQxNDc2NTM1ZDA1MTc3ODc0NzMxZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMGM5NGEwZjJlNzg5NWFmMTZlOTZhMzRhM2VmNTlkMTVkZmVjMjgxNzk0NmRiNTUzNmMwZmVkMzg3Y2ZlOTc3MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYjg4NWE4NzNhNGI5NjlhMWI4NGE0ZWI0YjEzOTEwZjIwN2M5NGJkNWQ0OTFmNTc3NDRlZjRhYjE3NDQyYWQ3YiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZDNiMDc2OTI4NjcyNGM1NTFiNjJiM2JmN2YxOTE0ZDAxMjE3YTBhODE3MjBhMTBmZTdmNDdmODUzOGRmZjRhZiJ9"
+        },
+        {
+          "resource": "repo://supabase/tests/rls.sql#L16-L20",
+          "version": "repo-lines-v1:sha256:86e6efabb4b633f67f1df1b5406ddbb4352f12120c726320800019260cb83858:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTQwY2ViMWYwNTliMGM3NWE0M2MyNDZkNWVjMjc1OTJlYjc0ODA0NTU5MWEyNjM5OGI0OGViNmI0MjFkYTJkYiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZjFkOGNlMzAzY2QwMDNhMjJhMmEwMDdmZWFiMTBkOTFlOGExNTNkZDE3NWM0MTgxN2QwYjBjMzY3ZTkxMWJhYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODU2YTVmZjgwNTFhMzVhNmVlMjZjZWRiNWY4N2NlOWRjOTg0NjJiYzUwOWFkNzBjOTczMDkxOWY3ZWMyOTcyOCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjIsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNzlkYjE3YmRmNzUxYTg5YmI3ZTM1NzYxYTg2YmYyN2VhZGMwZmFiOTMyOTM1NjkyYzhmMTU1Yzk2OGE3MzI5MiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_0b058878517b49d08cc4dd8d441a4f55",
+      "statement": "Editoric catalog writes are constrained by column-level grants rather than RLS: editors get `INSERT`/`UPDATE` only on content columns (title, instruction, age bounds, routine anchor, safety notes, synonyms, world, goal_id) and never on `status`, `reviewed_by`, `reviewed_at`, `withdrawn_at` or `withdrawn_reason`; `created_by` defaults to `hq.my_editor()` so the author is always the caller.",
+      "evidence": [
+        {
+          "resource": "repo://supabase/migrations/202610290006_editorial.sql#L86-L101",
+          "version": "repo-lines-v1:sha256:147161f75f1738236de35d3d6885c10dc3b78bbf2d6a8a7d6704be0ed582a8a0:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFlMzE5OTc3ZmNkNjExOTA1YTViZDM4OTFiM2NhNThjMWZiMzBlNDhlNzRmNDlmYmQwNzdjY2FiMTE2MDQ0NDIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJjZDQxYmQwNmQ1N2JkYmE0YjE4MmVkMjBiNGMzMWE5N2U5Yzg4NWQ5OGY4MDU1Y2UyYWExZThhZTc4YzJkMmIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU3NjMyZTI4MTg3M2FkNDNkNDMxNzZjNzI1YjUzMTc2ZjFiNjliMWJlMDgxN2MwZGM0MThmN2IyMDAyNzFhMGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQwZjQ1MTMwMjA0NTVkMGI3YWExMDBmMjhmMjBlOGU4MmExN2IyNWVjZjFkMzc2MDg3ZWJhZmZiOGQ4MzBmODcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_aaa69419ed014b72b196276ac4271c50",
+      "statement": "Status transitions, release building/publication and withdrawal are unreachable by direct UPDATE: they are `SECURITY DEFINER` functions with `SET search_path=pg_catalog,hq`, each reading `actor := hq.my_editor()` and raising 42501 'Editor identity required' when NULL, then `REVOKE ALL ... FROM PUBLIC` plus a targeted `GRANT EXECUTE ... TO hq_editor`.",
+      "evidence": [
+        {
+          "resource": "repo://supabase/migrations/202610290006_editorial.sql#L156-L207",
+          "version": "repo-lines-v1:sha256:5b619723d38d6b77d1f079fb97cc2cd8b7e58a7931efe1d4cae8580c6e4bf83c:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA2NGQzNTJkMGE0Yjg1ZTVkM2Y1MmVjN2E2YTRmNzMxNjI4YjJiNzUzMTczODc2OGE3YWJiZGI0YzRkN2Y0OTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVjYTNhYWE1MjY3NmJjNTRmNzZhZjVlMTg5MThkOTFkN2U5Y2ZhZDhlMTQ0Y2MxZjQ5MGFmMTMyNDQzNjIwZjUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc0NDYzNGMyODBkMmRhMjBmZTkzM2IwYWY5MTBmYjc4ZWQzY2FiNzJhMTI4NDAyYmU1MjExZjI5MTEwNDJlZjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBjMmQ5YjM0NmQyZWU0ZWIxYmRmZDgzNTEzZjEzZjdjZjI2MmFmMGVkNjRmMGUyNzc0MWFlMzRjZWZiMGIzNGIifQ"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290006_editorial.sql#L305-L308",
+          "version": "repo-lines-v1:sha256:fafc4bed615babd9d641bd8c04052be38a4ebd467613a72236ed628d588d8fda:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZmFjMjczZjlkMDcyY2Y4M2EzOGExYjM0OTBlNmYzNzA3NTcwM2NjYTJhMGJhNzljMzY5Y2Q3NjY2NjFmMGQxYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNDU3Yzc3NzIzMDQ0Mzc4YzE3NGU2ZDY2NDdjMGM3MjZjNWYwOWQzNTlhNjk2MjJmOTNjMDdlN2I5YjJjNzU3NSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYmI1NjNjOGM5MDcxOTgyNzlmM2M5MDdkNzYwZDJjZjdiNzA3NWY3NzA4NDE5OGU0MzgwZWIwODZiNjYzZTU1YyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_cb5d50513d0348bf94dc4dd6b577ea50",
+      "statement": "The trust chain continues from `app.editor_id` into those functions: the recorded `hq.catalog_audit` actor and the two-person rules (`Reviewer must differ from author`, `Publisher must differ from release builder`) are all derived from `hq.my_editor()`, so the database enforces them independently of the API.",
+      "evidence": [
+        {
+          "resource": "repo://supabase/migrations/202610290006_editorial.sql#L188-L190",
+          "version": "repo-lines-v1:sha256:bbf2bde9eedbcc6e4f45765ce303cdb25dd308b1837fc5d19466fd88d9f72be7:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNWZlMjgxYWJkM2YwMTFmN2FhMWI4OTMzN2U4NDhhMTU1YzZmNDk3MDNjYjU5N2E1MTFhNDIxYWI1ODM1ZDA2NyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOGQ0ZjhiYTJlMGY5ZTBlMjAwMTE5YjAzYjNmMDA3YzhjNGM3NTNjYmJjYjE3ZGQ1NjdmZDZmZDFiZTg5M2VkMyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzI5MTQwMGVjZDU4ZmRkMTYwYzIyZjgwNzA4NmRkNzc4MGE1YjgyMDY5Yzk3NjcyYjc0ZGY0MzVhNTE5NDNmNyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDVmMWQxYjA0NzczOWFhMGY0MWEyOWRjOGJmMzI2NTMxMWUyYmU3MzFiMGI4MmM1MzE2MjJjMTA1NTRlMTRkZiJ9"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290006_editorial.sql#L204-L205",
+          "version": "repo-lines-v1:sha256:9e395faf821dc770456b25cf8cf17c9e3c72660d3acc6776e3242adc18ca0421:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTg3ZmE5ZDhkNTY4ZjM2MGVlZTBlOWQ0MDhhMjNkMGVkOTcwMWZjNGE3NGZkNzdiOTg0MGExZTcyNGZhZWI4NCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOTgxOTZlOGU0ZDMzMzlkN2Q3MThmZGUzMDNlOWM3ZWVlMmYwNWQzODE4YjRhZGUwMGUwOWJhMWQyOTBiNGZiMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMTczNzkzN2JlNTAwNzg5YWVjNjY5MDZkNDIwY2RjODg2MTkxZjFkYjJmZmQwZGZiYTExOGE3ZWU5MGFkMzZjOCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiODg4ZjdmNjUzYjQ2MzFjZjdmZjdhZTc0MjNmZmJlNWE4NzU4YzIyMGZjMWM2ZTZhMWQ5MGFiOTQ2NjgyZjUwMiJ9"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290006_editorial.sql#L263-L267",
+          "version": "repo-lines-v1:sha256:d2d154cc7f0024a137082c6420a07801dbed825c5baa856ef0fbca512fda0ec3:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDhiN2QyYmQ2ZmYwN2I0MjRjOWM2Y2M4MWNiYmY5NmY1NDM5MGI1OTZjZTdhYWIzMWIwZDE2N2I4OWNlNmE0YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiM2JkNTZiODZhMWEwODdiNjQ1MzU3ZjlhMzE1YmVlZTQ1MWQzODUzMWEwNTQ4Y2M3Yjg1ZGIwMmJjZjM0Y2Q2ZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzE0N2I4MTdiZTcyMWNhOTg5NWMwMzQzMDk1MjAyOWE0N2MwYTcyODJjN2M3ZmEwNzA2MDc3MGY0YjhhNWE4NyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiM2RmODYxM2YwZjgyMWRlN2JjNmViNmFiMjcxN2JkNTJhZTk1M2M5N2NhNTBjMzZkYWNiM2JhODY3YjkwMzVkNCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_15fa56a9cb5549028462a9f91f46f2c6",
+      "statement": "Service roles never read catalog base tables: `hq_api`/`hq_worker` are granted SELECT only on `hq.current_release`, `hq.published_releases` and the `released_*` views, each of which requires `published_at IS NOT NULL` on the release and `status = 'approved'` on the version.",
+      "evidence": [
+        {
+          "resource": "repo://supabase/migrations/202610290001_catalog.sql#L171-L217",
+          "version": "repo-lines-v1:sha256:1d117ac0711767852d9e1dcd7a9f925e07e53f7ca83d78f2a1fb66327c1cbcc3:eyJzZWxlY3RlZExpbmVDb3VudCI6NDcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI5NGM1NTdhZDIxMzFmMmE4ZDQ5MTNhOTM2YjJmMTliZDNjNWQ5ZjRkMGE2OTk1ZmJmMDFiYTljMGFmMTYwNzUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyYjU4NmUxMDNiMTYyYTBiMDdlOGM4Y2QwNzIzMGE0ODdlMDkwN2Q0MDk5YjgxMjA2MWE0ZDJlM2VjMWI0MTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUwODI2Nzg3ZjE2M2M5MTEzZTc5N2U1MzhiMWM2MjMwYWVjZDFhMjk1Yzg1ODZmNzgwZjRhNTBkOGI2OWUxNDIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290003_profile.sql#L24-L25",
+          "version": "repo-lines-v1:sha256:825a5f48a7e064e555cc4dd4a2ced61564dd4bcb39476d2f0a3685ff7e49c6a6:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDU3NWNiYThiNzgyZjg1YWQ2ZGEzZjE4ZmEwZTBjNWU2MGIxZTBhOTdlOTNmZDA5M2JiNTE2NjhhNjU1ZmM5MCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYzNhMGY0MjM2OGYwZWViYzg3OWM4MDMwMWEzZmJlNzEwMmU0ZmIyNTU4NzhiZGE4YjI1ZDM2N2NhOWJlZjQ5MCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOGZjY2MxZGY4MjI5M2UzNTZhMzBmOGRlNzcxNjE0NjY0YzQ2NjgwMGYyZDdlZDA1ZjQ1YzVmYjc4Mjg4ZTUwYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMzQyM2I0YzQzMjhiN2I5MThlMmMwM2FhZjQxYzQ5MzQxZmJhODgzYWIxNzNkNTA0YWU0ZjY1ZjI4NDQzMzUxNyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_d05a31a2fd2d4705bae3de3f401e4812",
+      "statement": "Editors get a parallel, broader view family granted only to `hq_editor` — `habit_version_details`, `concern_version_details` and the `release_*` views — which filter on neither publication nor approval, so staff can read drafts and unpublished candidates while parents and the worker cannot.",
+      "evidence": [
+        {
+          "resource": "repo://supabase/migrations/202610290006_editorial.sql#L103-L153",
+          "version": "repo-lines-v1:sha256:d571517efe58fa8a40a21297c6eaa65ec98529e737162c56a199d88014822450:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM0MTljNmQ5OTk3ODE4MWQ4ZjhiZGE1MzdkZGQ2MjVjMGUyNWJiNDRjMGY3ZGVlNDA0Nzk5OGY5YTg1YmYyNzUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2NTBhZGIzODBkMDUzNWUzMjVkZGEyNzhiOWEyNjQwZjA2Zjc2YmFlNzFmNTEwMTVmZGNkYmU4YWM2ODFjMjgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjODdkNzM0YmJiN2JiMTJiMTg4MjM2NjRiNzczMWNmMDNkYWE1MDc2ZGViNjFjYzAwNGNkMGQ3ZDk4NTYxN2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU5ZDdhNWE1MGJlZTg1ZjU4NzhlMDUwOWNiNGE3ZmEzZThmMTI0YzE0M2FmNTY4ZTA5OTk1ZTE5OGEzNjE4NWEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b0fb0943425845f9bf5a8fb2b0666fe9",
+      "statement": "`load_release` switches view families at runtime with `views = \"release\" if candidate else \"released\"`, and guards the release id the same way (`hq.catalog_releases` for a candidate, `hq.published_releases` otherwise), so a parent-facing path cannot even name an unpublished release.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/catalog/repository.py#L7-L20",
+          "version": "repo-lines-v1:sha256:2b818c77d055993ea84391a8d2a87e4eda4e046d7cd0c6b4ee63c14cda565519:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNlNzgzMzY4NGI5ZmIwZjExN2FiYWVkN2M4MGJkNTdjMmRhYmVjOTA2ZDI5YTJlOWVmNzYwZTIzZGI4YmEwYWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZlNzFhOTYyODEwYzJhNGZjZWE0ZGM4ZTM2MGQ2MTE2NWVhMGJiNTdjMTkyMmYxN2QxOGYxZTQyMmRmYWZjYWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBhYWMwNzE4NTIzMjBiODRhNjhmMjI2NDcxNWZmODg1NmUyMzJmOGQxMTEyM2Q2NzIxZDI5MjVhNzA3ODBmNTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI3NGYzMjY5MDg3YzdhMzk1YzY5NWVjNjVhNjIyMjAwZjU2OWY0NjNlN2NiN2JmYzFmNzhlNDllMjE0NmRhMjYifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/editorial/api.py#L325-L343",
+          "version": "repo-lines-v1:sha256:f82f4b652476e44d9eb10bcc5191239132ef4b8f1a69360263a03b5130f32184:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRlYWIxMWZiNjM1NjZjMjcxNjk3ZjNiZTc2ZTliYTlmOGYxYTI1MTg4ZDJjOGQ1ZDBmYmZiYzVmM2VlNzk0NmIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwOTk3M2Y5YTgxNDFmZWE2YzZjZTA5MGVjNDYxOGYwMThmNTUwNzM1M2E5ZTNjMmYzY2MwMTRmYmRmNDFiOWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjkxOTRiYzc3ZDNjNGVlYWMzZTIxODRkNzI0ODViNGJiZmIwZGRhYmQ2MGIwYmI5YjNjMzkzYTAxYTE1YjA3NTAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVjMDk1MDdhOTkyNjA1ODczOGY3MzU1MDcyYTVjOTNmZDEzNzlkM2EwYmEwYjllZjI2ODYwY2ZiOTZjYzliMGMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d351d3154a4c4c408693bca5dc4fc8b7",
+      "statement": "Parent writes prefer narrow column grants over broad table grants plus RLS: `UPDATE(resolved_at)` on `hq.plan_flags`, `UPDATE(timezone)` on `hq.households`, and an explicit per-column `UPDATE` list for the profile fields on `hq.children`.",
+      "evidence": [
+        {
+          "resource": "repo://supabase/migrations/202610280001_onboarding.sql#L37-L40",
+          "version": "repo-lines-v1:sha256:5def22d2c31d0052b6cc0e2440b51d48e82704a4ebc64fd00086c8dd0ad2198c:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYWZiNDU1NzU5NmVkMGRkYjZjYTM5NDY1ODkxNGEzZDYyNTFlYzU5MTU3N2YyZTMxMDAzYzk1NjRlNWIxYzA4MiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZGZhMTM3YzcwNWU1N2FjNmZmN2NjNzMxZGJhNGZlODViNGQyM2JkZTY5M2Y0Y2FjNWM3MGNiM2QyMjBiYzIzOSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMjNiYTRkZDZmMzJjYWEzODMzNTZlYzQ4YzI0ZDZlYjdjYjcxYzU4ZWExNTlmOTkxOGE4MDc4OGU0MmVlYjA3ZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYTRkYzk2OGQ5MGNjN2UzMDY5M2EyNTZmYWY1ODkwOTUwZDZlYTc3NWI0NzE5NDQ3ZWJlMWU2MTAyYWEwYzkzYiJ9"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290003_profile.sql#L10-L12",
+          "version": "repo-lines-v1:sha256:d040ad233a89aacbde046d9fd867e19288497aeb2e011436ee8df160d9b15b82:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZWVhOWY5MmM0MmRkZjhhZDFmZGI5ZTQ0NTU2MzEwODRiOWM0NzdmM2M4ZGU1Zjg4OGNlOGFkNjBlODRkNWJmNyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDgwODk0MGE4YzM2YjQ5ODFlYTY3NDczMThlYTczMjc0ZDdmZGU4M2ZmMWJhYTcwZDhlZTA2NjVmMjA0YWE5NyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDViY2Q0MDQ3ZmMwZDk3ZmI3OGJiMTc1MzU4NGY4NTM2YWNhODViNDBmNmJhYjgzNGE2NzIxMDIxOWFjMzE5NCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMGNlNTk3MmM3NzU0ZTQ5N2U0MmViZjdmM2UzNjE1MzdjNmExYWVjYjgwMWZmYTg5ZTIzYmZmZDI5NWU0OGMyMCJ9"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290007_resolve_plan_flags.sql#L1-L2",
+          "version": "repo-lines-v1:sha256:1934b6cc0a4c8a2da286d96667fc7d29a710d432318f72a0d18194bd166a80a8:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTg5N2Q2YmM5NjUzNTRlMzk5Mzc3NjM4Y2E5YmIzMzEwMzUyZTk2YzAwNjE2OTc3NmNiZTAyM2I2NjY1NmNkOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiODBiZjJkOTJhM2Y3ZTMwZGNkN2I2MWMxYjRiNTkxZDU2YTI3YmM4OGIyNDQxNDE4YmUwMzVkNDIwOTY5NjhmYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_ede59c4bea774e5280781242a30bfd4a",
+      "statement": "`hq.lock_intake(uuid)` and `hq.lock_release(text[])` are `SECURITY DEFINER` helpers that only acquire locks — the intake one re-asserts `parent_id = hq.my_parent()` and membership, the release one takes `FOR SHARE` on the policy, current release and referenced habit versions — and both are `REVOKE ALL ... FROM PUBLIC` with narrow grants.",
+      "evidence": [
+        {
+          "resource": "repo://supabase/migrations/202610290003_profile.sql#L33-L46",
+          "version": "repo-lines-v1:sha256:ce0a2498e038763d8aa8dd9e23aaea1c5605a90970fd8ce2f0b0ffa8ad550cc1:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM3ZjcxZTIxNTI0MzlhOWY0MDFmZTAzZWNmNmYwZTY5YjE4NGVkYTA0Y2IwNTczYTQ0MjAyZGYzZDRlZjg5MGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ5YzA5MTgzZDNhMzEwNmZiZDY1YzEwMmNiODY4NjEyZmRhOWJkNGU3OTkwODhlNjVmYjJjZjFlMWI2ODhjZDMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImViMWZmY2NjNWI1ZjFkODBiYjUyNzE2YzA2ZjZkMmM3MDgxZDM0YmExZWU5MDI1NTgyNjkxMGNjODBlMTgyNmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290004_intake_switch.sql#L36-L44",
+          "version": "repo-lines-v1:sha256:de6cb9955a898d7a7bf6871ca77977e646dac7ce87e890af1588ed51a71cd836:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDkyODU2Nzg0ODg2ZDg1NDJhODg1NmE0YTdjMDJiZDRkYThiNzdmMGJjMTA0MTQ3OTk1NDY3YzQyNTBjZjExZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZGE2NGRlZGY3N2U0NDU1YjQwNTI0MzZhNGI3YzNiM2VmY2FmNDE5NjA5NDMwZjVjMTIwZTA0ZTRhYzE1M2VhZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZWZmNjE4NDY1MDQzMTkyOWY1NDk1YjFmYjYzOWQ1ZGFhMWExNzY5MjczY2Y2MGUyZDY5ZWI0MTIwMTY4YjQxNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_86da18fef47348db815fb632a1ebe999",
+      "statement": "`POST /v1/children` writes household, membership, then timezone in that order rather than upserting, because an upsert's new row would have to satisfy the household SELECT policy before the membership row that grants visibility exists.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/main.py#L135-L154",
+          "version": "repo-lines-v1:sha256:cb7949fd7108e473845a51ad19971c92e2faeaa5c2041dc796970d1cc2f8fc0d:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEzMmI2YTBhYjhjZmY0OTA0NDAwMjI4MzdhYTFkZGJlZGJlM2E3MGM2ZTU5MGJkYzY5MzRmZjdkNjU1OTMyMWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUzY2Y1OTI0ZjE0Y2IxMzkxY2M4Y2RhZWU4MzVhMzI0MmYwOWUwOTk3NDBhODNiYWM5NThhMjBjOTE5NTliNDUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFlYWIyZGMwY2U3ZThlODZhZDM4ZmNmYjczZjNlODRhNjIxYjFiMWJjZjcwZmVlNDU1MjM2ZWU3ZjM3OWE2ODMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEyNGFlNzk0NDdmZjZkMzZlODI1OWZhOTY5MmJkYjgzMWI3OGU2OGQ4MDExZjMyOTgxOTQ4ZDYzZDgxNzc5ODkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_55406f36d12b42a292aef35fa09ab230",
+      "statement": "`LOCAL_DEMO_AUTH` plus `scripts/local_token.py` mint short-lived HS256 development tokens from `JWT_SECRET` (optionally adding `app_metadata.hq_role`), and must stay off on hosted services: `demo_settings()` refuses unless `LOCAL_DEMO_AUTH == \"true\"` and `JWT_SECRET` is set, and `render.yaml` pins `LOCAL_DEMO_AUTH: \"false\"`.",
+      "evidence": [
+        {
+          "resource": "repo://render.yaml#L57-L62",
+          "version": "repo-lines-v1:sha256:bd77f7f20790c62b2a409d0e35ed1840a42cf6cc426419b28ec6c6459d693c51:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjRlOWM5NDQ1OGNmYWU2ZGM4MGUxMjVlYTdiY2MyYmNjODU0ZTg3ODE5MjI4MTU3NTNlODEzYzlkNGNmZWRiZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOWU1MTBiZmU2YjdkNTExZDhhY2YxZDMxN2RiNjVkZTk3YjhiYmI0YjYyZTZmYTIwNTA0YjQwMWE4M2QyYjY3ZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNWU2NDZiZGE0NGIxOGM1NWI4M2JkYTVmYmRiZDQwOTYzYWNlMmNhMGJkNGNjMzgxNzQxYTdkMDkwOTBjOTZkNyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMGY1NWQzMzdmZjNiNzJhMTkwNTJiZmI0NzU3ODg2MTFhMThkMzI0NTg3NzFhMzI2Nzk2OTZiMmQxMDUzYjQwZCJ9"
+        },
+        {
+          "resource": "repo://scripts/local_auth.py#L17-L42",
+          "version": "repo-lines-v1:sha256:4f367fdb4cda921f5c58d11cb53acf7f91850c17107061589e3c0bda78ea077c:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ2NzVlNmMyMDVhMTllMDhkNDJhNzRiNTA0ZTFhODE1MzIyN2QyYjIwMDkzZmE5ZWM3OTM1NDcyYTg2YWY3NTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjgwYWQ0M2QyMzBlYmRkNmM1NmY3NjQ1MmM0YjZhZjM3MmMyZTE1OWJmMjJhMTFkYjgyNzU0MmY2ZGU2NjYxYmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjVhMTQ3ZmQ4MWU5NTVhMWJjNzEzNjU5M2M0MmZmOWJlMzIyMGNjZDUwZWU0MDlkNjVhYTcxOTViMTE0ZmI2MDgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://scripts/local_token.py#L1-L34",
+          "version": "repo-lines-v1:sha256:cfd7a356f570de59d8dd619b4742dca44464699710daeaabee39b75d27ae1b77:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRiNjE1ZmI5YmEwOWI0ZWIxZTQzOTBkNzc1Nzc5NTY0MmY2YjgyMDUxZGU0OGZiNGQxODQ1OWE1MTA5Y2RlZmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc2MWM2YjVmY2NkMDIxMDU2ZjFiZTM5YTMzYWFmMzcyMDE3ZTQ2OWY3ZmJlZjM1YWFjNTEwMjhiZTU5YzVhNTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8c03b85898ca4a5796a43cee52aa0eed",
+      "statement": "Deployment authorization prerequisites: the migrations create `hq_api`, `hq_worker` and `hq_editor` as NOLOGIN roles so the applying database user needs CREATEROLE, and `scripts/setup_db.py` runs `GRANT hq_api,hq_worker,hq_editor TO CURRENT_USER` so the connecting login can `SET LOCAL ROLE` into them.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/setup_db.py#L39-L39",
+          "version": "repo-lines-v1:sha256:a3771574f16d4db8288b9825f6cb134e2b81b8b8ca54f40a8a0da0711b637fc6:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTM3NzE1NzRmMTZkNGRiODI4OGI5ODI1ZjZjYjEzNGUyYjgxYjhiOGNhNTRmNDBhOGEwZGEwNzExYjYzN2ZjNiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTM3NzE1NzRmMTZkNGRiODI4OGI5ODI1ZjZjYjEzNGUyYjgxYjhiOGNhNTRmNDBhOGEwZGEwNzExYjYzN2ZjNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYzQyNTYwOTNlNTZjYTgwY2UxMTI1MDUzYmIwNTMzNGUwZmZjOWQ2MTU4ZjY0MDdlYjRiMWI5NGE5NTZiYzliMiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMzBjNGVkMDI0Yjk4MzE2MTFiZjI0YzU2ZWUwYzY2NWQ5OGRiMzQ4MjQ5NGI3MzUyNWJiZjdlMzViYTFhMDUyZCJ9"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610280001_onboarding.sql#L3-L7",
+          "version": "repo-lines-v1:sha256:7a1a4c3b1238cb1078861a8a197cde945de5b0c6d0e8c90c4513dcc2a34b3921:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNWQyYWFjY2M0NGIyYTdjMjU0NzdiZmFkMzM1MDFmNDk4NDQ4OTJjOGM4OTNmOTAxOGQwYjcyZjZhYTYxNmQ5YiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOWY0MGQ1NjQ4MjU3MmQyMmYwYjRhOTczMzliODM0ZWJiMWIxN2E3YTU0NjQyZWRiMGFlMjQ0MWUyNzFjNDMwNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjIsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMGE1NGYzZjZkN2I3NzM5MGRiZTVkMmRkYmFiNGM1YzQzODQ1ODRlYTA3YWQxNDE1NDg4NTRlYjA4ZGY5MTk3NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNWJlNzkwMWVmM2RhZTljNWIyOGUwY2U1ZjQ2NDY2YjAyODQ0MmQ3NzFlYjdiZmU2OGRmOTJiYWJjZTJlMzFlYSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_a239f8176cb64bcfbb48bfb7103fd3fd",
+      "statement": "The `hq` schema is not in `supabase/config.toml`'s exposed `schemas` list (`[\"public\"]`), so the Data API cannot reach these tables and the backend is the only client; a service-role key used as a parent token is refused by the `role == \"authenticated\"` check.",
+      "evidence": [
+        {
+          "resource": "repo://README.md#L32-L32",
+          "version": "repo-lines-v1:sha256:87ca553f099bc810fda47700aad94aa30027c31b138f8f437b0a0dca7e61f9e2:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODdjYTU1M2YwOTliYzgxMGZkYTQ3NzAwYWFkOTRhYTMwMDI3YzMxYjEzOGY4ZjQzN2IwYTBkY2E3ZTYxZjllMiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiODdjYTU1M2YwOTliYzgxMGZkYTQ3NzAwYWFkOTRhYTMwMDI3YzMxYjEzOGY4ZjQzN2IwYTBkY2E3ZTYxZjllMiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZDZhMDg0YTc3YWRhZGQzZTVlNjY3Njg2ZDc2ODBkMmU3Y2UxODhhYTZlZmZlODFjMzQ3MTRmNDYzZTBjZDIxZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjJkNzMyOTNiNzkzOWYwMGEwNDA2NWIyZjNkNWIwNmIwYjI2ZjI1ZjJlYWRkZjQ4MjZhZjFmNGVkMGQ2ZWYzYyJ9"
+        },
+        {
+          "resource": "repo://supabase/config.toml#L3-L8",
+          "version": "repo-lines-v1:sha256:5d59d6348b70662312cc758cc00c5fc04e682a8aa362d0fc1269cdcaa07f1bc7:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDJlZDFmNzNiNzMyODE2NWRmMGRhMzMwMzY5MzBjYzIyMzkyNzQ3NGMxZWMwNDk1YmZlODVlZWIwNzEzOTdhZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjMxZGU0MWJlYjk0MTdjZTQ2NDliYWE3MTI4NjQ5MzFkMGJkYjhiMTM0OGNiZjBlNGY5MGI3YTljYzU1YTgwOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjIsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMGE4ZDEyOWQyNzkyZjFiNDBkMTdjOWZiNzFjZDMxMTg3MWE0MzBmY2Y0ZDdmOGRjYmE2Y2Q3OWFmNWU3NWMzYiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNWQxZDNmNzhkNjY1ZDkxYmRkZmNkNjU0MGJjZDFkNWMwNTNkYWE5YmNhMmMwZWEyMTQ1MTdjNTc2YzA2ZmYzOCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_0e2db771c4ad4698bb862f41ec77ba4e",
+      "statement": "The RLS boundaries are executed as SQL by the pgTAP suite `supabase/tests/rls.sql`, which switches roles inside one transaction and asserts own-child visibility, hidden foreign children, 42501 for API catalog writes and draft reads, 42501 for an editor reading `hq.children`, and refusal of builder self-publication.",
+      "evidence": [
+        {
+          "resource": "repo://supabase/tests/rls.sql#L1-L22",
+          "version": "repo-lines-v1:sha256:b428230eed7d7f09ce69bf01832fbb72c099349b0b91f4b098902369b14fe4a6:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY2ZjgwYWFjNzM0MjI2MmQ4OTkyOWFjOGNmOWZiMTFlYzEyOTU2NWE2YzhhNGVlYzM2YmU1ZjE4YzNiMDhlNjUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNhNDA3MTZiMmQ1ZWRlZmYxNjBiYjQzNjdhNmU1YTkzZTFmMWMyNTdhOTlmY2QxZDUwOTc2YTdiYjI1ZDcxZWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3cd574c94bc7443d87f3e0e9a6f69dcf",
+      "statement": "The Python suite exercises the layers above RLS: `tests/test_security_and_changes.py` parametrizes invalid claim sets and a corrupted signature and validates a real RS256 key through a monkeypatched `PyJWKClient`; `tests/test_editorial.py` asserts 401 for no credential, 403 for a parent token and for `hq_role: \"support\"`, and success for `hq_role: \"editor\"`; `tests/test_local_scripts.py` asserts locally minted editor tokens verify and parent tokens are refused with 'Editor role required'.",
+      "evidence": [
+        {
+          "resource": "repo://tests/test_editorial.py#L56-L62",
+          "version": "repo-lines-v1:sha256:f12783337f9935a39f4b2e7ad6c7a06a65d58d7b1d22ea797cd45d43fead2103:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjZmZWEzNDU2NDg2YmU4M2M4NWUxMGUxMjM0MDJhNjFkYjUzNDFiNWI4NzljNWE2ZTgyOWIxZTYyNmYyOThkZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiY2NhYjE4MmY4NWVkNTg1NzhhNzcyOGEyZTFkOTg3MTRlNTEwODAwOTAwNDE1OWI2YWMzNWYzZWIzNjRlYzdlMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzY3YWU2MTRmNzNiMzkxOWQ0ZmEzNzdmYzFlYjRiNTczNmQwNTNlYmYyNGUyMjA2ZGRlNzE0M2M5Mjk2MTRmMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTVmN2FlOWZhN2IyZTNhNzQyYjhlOGU1NmE3NTgzMWRiZTU1YWYwZDRjY2ZhYWRkMzFhODBmM2M4ZWM5Yzg4MSJ9"
+        },
+        {
+          "resource": "repo://tests/test_local_scripts.py#L12-L26",
+          "version": "repo-lines-v1:sha256:1146125a150cd2564017332da3039cfeef3c741ec00c66c361973a1b0bce0509:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNjYmQ2YTlmY2UwNzY4NGJmNWZiY2M5OWE4YjhmNTFhNTZhYzRkNjA2YmRhMmQxYWM0YzczZGMyNmU2MzE4YzQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNiMzJmYWFlYmUxNjQxY2Y3MDFkMmFhYWYwOTIxZWVhZDk2ODkxMjA0OTQ1ZjEwYjU2ZmU2M2ZmNzUxNmRhZGMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNmZDg3MGIzNzE5ZmY3NWQ1ZTkxYWY0MjdiNGRiYTI5MTFkY2M0MzUxN2Y2ZTFlNWJiMzM1OWU1NjllY2M2MzkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://tests/test_security_and_changes.py#L17-L58",
+          "version": "repo-lines-v1:sha256:2e93a856706f50fc5e9604e84123887f03bf1c415e5e9a2da8ba3fb629273b41:eyJzZWxlY3RlZExpbmVDb3VudCI6NDIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQzODVjZGRlMzhhY2IwYThjNDgxNGJmNGU0ODAwNDFiNWY2NjcwM2VlNjVhMDJiNzBmNjk4NjdkMTk5MTVmNzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI2ZTVjYTk5YWViYmM1N2RhMmExZGY3Njc4YTBmY2ZmZGQzYTViNzZjOTllNGI0NzBhMWFhY2EyOTE1ZTk2YzQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFlMTRmNzE5MTdhZDQ4MjQ3MjA0NWRlZDY1OWViZGEwMWI4NTY0MzRmZjNkMWY0OTcxZDQ4OWQzNDIxYzE2YmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA4YTRkZTM5NWE0NmVhZmFmYTRkNzVkNDgxYmQxMGYzNWViYmNjMzRiMmQ2ZGZmN2VhOTFkNmQ3NjJkMjg1ZDkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_3ae13b0024f9450ea6fa95124ca05390",
+      "statement": "A documented residual authorization gap: release validation runs in the API before `hq.publish_release`, so a direct database caller holding `hq_editor` could publish a release the API would have rejected — the two-person rule and immutability triggers still apply, but the content validation does not.",
+      "evidence": [
+        {
+          "resource": "repo://docs/implementation-ledger.md#L62-L62",
+          "version": "repo-lines-v1:sha256:18c55cf9d7107b8c439dfeb9719c31bcc80a64cd1ecb68e02af3f3a706d40345:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMThjNTVjZjlkNzEwN2I4YzQzOWRmZWI5NzE5YzMxYmNjODBhNjRjZDFlY2I2OGUwMmFmM2YzYTcwNmQ0MDM0NSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMThjNTVjZjlkNzEwN2I4YzQzOWRmZWI5NzE5YzMxYmNjODBhNjRjZDFlY2I2OGUwMmFmM2YzYTcwNmQ0MDM0NSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYWZlNzRjMjAxOWNkYjgwY2ViZDEzN2Y1ODIyZGEzOTUwZGMwYjRmOTUwOWY4MmE3MmJmZWYxZWM1M2EwZDg0NiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjQxNTY0NGZlZWEwMDkyMWQ0NjY4ZDAwNDNhYTE4YTQ4ZTc2MjgyNmY4Y2RhNGE1YzUxY2E2N2Q2MWNjNmIzOSJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/editorial/api.py#L333-L343",
+          "version": "repo-lines-v1:sha256:77cbe0fff98144815206d7179ca9ee5bea361fb44019d10fa71136caff927116:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY5Mjk5YzIzMWRjZDQwOGUxMDJmMTAzZjE0ZGE1YTJlNmZmNDlmZGQ1MzFhM2Y5YjZhNjE5NjIyOGZmZWU3YmYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwOTk3M2Y5YTgxNDFmZWE2YzZjZTA5MGVjNDYxOGYwMThmNTUwNzM1M2E5ZTNjMmYzY2MwMTRmYmRmNDFiOWIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRkMDAzN2ZkYzc5Mjg2ODUyNWMyNTE5ZDgzNDY3MTFkMDk1NzM2MzA1NDcyYmIzNzgzYmQxMDlkOTU2OWY1NGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVjMDk1MDdhOTkyNjA1ODczOGY3MzU1MDcyYTVjOTNmZDEzNzlkM2EwYmEwYjllZjI2ODYwY2ZiOTZjYzliMGMifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-30T00:13:47.181Z"
+  }
+}

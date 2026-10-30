@@ -1,0 +1,150 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:9ff1f2fb7f290f35e8c46b4e5860191a4daf99e53fba01d2f0875fa6e15edbc3",
+  "claims": [
+    {
+      "id": "claim_61b39f8813054e5a859230f95c7563bb",
+      "statement": "POST /v1/children creates the household and membership on first use, then inserts the child profile with routine schedule and other durable fields.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/main.py#L135-L154",
+          "version": "repo-lines-v1:sha256:cb7949fd7108e473845a51ad19971c92e2faeaa5c2041dc796970d1cc2f8fc0d:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEzMmI2YTBhYjhjZmY0OTA0NDAwMjI4MzdhYTFkZGJlZGJlM2E3MGM2ZTU5MGJkYzY5MzRmZjdkNjU1OTMyMWMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUzY2Y1OTI0ZjE0Y2IxMzkxY2M4Y2RhZWU4MzVhMzI0MmYwOWUwOTk3NDBhODNiYWM5NThhMjBjOTE5NTliNDUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFlYWIyZGMwY2U3ZThlODZhZDM4ZmNmYjczZjNlODRhNjIxYjFiMWJjZjcwZmVlNDU1MjM2ZWU3ZjM3OWE2ODMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEyNGFlNzk0NDdmZjZkMzZlODI1OWZhOTY5MmJkYjgzMWI3OGU2OGQ4MDExZjMyOTgxOTQ4ZDYzZDgxNzc5ODkifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_772f97b8439e4c699ee143a7e3478680",
+      "statement": "POST /v1/children/{child_id}/intakes stores one round of the parent's concerns and the daily available_minutes budget; later plan runs start from the current confirmed plan.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/main.py#L200-L215",
+          "version": "repo-lines-v1:sha256:8abe80b1c036fcfb1f3a29a864d727d0cb75cc46d4dbb9fd409d397a2535ac0b:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQwYjBkNjg4MGY1MjhiYTE5YTA4NzIwNmI5MzkyNjE4YzY4MGRmODY2N2M5YThiOGYzOGFjMzBiOWM4NjJmMTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZkMDAwNzg3NWRlOGY5MmQ5MmI3ODdhMDE4YzE2YzAwMDQxOGJkNWY5NDk5MjNiOTBmNGQ2M2M3ZWMxNmQ4M2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhkMGQ4OGEwOTZlZWY5N2EyMjdjOGZmOWI2YjExMjBmNGNmY2MxODE2ZWJiZTY0NTJmNmNlNGQwY2FhNTEzNTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc3ZDcxYmNkOGJlYjE2OWFiYjkwYTY5MGE1NjRmOThhYmEyOTZiZTlmMjAyZjQ4NDIzZmVmYjViZDM5OWQyZGIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_6f89c6430e774e168d0a14d02f5ce9dc",
+      "statement": "POST /v1/intakes/{intake_id}/plan-runs requires an Idempotency-Key header; enqueue captures the current intake_version and base_plan_version into the job row so that races with later edits or plan confirmations are detected.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/main.py#L217-L233",
+          "version": "repo-lines-v1:sha256:59a21391b45adcff7b7dc430fcd8b0b0621ac44487a16ea9539d0e9dabc9de00:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQwYjBkNjg4MGY1MjhiYTE5YTA4NzIwNmI5MzkyNjE4YzY4MGRmODY2N2M5YThiOGYzOGFjMzBiOWM4NjJmMTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlYjcwMjU3NTkzZGEwNmY2ODJhM2RkZGE1NGE5ZDI2MGQ0ZmM1MTRmNjQ1MjM3ZjVjYTc0YjA4ZjhkYTYxYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdmM2Q4MTY1ZGViMjNmYzk2NGY5MTUxMzc1MWRiNTQ4YWQ5NGQ2ZjE3ODY3MWZkMzU4Y2FiOTFiNDUxZGZlYTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg4ZWNlOTUxMDc1YjY1MGUwMDZlMWY3ZmY1YTQwYzBjNzQ2NzMwM2ExZmUyYTg1OGU2YTA1ZGIzY2MzNDVkMWIifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L21-L44",
+          "version": "repo-lines-v1:sha256:ef27a0cd9efcd65c24629e1015b6edfde811ef3405855f8e0c1b15876d449c35:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBlMDE0NjczNWY4ZmQzZDJjOGYzMmEwZGNjMDBiY2Q5ODNhODZhZTRjZGY0YjcxYWFkOGZlODIwOGVjZTFjZTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM5MjIwNGM2NWY1MDJkYzE2NDU0YjYyNDA4NTZhOWFiN2FkZTAwM2E4ZTlmODYzMzNlYzBiN2M5ZTQwOTQ5MWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFmZWQ0MWY3NDJjOTI3YmMwZmM3Y2EwMTM2ZjliZTZmMzZjZWZmM2U4MGMwZjRhNzcyYzIyODZjMjU4NjlmZmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjcxNTJhM2ViZDBkYzQxY2JlMDM4ZjIwZTI1NTk1OTEzNGUxMDY2ZDg4YzhhYjE2MDIzYWViMjE5M2RkYmI0NDYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d67bf05040e947f88354980a1ef31529",
+      "statement": "The worker claims a queued or stale-lease job by setting a lease_token and lease_until, and spawns a heartbeat thread that renews the lease while the run is active.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/worker.py#L38-L58",
+          "version": "repo-lines-v1:sha256:5b6e0a2091b83beec9ada826cad518842ce79bb9dd64c402652d34ee2694d95e:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE3ZjM1YjMwNzg1YzIzMGI2YjFkZmZiYmQyMTc2ZjhiMDUyZTA4ZTAyYWYzY2Y1ZmY4YmEyNmY3YmM3ODFiMzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhOWY4YzJiYzdhMTQxYTAyMmFmM2ZlYjhhYjUwMDhlYzI1NzU3ZWYyNGFjZDA0OWY1MDg5YTc0YjdjOWFlODEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI2YWQyMzM1ZDM5NGEwMTE2NjAyYjcyMGNiNzJjNDdmN2NiNDk5YTM3MzM0MzMzMmEwNGU4OTRjMDE3MjkxMmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImIzM2MxNmVhODlmYTFiZDVkNThiYmRlNTdmZDE4MmViMDY0ZmEyMjE2M2I0YzE5MTJhMGUyMjg3Zjc5MTVkOTMifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/worker.py#L61-L78",
+          "version": "repo-lines-v1:sha256:4a1d482af4c6fa777be2f743a6c4d8abce4fbe0368181da2a72ab2825f6a7e73:eyJzZWxlY3RlZExpbmVDb3VudCI6MTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI0M2Q5NzEwNTkxYzU5NWE5MjQxOWM0NzUzMjg0MGEwN2JjM2ViMDA0OTY3MzJkOThlZGMzNTM5ZWFlODcwMzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZhOTZiMzdlN2Q0NTEyZjk5MjcyYWQ4NjM0MzYzZDBiNDAwYTFjOGM0MWE4M2IyYWRlMDgxYmQ3N2RhNzJmODAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI2YWQyMzM1ZDM5NGEwMTE2NjAyYjcyMGNiNzJjNDdmN2NiNDk5YTM3MzM0MzMzMmEwNGU4OTRjMDE3MjkxMmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjgyOTQzNzZkMTMxNmY2ZDhhZjVjM2Y5YjI0NjEwMjFjYTNlODYzYjhlOWRmMDdmY2FjZDVhZjU4MWZmNDQ2NjgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_631302350fb54207a3c021260091a8a7",
+      "statement": "generate() runs three model-backed stages in order: a mapper that maps concerns to catalog goal IDs, a director that delegates to a planner subagent selecting habits from reviewed shortlists via search_catalog, and a mandatory reviewer that accepts or rejects the selection for safety and fidelity.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L523-L543",
+          "version": "repo-lines-v1:sha256:161c52c22c9c5e11023e248f2e6642f1cdb5fb9e06113ba9bfe1c5fac69a664f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg1OGUyYWZmNDAxZWIyZjYyMzg0ZmZkNTA2NWU4ZDkwMmQ5ODM4NDgyY2QzMWQ3MWVhZmFlYmUzYzZjYzM3MTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlYjcwMjU3NTkzZGEwNmY2ODJhM2RkZGE1NGE5ZDI2MGQ0ZmM1MTRmNjQ1MjM3ZjVjYTc0YjA4ZjhkYTYxYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU5MzdmYjA3OGMyODFhN2I5NDNhZTNhNzE2YmNjNjNjYjRlZWQ2ZGNiY2E3NTZkNTc2ODNiMWNlMjA4ODUzNjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJhNGQ3MzA1YWQzZjNiNzY5MGY5NzdlYjQ4MTE2NTg4ZWY4ZGM0OGI0ODE2NDg1MzY1M2UwMDdkMzZkYTg3MjEifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L545-L662",
+          "version": "repo-lines-v1:sha256:eb63ce3d813035ec8c0bcb2cbed0d527ff6250e5f79e745524cc596a83a5f613:eyJzZWxlY3RlZExpbmVDb3VudCI6MTE4LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI5Yzg4ZGViNDY2ZDE3NjFkMTRhNDE1MzEwMGMxODdmY2NjNzc4YThhM2I5YjFjZDdlMTk4NDg3NjI0YTc3YTYyIiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI3ZWI3MDI1NzU5M2RhMDZmNjgyYTNkZGRhNTRhOWQyNjBkNGZjNTE0ZjY0NTIzN2Y1Y2E3NGIwOGY4ZGE2MWE2IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI0OTVlMTBhMDk4OGM0NDY2NmM2MzQzOTRiZDdiNmNjMDExYjA2YmVkMWVkODk3YmM2Njk1Y2NlNzRkZTUxYzRmIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJhY2E0ZjlhNDAzZmY4Y2UwZDBhY2ZkMTQ4ZTBiOTljMWY0Y2RhMzBlYTZlMzMzMDFmZTdkZDJmY2ZlMDEwMjNhIn0"
+        }
+      ]
+    },
+    {
+      "id": "claim_74cfbc3af3bc4a74873d0c215ee16631",
+      "statement": "BoundedChat enforces per-run time and token budgets: it raises BudgetExceeded if the remaining run time is exhausted before a model call, and the charge callback checks max_model_calls and max_run_tokens before each invocation.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L108-L184",
+          "version": "repo-lines-v1:sha256:a9e48c12f95786a00e4195482b46b4469f5b27fe6ea3c247c0b26fe15a9ef4ff:eyJzZWxlY3RlZExpbmVDb3VudCI6NzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFkM2JjODEzNzU1NjhlN2M3OGYwYWRhOGY0Y2MwY2RjNzZkOTNhNGI4Mzg5ZTU3NTFjZTEwMTE3MzRlMmNlMmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNhY2E4YjNjZTE2ZjcxNDg2MTNmM2EzNjIwMDZlYjIwNWUxMTJjYjRkZTJhZTBhODY1NTdjMzIxOGVhNWZjN2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU5MzdmYjA3OGMyODFhN2I5NDNhZTNhNzE2YmNjNjNjYjRlZWQ2ZGNiY2E3NTZkNTc2ODNiMWNlMjA4ODUzNjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdiNGU2MzA5YzA2MzczM2Q4YWM2NjQyZmIzOWNiNzQ4YWNjMTNkOWU4NDg2MjQ0MzI3ZmEwMjYwZTNlMDU5MGUifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/worker.py#L96-L119",
+          "version": "repo-lines-v1:sha256:97de9b9af2db7229db64b9a30fd50ec01b3405ae11392038043c52bf433521e2:eyJzZWxlY3RlZExpbmVDb3VudCI6MjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc0YzNjZjkxOTViMTBkNTRlMTMyOTQyZjk1ZWEwMTBmOTIxOWNiOWZmOGQ2MWJlZWQxZjdjZTY1NzRlOTNmYzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhOWY4YzJiYzdhMTQxYTAyMmFmM2ZlYjhhYjUwMDhlYzI1NzU3ZWYyNGFjZDA0OWY1MDg5YTc0YjdjOWFlODEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEzNjI3OGE5ZGVhZjEyZGQ1OGIwZWFiNjNhOGExMmE2NTAzOWRkMjM4OWVjYjQxOTA0ZDc1ZTQyYmMwZDEwMTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEyYTQ3ZDljN2EzMjgyMmM2OWJkYmUyODk1YmExYTg1OGNkYTU5ZTMxYjRlOGZjMDc3OWQ0ZDAzMTVmOWU1NjUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_b37eccac7afb4148a5be810cb70af9ef",
+      "statement": "Before inserting the proposal, the worker revalidates the snapshot versions captured at enqueue against current DB state; the run fails with ValueError if the intake_version, base_plan_version, or profile_version has changed.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/worker.py#L170-L188",
+          "version": "repo-lines-v1:sha256:f5204c30dc720321099fc920e2ccd90806838767aadc0959b7e322a47b4285e7:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ4NjMwMjRhNzJiYWVmM2JkZmI2NGNkZDM4NjZjMjFhZTcyNTdlZjY5MmQ4N2NhMGRjNTliZGYxNTdiNGRmY2UiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY1ZjBmYmI3MGJjMjMzZTc3YjE1ZWE3NzYwOWJmYjlmN2YzMTZhM2I1MTAzZWU3MjZmMTA4NmE3YTM4NTE2OGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEzNzcwMThhN2QwYTBkMTU2OWRhZmQwNTY2YzQ4NWFjNWI3YTJkZTZiYzQwYjcyN2MwMjM2ZTczMTdhNzVmNTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjkxNjIyMjZlZTM3MWQ3ZWQzZGJlZTYxYjAxODlkMzgzOTNhNDNlODlkNjI3YTc0YTVlM2RiZTcxMDEwOTM4N2UifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c7b136b5f17f493a9ac8c835d61f0104",
+      "statement": "PATCH /v1/proposals/{proposal_id} checks expected_proposal_version and the current profile_version (409 on mismatch), then calls apply_patch which rebuilds the proposal from the catalog and enforces max_active_habits, available_minutes, coverage, and chapter rules; rule violations raise ValueError translated to 422.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/main.py#L268-L312",
+          "version": "repo-lines-v1:sha256:6793e47f6c19c86942c4c712354bea22e9488fc9191eb795a9e6d2600e2f345b:eyJzZWxlY3RlZExpbmVDb3VudCI6NDUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUzZTYwNGQ1ZDRmMDQzNmI5MWIxZGQ3ZGJhZWEwZmRiZWJlY2I2Y2EwNDJkMDdlZWFjNGIwMzFkZjRiZTFlMGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlYjcwMjU3NTkzZGEwNmY2ODJhM2RkZGE1NGE5ZDI2MGQ0ZmM1MTRmNjQ1MjM3ZjVjYTc0YjA4ZjhkYTYxYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJkNWE0ODk0ZWFiZDM3YTk4MDNjNWM1YzJiMzUzMWU5YTE3N2Q2YzQwZTM0YTAwMzg0N2Y4NTQ1NjJhZTNkNTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjIyOTE3Mjg0NjIxMzZhYWU4OWUxYzM1MjA3YzBhMTEzY2FiZTcyNjRkZDdkODE1NjYyM2I4MzllZGMwOGZmYjkifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L234-L309",
+          "version": "repo-lines-v1:sha256:40c3bbdb3d097798590ae42c81205dee5e80332628ceb6fdb9aeb96821a29afa:eyJzZWxlY3RlZExpbmVDb3VudCI6NzYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI2YThjMmJlNDk1Y2U2MDA4ZmQ0NGFjYzBkZDEyM2VkMDdjZjhlYzNiZjg3ZmZlNDQwYTJhNmMzNGY0Y2VmNjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlYjcwMjU3NTkzZGEwNmY2ODJhM2RkZGE1NGE5ZDI2MGQ0ZmM1MTRmNjQ1MjM3ZjVjYTc0YjA4ZjhkYTYxYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM3Yjg5NWRmOWM3MGEwYjEzMzA4NjIyOGY3YTIyNmIzMWVkYzljY2NkZjYyMWViZjBlMzFjM2U1ODZhNzhlNWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI5ZmRiNjU3YjU0MGM4YTlmYmVhZmUxZmUwZDJmODQyYTU2YmE3OTBmMWZhODFhYjgzM2Q5ZDAzYmY5MWJmN2YifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_24f7e7919e914783a2a730d05c592c68",
+      "statement": "POST /v1/proposals/{proposal_id}/confirm checks expected_plan_version and expected_proposal_version, verifies the profile_version matches, and calls validate_sources which locks the onboarding policy, current release, and referenced habit versions; only then does it insert the immutable plan version, mark the proposal confirmed, resolve old flags, and upsert child_goals.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/main.py#L313-L322",
+          "version": "repo-lines-v1:sha256:72e7ec62879121c0c358a4b5a7396e87acc28d30f036ecae9a64ce95da769477:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJlNDY1MzY3YWY3M2ZjZTEzMTEzMmY0YWZkZWYzYzQzOWY1OGY1NGFhZDNlZTQxMzQ5NWUyZjU0ZDAyYjE3OWIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlYjcwMjU3NTkzZGEwNmY2ODJhM2RkZGE1NGE5ZDI2MGQ0ZmM1MTRmNjQ1MjM3ZjVjYTc0YjA4ZjhkYTYxYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjMwMTRjMDkyNDkxNmQ1YTQ1OTg1NWUzODI4MGMwMDE0N2NmMGQ3ZjgzNmRlNWQ4ZjUzMDgyOTgzMjAzMjRiNWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImJiNzNmMDQzMjAzNWEyMzVhMzMyZjFiMDY0MmM1Y2RjYjMxMzI3OGVkZmFhYjZiNzRmZjBiM2ZhNzA1YTdjZTkifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L47-L61",
+          "version": "repo-lines-v1:sha256:39f74b7c1af1478e80d2070a92d75ea2dd12365880f1344f0b32c1b3d7ee37dd:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0MDIxNjE4MWJhZGE3NDc5NGJkYTM3YzcxNzVjODJkMDgzNjBhOGY2YzZlYjBhOGRlMjVmNjVkMDc5ZjAzODgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlYjcwMjU3NTkzZGEwNmY2ODJhM2RkZGE1NGE5ZDI2MGQ0ZmM1MTRmNjQ1MjM3ZjVjYTc0YjA4ZjhkYTYxYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhiOTc0ZGE0MDg2MzJhNGFhN2UyYWU4MGI4NjAzOTFhM2RjZDgyMTFjNzllY2FkN2NhOGU5NTEyOGIwMDE4MzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNkYTAxNGRlNDcwM2RjM2JjY2U0N2RiMzUwODc4YjAyZDVhOWM2ODk1MTZjMzBkMWY0ZGI4YTJmZjExMzRlYjAifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L63-L118",
+          "version": "repo-lines-v1:sha256:020cfec24e50996c1814cd45bf7a415f185b5bf81474201e7c03e98692a5d20a:eyJzZWxlY3RlZExpbmVDb3VudCI6NTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI3Njg1NDM2NmM3MGRkNjZmMGI2ZmY5YjBjOWJlNTQ1ZTFkNDE4MTEyZWEwODFkNzg2ZjRjMzUyYWZhMmMzNjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJkYjMyMjljMmEwMDQzZDE5NDRiOWJjNzBlYzFiMTNiYWMzMzFlNWMxYzFhMDMzYTA0ZGI1Yzc0YzdmMDZhZWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU1M2NmZGZjZTMwYmI4ZWQ3MDc0ZjU5ZTk5YjgxMjhjMzQwMzE4OWU4YTg0M2ZlM2RjZDNkNzYwOTMzZDQ0MTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVhNGVkZmNmNTQ0ZmEwNGVlZTMzYzM2MWI1YjVmYzU1OGMxMWVlYzEzMTJiMGViNjhjNTNjNTAwNjUxZjA3YjQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_833a52ee144e45fdb70d7a49ed429782",
+      "statement": "A planning run ends in one of three terminal states reported by GET /v1/plan-runs/{run_id}: ready, failed, or cancelled. A failed run carries one of four error codes: deadline_exhausted, retry_exhausted, provider_or_infrastructure_failure, or the exception classname (typically ValueError) from validation or unsafe input.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/worker.py#L81-L225",
+          "version": "repo-lines-v1:sha256:2667a18901d173276aff96fa1cf0b0744a5a75902b7cb09db209657ae45cf283:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQ1LCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiI0Y2NkZjNhNDljNzk2MGY2OTZlNDdlMTI1OTFiNmRlMTZjY2Q3MDk5OTlkMzBhZGYwNzQ5MzdhYTk1NmUwMjU5IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiJkODFhYmIxZTkxYzA0MTU5OWU0Mzc0ZDdjZDgyM2ViZjdmYTJhODU0ZjY1YWFiYzMzMWE4Y2Y0NDMzZGJjMzA0IiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiI5YjcyYzgwZmM4M2I3ZDYyMWY0Yjk3Mjc4ZmU4NGM2YmQ3MGE0MDIyYjNiMjJiZmYwMTMyNmQ3ZWVhYjZmOGVmIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiI4MTA5YzZmNzljMzNjODRmZjlhY2U1NTFkZDBiZmYyZTUxMGYwNmE0ZGI1MGQ4OGY1OWE4ZGZjZGVmNGYzZTYwIn0"
+        },
+        {
+          "resource": "repo://tests/test_recovery.py#L11-L16",
+          "version": "repo-lines-v1:sha256:9ee61809ab0af810c6c1d4554c32668eced66c366b4e0ec3ee163a5c33bacb68:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODQzMzdiODVjNDlkOWU4MjFjM2M3NDgyMGVhYzE4MTkyMWUyN2Y3NmYxZDRiMGVhYzg1M2I5NWI4NTFkZGZkNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjc2YTQ1MTk5MmQ5YTNjNDEwMmQ1NjY5ZDNmZThiNjMzMWNiMDMzNDM1ZDA2ODUxNmNjYTcwNDRmNGFiM2U5MyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDAzZmI3NmNlYTQ0ZjA3NDRmYzZkNDhhOGJhNGFmNjljMzM1MGZlMzM1NGE2ZDU5NTNiY2M3ZTZiNWQzZGRkYiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYmUzN2Q5MDgxYzUxZjEwYTVlNDBkM2MyYjJlYWVlZDQwNzQzMjc0ZTU3Nzg5ODk3ZmZjNjJjMGFhODc3OTJiOCJ9"
+        },
+        {
+          "resource": "repo://tests/test_recovery.py#L40-L46",
+          "version": "repo-lines-v1:sha256:6e0ae92eced779128edf61e915d5a8cc40ded85fcb593a323e9e3f9edfbe55ca:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOWUyNjEyY2ZhY2Y4Njc2NGY0NjE4ZTQ5ZDgzYTFkNzBmYmU2ZDlmMDdhM2Y0MmQ0MzM3YTRjZjZjYWNiNzY0YSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiN2ViNzAyNTc1OTNkYTA2ZjY4MmEzZGRkYTU0YTlkMjYwZDRmYzUxNGY2NDUyMzdmNWNhNzRiMDhmOGRhNjFhNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMGIwZWFiOTBlNGNjMmE5Zjc0YTdkODhhZmMzZTYwYjM0MGVhNjQxZmZkODdhMGEyYjk1ZTEwZjJkM2M5ZmI4MSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjk3YzViNTFiY2MyNzBmNDFhYzg4ZmVkYTc2MjBiNmE5N2YzMDMxZmUwMzlhZDAzN2IwZDY4NTExNmQwMjIwMSJ9"
+        },
+        {
+          "resource": "repo://tests/test_recovery.py#L48-L59",
+          "version": "repo-lines-v1:sha256:89d017ade7b6745e017953f03dc42b1b021d40e5cb0e5b5d711a8cd51b36b456:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRjNDYzYjkzYWNmNzQ2MmFlYTQ4ZTNjNTQ5YzliMTc2Yzc2Y2JjMTQxODVlZWFlNjEzMTVmZGQ2NTE5NzE3NDEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlYjcwMjU3NTkzZGEwNmY2ODJhM2RkZGE1NGE5ZDI2MGQ0ZmM1MTRmNjQ1MjM3ZjVjYTc0YjA4ZjhkYTYxYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg0YTI2YjA1NWU2ZDIxODFkOWM0MzBlNDE1OTUyZjE1ZTUzZTkxY2NjNDY1ODFiZjEyZGZlZmM0ZDExNGE3N2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjgxNWNjNzE1NTVhM2U5MzE1MDFlM2I0ZTU2NGI0OGQzZTAzZTk2MDUzOGJkMzgwZTRkMTdmMGU0MzE0ZWM2YWYifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-30T00:13:47.181Z"
+  }
+}

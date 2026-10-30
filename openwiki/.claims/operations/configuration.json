@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:08a5f467cf71c9ab67f9c15183bea75532b810006d30afdeef8f69bb3cdd07d0",
+  "claims": [
+    {
+      "id": "claim_627fd63c866e4b99a3522a5a75e2b4e1",
+      "statement": "The Settings class in config.py uses SettingsConfigDict with env_file=\".env\" and extra=\"ignore\", so unknown environment variables are silently accepted without validation errors.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/config.py#L7-L8",
+          "version": "repo-lines-v1:sha256:ad16c9f016cc88ff76dcc8e970d6cd1bcd65d1adc2064acfff439131f77725dc:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZTM4YWVlZjM2N2E4OTIwZjljMTlmYWNhYWU4YThmYjJhZWIzMDA0ZDQ0YmVlNmJmMjZmMWY1YjAxYTE2OTkwZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzI5OWJiNjMxMWYxM2EzNjdkNzg2YjhiNWZjMDc1YWY1ZTdjN2RkNTRlMGJlMWVlODA5NTE3MzIzYWZhMWM5YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODkwNjA5YmI5MTdmNTczOWY3MmRmYjMzMzdhNWI4ODBhZGQ3ZjE2MDBiYjMyZDY3YjU2YjY1NTdmMTQ4ODEzZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzlmYzc4MTg1OWM3YzBhM2FkZWY4MGZjMWEzZmQ3MDMxNWFhZGUyMTljOGE3ODFlODk0ODcwZTIwYmMxMzU3OCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_a1e20fa3c9e449f4b3e94f83bb01bf95",
+      "statement": "Settings defines the field model_mode with literal choices [\"fake\", \"ollama\", \"google\", \"openai\"] and default value \"fake\".",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/config.py#L11-L11",
+          "version": "repo-lines-v1:sha256:38c89f6454f535126424fb8fb47fcf41088c8068ec6a804a4273065b88c1d0f1:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMzhjODlmNjQ1NGY1MzUxMjY0MjRmYjhmYjQ3ZmNmNDEwODhjODA2OGVjNmE4MDRhNDI3MzA2NWI4OGMxZDBmMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMzhjODlmNjQ1NGY1MzUxMjY0MjRmYjhmYjQ3ZmNmNDEwODhjODA2OGVjNmE4MDRhNDI3MzA2NWI4OGMxZDBmMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNjIyYzM1NmRiNGRkZTA0OGEyZTZhNjJkNTlhMDZhNmViODg2MGYwODYxOWMyNjJmZmNkY2E4NDljYzYyOWFkZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZmQwNDVmNTNjMzFlMzI1OGNhYzdhYzBkZDNhZWJmZmFhZTU4OGE5YzZiMWI0MTc4OGY4YWMyNzM1ZDEyZjhmZCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_2251418991524b08a4d77ca245fa0bb4",
+      "statement": "Fields google_api_key and openai_api_key are typed as SecretStr | None, meaning their raw values are never directly exposed by the model.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/config.py#L16-L16",
+          "version": "repo-lines-v1:sha256:17423f581a7d5196d5397a8a521a0626c98b91885d8d2f07627c3d91c30717b1:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMTc0MjNmNTgxYTdkNTE5NmQ1Mzk3YThhNTIxYTA2MjZjOThiOTE4ODVkOGQyZjA3NjI3YzNkOTFjMzA3MTdiMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMTc0MjNmNTgxYTdkNTE5NmQ1Mzk3YThhNTIxYTA2MjZjOThiOTE4ODVkOGQyZjA3NjI3YzNkOTFjMzA3MTdiMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYjJkYjI4OWVhNzg0MjBkNzg1ZGRhMTVmYjFhNzdiYTkyZDdmZDhhM2E0NzQwNWZmODg5ZjE2YTI0NjJiY2RhMyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYWQ0MTcwODY3MGQzMWZmMWVjZDQ3NWI4YzNiOTMxZGFjYTA1ODBmMDI1NWQ3YmYwNWJkOWQxNjA2OGVjZGNjMCJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/config.py#L20-L20",
+          "version": "repo-lines-v1:sha256:523e72cea7ead5f497cf1a4c4d899975f148f813df4109bb5a8cc4511f3f519c:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTIzZTcyY2VhN2VhZDVmNDk3Y2YxYTRjNGQ4OTk5NzVmMTQ4ZjgxM2RmNDEwOWJiNWE4Y2M0NTExZjNmNTE5YyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNTIzZTcyY2VhN2VhZDVmNDk3Y2YxYTRjNGQ4OTk5NzVmMTQ4ZjgxM2RmNDEwOWJiNWE4Y2M0NTExZjNmNTE5YyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYWQ0MTcwODY3MGQzMWZmMWVjZDQ3NWI4YzNiOTMxZGFjYTA1ODBmMDI1NWQ3YmYwNWJkOWQxNjA2OGVjZGNjMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjI1OGFhMDdmZjI1MzMxY2I2MDJiYmFlMTQ5NmE4YzQwMWI5MjUyNWZmZDMzMjgxYzZhMDAzOTYwZjZiYWNkMSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_c9e508a01cbd46aaaf32776d09fc85ae",
+      "statement": "The model_validator google_configured in Settings enforces that model_mode=\"google\" requires both google_model and google_api_key, and model_mode=\"openai\" requires openai_base_url, openai_model, and openai_api_key.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/config.py#L33-L40",
+          "version": "repo-lines-v1:sha256:ffb5396f37cd96005c90e0cfa1e6b45ad46cc9abe29f74d2252b477889c8783a:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODgyMGY4ODJlZjUzNmMzMmUyNDUzMGFmY2JlZTNjYTZmY2E4NjE3NzZjNmVlMjBkNzcyYTBhNTM5MmQ2ODg1YiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjEzN2U2Mjc4MTEwODE5MzgwNDhjMzVlMTljOGUwMGQ5YWQ1NDZjODc5M2FhM2NiOWM3NjI2ZGYzNWM1NDZkMiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZDI5ZjZhZDcwMjliZTVmMThjODZmMWNmNjFjODgxMWI0NjYxMGYwZmFjYjhmZDM3NGM0OTI5M2MxYmU3ZWJmYSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjEsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZGM1NDE3YzU0ZDFmOWJmOGUwMjNjZmZhYmRlZDA1YmJiYmVmNTUwMDljYjgwNDg3ZTViZmE3MDhkZWE1ZjhjMCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_bb2d842476f242a19fc4f4f0d4dde9f1",
+      "statement": "The field run_worker_in_api is defaulted to False and is consumed by main.create_app to determine whether to spawn a planning worker thread inside the API process.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/config.py#L22-L22",
+          "version": "repo-lines-v1:sha256:3a432745d718a4441afadcedf46de86611e25310e20b9fa953f5adf7d62dbd98:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiM2E0MzI3NDVkNzE4YTQ0NDFhZmFkY2VkZjQ2ZGU4NjYxMWUyNTMxMGUyMGI5ZmE5NTNmNWFkZjdkNjJkYmQ5OCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiM2E0MzI3NDVkNzE4YTQ0NDFhZmFkY2VkZjQ2ZGU4NjYxMWUyNTMxMGUyMGI5ZmE5NTNmNWFkZjdkNjJkYmQ5OCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOTExZjQ4ZGVkZTNjYTNlZWYxNTI1NmExZjBjMDUwMWYxZTM3NzY4NzQzZjFhNTk5NDk5NGRhMjY0ZDJhZDY2NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNzdhZDY3M2RlMjViMWMzNTczOTFmYTY0YTRmY2Y1NWVmZGI3NjQwYjExNTA3ZTQ4ZDJhYjQxN2NjNWE3MGQ3NSJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/main.py#L92-L95",
+          "version": "repo-lines-v1:sha256:d71590d3ca4417842b4229a641555f966ffb617a9be7137accc07dbc220ffaa0:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMGIzYzFkMWZmZGM0ZTEzMjBlMjk1Zjc4OTUzZDY4ZjdiNmJkNzU5ZDY2NWRhYTQwMjNkYjdmOTc4NDNiNWE5OCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZWE1ZTA2NWYwNjBjZGU0MzdkZGEyMjg3OTNlNGY1N2E3YzBjYTdlOWNhY2ExNGE3NmVlODRjYzJkOGJlOGFjNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNThlMmViMTRhNDViMzUwMTNkYTM4N2RjZGNmYWI5OGIyYjM0NzIyZWYxMDkwMDVmMzExZDM0YzQ5MjI3MjUyNyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNmVmNzFjMDVkNzM1N2IxODJhM2RkZGI1NmFmOTJmMDIxOWM2Y2I2OTg4OWRhNmFmMzM5Mjc1OGMyNjA3NTU0OCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_2a3214b994bc44be9dadd96a8b376672",
+      "statement": "The planning module branches on model_mode to instantiate ChatGoogleGenerativeAI, ChatOpenAI, or ChatOllama, and asserts that provider keys are non-null since Settings validation already guarantees them.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L138-L166",
+          "version": "repo-lines-v1:sha256:4bbd12902906712501b54f1e75210f3c65bb06f800d62a042e7326e15aa6485f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRmMDk1NjBjNTRhNDdkYmVlYmVlYTFhYzgzNGJkM2JmN2ZiOTc5Y2M5Y2JhODM0M2Y4MmI1ODcwOWQ3NTg5MTEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFjZGNkNGFkOWYzNzY5OWViNmRlYzliODY3NDk5MzU3Nzg5ODI3YzAxMDM0ZTM1NGZhOWIzMjg1YWNiNjIyMjAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY2NTRiMzJjNWUyZTIyYzYzMDJkZjRhMDZlMTlkNjJhNWExZjRlMTJmYmRiYWMzMmU2ODA2YjFkOWQzMDVhYzciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijc2OWY5MzkxNDhhNmFkNzljYTJlZmI5ZDBhNDc5OGRkNDNkYTNmYmQ1ZGJlMGJjOTUyYzNlMDkzYjQ0ZjJmMTMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_1c81aee50fa74d00be52a2c1a9cb4204",
+      "statement": "bootstrap_local.py defaults to Supabase mode, starts the local database, extracts the DB_URL, and writes a .env file only if one does not already exist, preserving existing configuration.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/bootstrap_local.py#L97-L110",
+          "version": "repo-lines-v1:sha256:8a3e245e2b13a48d7b13d4d88e28a6fd1abc17f365ab276cfa0d0255f03bb9cc:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc0NTM0NTk0OTU3ZTcxN2JmYTIxNjUyNDgwYWY4ZWU5MDQ0YzBmZjZkMjY4NTIwYjdmODYwM2IwYTQ3NzlhNGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MDlhNTNhNjE4ZDAyOGUxZDMwMDBjMGE3YWJjZWVjYmU1ZmIzN2Y0ZTUxMWVmZTQ2NjQzZmFkNmU2Njg3MmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg2ZWU0ZjVmMjQxMDhhNWY5MDdhNDU3ZGNjNmE0NDE5Mjk0YzQwMWY0OTA5Zjk0ZGJkOGI2YWJlYTk1ZTU1NWIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU2M2JmZGIyYWIxNTFjYzQ0MmVmMzdiZjIxZDU0NmU2ZWJiZmY0OGU1YzA1MTg1ODg2OGQ3NzgxYjI5ODE2ZDIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_34fed6cc1511400e88b063017d2b16d1",
+      "statement": "In native mode, bootstrap_local.py initializes a local PostgreSQL cluster with scram-sha-256 auth, creates habitquest and habitquest_test databases, and writes .env with a generated JWT_SECRET and LOCAL_DEMO_AUTH=true.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/bootstrap_local.py#L31-L94",
+          "version": "repo-lines-v1:sha256:c5fa6a4b73f9d007987bbf88a1d51eb320751626850ebebb831cad75ca0f849c:eyJzZWxlY3RlZExpbmVDb3VudCI6NjQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImJlYmVjMzZjYjNkNGY0ZDkzMzNkNTJiOTNkZTFlNTk2NDBhOTE1NzkwMDhlYTliNDI5YmEyNTcxNTIyY2IwMmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5MDlhNTNhNjE4ZDAyOGUxZDMwMDBjMGE3YWJjZWVjYmU1ZmIzN2Y0ZTUxMWVmZTQ2NjQzZmFkNmU2Njg3MmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjYzRhN2QxY2M3OTZhYmEzZTQ2NzIzMzI3ZjUxN2U5ZjgxMTk4MmQyNTBmMDcwMjk4NmU0YjU3NjRhZDk1ODkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFlNjhlNDIxYmQ5NWQ4MDVhODBiMGI3MDQzNjZiZTFjNmZiZjgxMzU3MDhlYWM0NjI2NjRlYjYwZWI4MzY3MDEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_656626f7f0ce48a48de7f3e31c0a2b3e",
+      "statement": "render.yaml defines a web service habitquest-api, a PostgreSQL database habitquest-db, and an envVarGroup habitquest-settings that carries sensitive provider keys and toggles.",
+      "evidence": [
+        {
+          "resource": "repo://render.yaml#L4-L43",
+          "version": "repo-lines-v1:sha256:e793ca598d95fd8448bdceb5fffc19c6cb30ccda4becb57f34345c1e95834130:eyJzZWxlY3RlZExpbmVDb3VudCI6NDAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZjZmVlYWJkODk2ZDhlYzU0OGQzOWI0NzUyNGEzOGFhZDU5MWM3ZGZlMWRhYzQzNGJkYzBhZDIzNzAyZDlmZDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE2YTliYzhmNmI1ZGRiODk5NDExMGY3NTYzYTBiMzE2M2Y0MzEyZGY1NWY0NDhiZjZhODU5MjE5YWM0MzZkYzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNjYTRmMWJmY2NjMjk1NzhmM2UyNTMxOTM5ODZiYzYzNzkzOTZhM2ExN2JhMGUwMjEwZmNhNmRjYjc5NWU2MGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjljMzMwNjFkYmQxZjVmMzU1NjNiN2EyZGI1MjIxMzhkYjBlNGU3N2RhZmQ4NGZlYjVjZmMwMDA0NjU2ZmRiYWYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c0282841ee524ad18a2b41498e1ae767",
+      "statement": "The web service in render.yaml sets RUN_WORKER_IN_API to \"true\" (free-plan single-service layout) and uses scripts/render_start.sh as its start command.",
+      "evidence": [
+        {
+          "resource": "repo://render.yaml#L19-L21",
+          "version": "repo-lines-v1:sha256:af35a5a3cb9340fc940dec4d62bfdd0affa7437e682c5036a74367e244eb9ef4:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjY1NjU3Nzg2Mjk1OGYzYWU1N2E5NWZmY2JjMjZiNmFiYWMyNjJhZTlkN2I3ZDdiOTBmZWE2MmNkOWVjYTNhNyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNmZkOWVlMTU4OWFkNzlhZTA2NjJmNWNmYzJkMDc1OWE2OTkyZjNkNjA2MzkxMzM1NWQ3NTE1NmU0NmY4MDJlNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMmZhOTI1MTYzMjgxNDBkYmM0NDAyMDRiZmE0YjM1M2NlNTg4MTM2NjkyNTM3MzA4YWM3Zjc5NDEzNjBiMDg2OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDE1ZjQ2N2EyNzI2N2Y0ZmNlMmQwZjc3NGZmOWQyNzkxODJmZDMwODE3MzBmYjkxYmEyZmFiN2MzNDVjYzBhMCJ9"
+        },
+        {
+          "resource": "repo://scripts/render_start.sh",
+          "version": "repo-file-v1:sha256:b76d669ab718f7575beef5266acad9ff90c2936c9ecd00832185331cae726521"
+        }
+      ]
+    },
+    {
+      "id": "claim_a0e653c7e6a64a6aadbc41f3f61b698e",
+      "statement": "scripts/render_start.sh applies pending database migrations with setup_db.py before exec-ing uvicorn on the PORT environment variable (defaulting to 8000).",
+      "evidence": [
+        {
+          "resource": "repo://scripts/render_start.sh",
+          "version": "repo-file-v1:sha256:b76d669ab718f7575beef5266acad9ff90c2936c9ecd00832185331cae726521"
+        }
+      ]
+    },
+    {
+      "id": "claim_1491b7e16946442c9013cb9d49a7f392",
+      "statement": "db.transaction uses settings.database_url to connect to PostgreSQL and sets the local role, statement timeout, and RLS context variables.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/db.py#L12-L23",
+          "version": "repo-lines-v1:sha256:a02907fbd991f4b9394fe0e40b36daae615bfae59c9f8e9fcceba083eb248f02:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFjMGU2Nzc0ZDYwZGJhYjU5NmRjYmE5ZTViMzJhZTVkMjExNTk0ODE5MzY5YzgzNDE1OWQzNzQ5N2RjODlmOTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBhNTUwOGJmNjJhOTcwZGVkOWZlNTU2OWZkY2FiNDk2NmJmMmQ3MzA3MTU5MjcxYTU4MzM0MjBhYTY2OGFhOGUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM5MTc3M2M5MzU0YzMzNjczZWRhMmUwYTE5YzVlYmIyMTlhY2JhMjkwYzdlOWY0YjkyZmFkNjIzN2FkNjlkOTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRlY2FiNmMzY2Y2NWQyY2E0YWRmZGMxMTdiODY1MDhjYmVjZTFkMTZjMjU5MGQ1OWUyYjhiMzM3NDUyM2U3ZTcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_51a62b99d9ca4c449114443d6aa346e4",
+      "statement": "auth.verify_token uses jwt_secret for HS256 validation if present, otherwise falls back to jwt_jwks_url for ES256/RS256 JWKS-based validation, consuming jwt_issuer and jwt_audience in both paths.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/auth.py#L9-L25",
+          "version": "repo-lines-v1:sha256:196bcd4ecaf773aa1bdd6f6775eed211b7fa099ae104bfb76d149058aab400be:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlMDBkMmE5ODYzZTVmNjE2MzU1N2MxNjFmMTBmNmJkZmFiYmVkZGQyZWY4OWNhOWJkYmVkN2YwMTUyYWFkZmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhOWY4YzJiYzdhMTQxYTAyMmFmM2ZlYjhhYjUwMDhlYzI1NzU3ZWYyNGFjZDA0OWY1MDg5YTc0YjdjOWFlODEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBiZDE0YjY2ODlhZTNlMWU1ZDNmZDE5Y2NlYmUyMDQ3YWI1MDljMjg5MzM5NDAxZGQ3NzkzM2I0MmUxM2M5ZjAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM1ZjA5OTk2ZDRkNzFlNjQyZDZhNDc1OTEwYjIyZjY1NzFkODQxNmMwODExMzUzYTllMTE5M2I1ZmYyZWYzY2MifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_1cbb45d294eb4f49a23a622866ab70e7",
+      "statement": "Worker scheduling fields (lease_seconds, max_attempts, max_model_calls, max_run_tokens, max_run_seconds) with their respective bounds are consumed by worker.run_once and worker.charge to enforce heartbeat intervals, retry limits, and per-run budgets.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/config.py#L27-L31",
+          "version": "repo-lines-v1:sha256:85995b2dfd99d0dad6590977a07995245b21ce1d79466a80dda5e59bb7a6a36a:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTZiMWVjYWIxOTRkNDRkYjc5NDE3OTE2YmJkNTRkODk2ZTJlOWI3NzViNmVlNTJlNGRiYzBkNzkzMzMwMjU0ZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYmM1ZTkyNzE5ZjY2ZDM2ODAyOTU2NDQwZDQyNTcyNGEwMjg1ODMzNjAwNGE2OWJiMGQ3NTNjMTIwMjU0NmFjOSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiN2U4NWExNWUwYTk3NjU3OWUyOTUzZTFjM2VlYjhkNjI4MjdmZDAwYTc4NDI0ZmM4NGRiYzRiNWRkMWZkNmU4OSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMTQwMzhmYTU4ZWQ0NTNhZjJiYjkzYzMyMjUwYzI1OTk1OWRjZmM3NzkwZTk1YzEzMDJiNzZmMjVjYzliOGMwMyJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/worker.py#L81-L119",
+          "version": "repo-lines-v1:sha256:e55740d9c10e776bbc4c8eb119100fa27a101a0925e4825efd09f8695472f95e:eyJzZWxlY3RlZExpbmVDb3VudCI6MzksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRjY2RmM2E0OWM3OTYwZjY5NmU0N2UxMjU5MWI2ZGUxNmNjZDcwOTk5OWQzMGFkZjA3NDkzN2FhOTU2ZTAyNTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhOWY4YzJiYzdhMTQxYTAyMmFmM2ZlYjhhYjUwMDhlYzI1NzU3ZWYyNGFjZDA0OWY1MDg5YTc0YjdjOWFlODEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjliNzJjODBmYzgzYjdkNjIxZjRiOTcyNzhmZTg0YzZiZDcwYTQwMjJiM2IyMmJmZjAxMzI2ZDdlZWFiNmY4ZWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEyYTQ3ZDljN2EzMjgyMmM2OWJkYmUyODk1YmExYTg1OGNkYTU5ZTMxYjRlOGZjMDc3OWQ0ZDAzMTVmOWU1NjUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_bb3ba586e21e49469ee2eca947bd49f5",
+      "statement": "Variables that appear in .env templates but are not Settings fields include TEST_DATABASE_URL, LOCAL_DEMO_AUTH, LANGSMITH_TRACING, LANGCHAIN_TRACING_V2, and PORT.",
+      "evidence": [
+        {
+          "resource": "repo://.env.example",
+          "version": "repo-file-v1:sha256:ed55e19d6a8e6f20b9ba5427ee0f680807a54214bff30c8b76f670d0d3a77774"
+        },
+        {
+          "resource": "repo://render.yaml",
+          "version": "repo-file-v1:sha256:4d2915ea54966a4b057636c8f8148b8fcee4faed779a0e310c7e048bdc319185"
+        },
+        {
+          "resource": "repo://scripts/bootstrap_local.py#L91-L94",
+          "version": "repo-lines-v1:sha256:45bc2f9aafa1741963b504d6ee067dca0a7d7395d9a3d72cd910cdb56e17610a:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2RlOWRjNTY3MTE3MjI2ZWVmYTFiNzEyMzg5NjkxNzUzYmViZDE4M2JjOTg2NDM0ZWZlM2I4NjNlZGY5YWUzMyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNTkwOWE1M2E2MThkMDI4ZTFkMzAwMGMwYTdhYmNlZWNiZTVmYjM3ZjRlNTExZWZlNDY2NDNmYWQ2ZTY2ODcyZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMjNkODdlZWE0OThmOThmNWY2N2MwYzA5YmYyZWM2ZmQ1NWY4Yjc2NTVkNGRlNGVjM2Q4Mzk3YjZiMDdkYmY0ZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMWU2OGU0MjFiZDk1ZDgwNWE4MGIwYjcwNDM2NmJlMWM2ZmJmODEzNTcwOGVhYzQ2MjY2NGViNjBlYjgzNjcwMSJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-30T00:13:47.181Z"
+  }
+}

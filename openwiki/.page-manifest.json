@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "pages": {
+    "/openwiki/architecture/authentication-and-authorization.md": {
+      "pageVersion": "sha256:9357f1d85f5b611cfdc3eabdfa57e3b802d8b971013de570887921d516307b2a",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "24baac5c-2fd1-4f3f-ae27-b1c34a4be10c",
+      "gitHead": "2f3fb2934a41d6e5e09a18f2ef754789be7fc9a3",
+      "sourceFingerprint": "sha256:dcee67db7382eb4d9deea64213ab4941d9cf05890d46d26588f41e09edf4d08c"
+    },
+    "/openwiki/architecture/data-model-and-persistence.md": {
+      "pageVersion": "sha256:5827cc59a80ef4a28e3f64cf8f0e3fb2d142c43b085879cdf6c1bde6c71edb27",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "24baac5c-2fd1-4f3f-ae27-b1c34a4be10c",
+      "gitHead": "2f3fb2934a41d6e5e09a18f2ef754789be7fc9a3",
+      "sourceFingerprint": "sha256:dcee67db7382eb4d9deea64213ab4941d9cf05890d46d26588f41e09edf4d08c"
+    },
+    "/openwiki/architecture/runtime-and-processes.md": {
+      "pageVersion": "sha256:5f13e69f0cc90cf03f9bbfa2086d19b32f73d0ac581c7688d936600903d30a57",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "24baac5c-2fd1-4f3f-ae27-b1c34a4be10c",
+      "gitHead": "2f3fb2934a41d6e5e09a18f2ef754789be7fc9a3",
+      "sourceFingerprint": "sha256:dcee67db7382eb4d9deea64213ab4941d9cf05890d46d26588f41e09edf4d08c"
+    },
+    "/openwiki/architecture/system-overview.md": {
+      "pageVersion": "sha256:703c6106760364c6b983f8644ac0d7593fdc6c4922fc41813ba548d953efe201",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "24baac5c-2fd1-4f3f-ae27-b1c34a4be10c",
+      "gitHead": "2f3fb2934a41d6e5e09a18f2ef754789be7fc9a3",
+      "sourceFingerprint": "sha256:dcee67db7382eb4d9deea64213ab4941d9cf05890d46d26588f41e09edf4d08c"
+    },
+    "/openwiki/concepts/catalog-and-eligibility.md": {
+      "pageVersion": "sha256:2a7cb2c83a46e4f89daf02c03a4eee01b5dd1c1f9ff299bcddb24c370bc2196f",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "24baac5c-2fd1-4f3f-ae27-b1c34a4be10c",
+      "gitHead": "2f3fb2934a41d6e5e09a18f2ef754789be7fc9a3",
+      "sourceFingerprint": "sha256:dcee67db7382eb4d9deea64213ab4941d9cf05890d46d26588f41e09edf4d08c"
+    },
+    "/openwiki/concepts/planning-agents.md": {
+      "pageVersion": "sha256:743b049f19bcf4505da6a7f429cabbc7191b91f014f8f300cda95e0d69110802",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "24baac5c-2fd1-4f3f-ae27-b1c34a4be10c",
+      "gitHead": "2f3fb2934a41d6e5e09a18f2ef754789be7fc9a3",
+      "sourceFingerprint": "sha256:dcee67db7382eb4d9deea64213ab4941d9cf05890d46d26588f41e09edf4d08c"
+    },
+    "/openwiki/integrations/model-providers.md": {
+      "pageVersion": "sha256:a2755955b89ed4f87ce4b69c720c73c57482990869af3b443c26852221edda6a",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "24baac5c-2fd1-4f3f-ae27-b1c34a4be10c",
+      "gitHead": "2f3fb2934a41d6e5e09a18f2ef754789be7fc9a3",
+      "sourceFingerprint": "sha256:dcee67db7382eb4d9deea64213ab4941d9cf05890d46d26588f41e09edf4d08c"
+    },
+    "/openwiki/operations/configuration.md": {
+      "pageVersion": "sha256:08a5f467cf71c9ab67f9c15183bea75532b810006d30afdeef8f69bb3cdd07d0",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "24baac5c-2fd1-4f3f-ae27-b1c34a4be10c",
+      "gitHead": "2f3fb2934a41d6e5e09a18f2ef754789be7fc9a3",
+      "sourceFingerprint": "sha256:dcee67db7382eb4d9deea64213ab4941d9cf05890d46d26588f41e09edf4d08c"
+    },
+    "/openwiki/operations/dependencies.md": {
+      "pageVersion": "sha256:6e548ff2fd3d945796476680c271390ce7c5614d9e7e750cd805e025c5a9564e",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "24baac5c-2fd1-4f3f-ae27-b1c34a4be10c",
+      "gitHead": "2f3fb2934a41d6e5e09a18f2ef754789be7fc9a3",
+      "sourceFingerprint": "sha256:dcee67db7382eb4d9deea64213ab4941d9cf05890d46d26588f41e09edf4d08c"
+    },
+    "/openwiki/operations/deployment-and-migrations.md": {
+      "pageVersion": "sha256:8cdc483a78b0bf4807784140fbe378dbc5af485521b3f89326ee325316ed02af",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "24baac5c-2fd1-4f3f-ae27-b1c34a4be10c",
+      "gitHead": "2f3fb2934a41d6e5e09a18f2ef754789be7fc9a3",
+      "sourceFingerprint": "sha256:dcee67db7382eb4d9deea64213ab4941d9cf05890d46d26588f41e09edf4d08c"
+    },
+    "/openwiki/operations/network-calls-and-egress.md": {
+      "pageVersion": "sha256:6e2bd87aa92bcb6ffd42b5c54672093e0ab9f6268800de865d9de0672a25885d",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "24baac5c-2fd1-4f3f-ae27-b1c34a4be10c",
+      "gitHead": "2f3fb2934a41d6e5e09a18f2ef754789be7fc9a3",
+      "sourceFingerprint": "sha256:dcee67db7382eb4d9deea64213ab4941d9cf05890d46d26588f41e09edf4d08c"
+    },
+    "/openwiki/quickstart.md": {
+      "pageVersion": "sha256:e4d8dc00d47df1ecc755d0af06af4302178b5e45a054ef423b6965025dd81903",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "24baac5c-2fd1-4f3f-ae27-b1c34a4be10c",
+      "gitHead": "2f3fb2934a41d6e5e09a18f2ef754789be7fc9a3",
+      "sourceFingerprint": "sha256:dcee67db7382eb4d9deea64213ab4941d9cf05890d46d26588f41e09edf4d08c"
+    },
+    "/openwiki/testing/verification-strategy.md": {
+      "pageVersion": "sha256:511be8da266bc75879c5e9e5f73accb151d6cfbc2990d0d136d10305de55ba28",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "24baac5c-2fd1-4f3f-ae27-b1c34a4be10c",
+      "gitHead": "2f3fb2934a41d6e5e09a18f2ef754789be7fc9a3",
+      "sourceFingerprint": "sha256:dcee67db7382eb4d9deea64213ab4941d9cf05890d46d26588f41e09edf4d08c"
+    },
+    "/openwiki/workflows/editorial-catalog-release.md": {
+      "pageVersion": "sha256:601bc6acd5a8f788c8d45a9c7ebaacb72f6d947313078e98f91c32680fb24b16",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "24baac5c-2fd1-4f3f-ae27-b1c34a4be10c",
+      "gitHead": "2f3fb2934a41d6e5e09a18f2ef754789be7fc9a3",
+      "sourceFingerprint": "sha256:dcee67db7382eb4d9deea64213ab4941d9cf05890d46d26588f41e09edf4d08c"
+    },
+    "/openwiki/workflows/parent-planning-run.md": {
+      "pageVersion": "sha256:9ff1f2fb7f290f35e8c46b4e5860191a4daf99e53fba01d2f0875fa6e15edbc3",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "24baac5c-2fd1-4f3f-ae27-b1c34a4be10c",
+      "gitHead": "2f3fb2934a41d6e5e09a18f2ef754789be7fc9a3",
+      "sourceFingerprint": "sha256:dcee67db7382eb4d9deea64213ab4941d9cf05890d46d26588f41e09edf4d08c"
+    },
+    "/openwiki/workflows/proposal-edits-and-confirmation.md": {
+      "pageVersion": "sha256:8001c9d5f5854c1a41d31dc0202bf05ffa792eac2b22d2408afcdd03b2454e0b",
+      "completedBy": "openwiki/0.7.2",
+      "completedRunId": "24baac5c-2fd1-4f3f-ae27-b1c34a4be10c",
+      "gitHead": "2f3fb2934a41d6e5e09a18f2ef754789be7fc9a3",
+      "sourceFingerprint": "sha256:dcee67db7382eb4d9deea64213ab4941d9cf05890d46d26588f41e09edf4d08c"
+    }
+  }
+}

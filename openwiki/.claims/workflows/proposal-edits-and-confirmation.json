@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:8001c9d5f5854c1a41d31dc0202bf05ffa792eac2b22d2408afcdd03b2454e0b",
+  "claims": [
+    {
+      "id": "claim_e81628fbccc44350afe0b762b6b0c7de",
+      "statement": "The seven parent edit operations — remove_goal, reorder_goals, swap_habit, change_level, change_schedule, promote_future and demote_active — are defined in the ProposalEditOp union in schemas.py and dispatched by op name in edited() in service.py.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/schemas.py#L114-L171",
+          "version": "repo-lines-v1:sha256:42ff26e02ac436f0def711efe81fdac48a4dd6dd5ca9cb32a44c6be19ec343fe:eyJzZWxlY3RlZExpbmVDb3VudCI6NTgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNhZDczY2U3YTUyMDNmYmE3NzU4ZDI2ODhiNWFmN2U1M2EyOWU3ZjlmZGZmMDg2YzlhZjU0YjMxNTUyYWY2ZTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZkM2I2YzViOTQ0MjJhN2MwNGYwMDkzMzgxYmY4ZDE3MDdlNmVjY2E2Zjc4NzMyMWE2Nzk0ZWEzZGYxNjQ1MmQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQxNTdkYjc3ZmI3OTAyNzBhZjIwOTUyYmRlZDNkYzYyMDUzMjI0ZjYxMmJlNmQwZDEyNzhhODg0MmMxZTg2M2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjcwODU3YzQ3OWVjNjA0MGRhMjVjOWJhYzhiZDkwMmQ3NTFkZGQ3ZjcxNDk4YjJkM2QxMjBjNzRhMGMyODhlOTEifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L155-L231",
+          "version": "repo-lines-v1:sha256:0f58cb2466236b99d4e1dc96ada88f3e4e0e9fed61fee64b2b39a78141a6ccb1:eyJzZWxlY3RlZExpbmVDb3VudCI6NzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUwNTE0OTBjODUzOWE5NzMyODFhY2IzN2VmMTY1YzlkZWQzNzQ4OTZmZGM4ODg0N2M2MzQyOWZkMjVlMTU3OGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg0ZmE3NGRlOGIyNWY5ODUyZDVjMTdiNDdjMzM4NDdiNzNiNjE0NjZkNzA5NzJhYzVmNjU3ZTU3NDc3OGI3ZTQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM0M2VjNTk1MTY2ZjViNzgwYjdhNzc5NGI2OTVkM2M5NTdkNWY3NWJkMDY2ODVhOWE4NmM4YWRjNzA1ZThhYTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI4MWZiMGQ3NzliZTQ2NmJiNzliNWFmNjI3NGJmZTk2NjVhYWY0MmRlNDE1NDY5Y2VkMzlmZDlhODZlMDRmMjAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_1754975312264a48937ff63e2027cb84",
+      "statement": "Operations that place a habit into active (change_level, swap_habit, promote_future) rebuild the habit entry from the current catalog release via built_entry(), which invokes entry() from planning.py using the habit, goal list, chosen level and child profile.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L135-L141",
+          "version": "repo-lines-v1:sha256:c73fea488653d7e19bd7a87699efcfa214cb4cf95e4096921b0d192cc25c6712:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzNlYzQ2NGQyZmUyYjVhNjVlM2U1MWNhZDkzMGNiYjVjODYzMjVjMDcxYjRkNzU0OTAwZDZlNTJlYjk3ZDhlYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNWIxZjc2NjI2ZTY3NDhkNGM1YjQ4NzdlNzJlYmRkMmQxYjNmNWUxMDViOTM1OWVhNzAyNWZiMWY0Mzc0ZjgyNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNjZiNzkwZDk1NDY5ZTQ1Y2E0YzY4MmI5NmU5MjQ0MGQxYTI3Y2E4YjIwZjM1MzBlZGYyZWNlOTc0N2M3YmVhNiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZmVjZjNlMjQ4YzE5NjA5MDYzNDZlZDJkMTVjOGY4ZDFiMzFjODk1MTMyN2JhMTdjNTNiNzZmZDdjZmU0YjcxYSJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L167-L180",
+          "version": "repo-lines-v1:sha256:a46e231aa320b2cefdc0758e359059535e26ed8fccbc55c10d1ae84217bfc4d4:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA5ZGU1ZjgxZjNkNjk4YmZhODVkYWNiYzZhN2U3MmYzNTcwMWMwYThjNTgyNDEyMjI3OTQ1Nzg5OTlhYzg1YmMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImVmNGZhYTI4ODU0NTE2OWEwMWQ5MzlkYjM4ZGQ5NWJhMjZkODQ2M2RjYzIxNzRlZGZhYWQ4MWU3YWUzODlkZjEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYwMmExNzgxZDQwOGI4N2Y5NzhjMWE4ZjkxNTQxZWE3ZGM2MzkzYTllZDU5MTJmN2UzZTI0NGI5Njk4MWJlZTQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjhmNjhiY2RkNWY5MDE1YTJlYjQ0MWU3MWJkNjk2ODY5M2ZjZGUxYTAyN2RkMTE2ZWI4YTFkZWE1YTE1MmEzMzYifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L184-L209",
+          "version": "repo-lines-v1:sha256:285fc48dedb477055766437c640e28fe9a19c16b68f758f692dd923d5573276f:eyJzZWxlY3RlZExpbmVDb3VudCI6MjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBlNmU1OTA5YmEyMzRlNDFiMjAzOTMzMjQxNzFmYmNlY2ZhYmViZGRjYWVmZWIzNDFjZTVlNjY0OWFkNTZkNDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhOWY4YzJiYzdhMTQxYTAyMmFmM2ZlYjhhYjUwMDhlYzI1NzU3ZWYyNGFjZDA0OWY1MDg5YTc0YjdjOWFlODEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhmNjhiY2RkNWY5MDE1YTJlYjQ0MWU3MWJkNjk2ODY5M2ZjZGUxYTAyN2RkMTE2ZWI4YTFkZWE1YTE1MmEzMzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImEyYjk1ZWMwMGFiZWJmZDgyNzM0NmJiNWFlMTQ4MzU3OWRhMzdjNDk5NDRlNTk0OGVkZjBiMzEzZTIwMjU3MGUifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L216-L228",
+          "version": "repo-lines-v1:sha256:17b5d124fe256ebb095f02a02599736b7c29be40cd6591325e616a5cd8d87984:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE2MTAxNTZhZjQxOGYwYTY1ZWYzOTUwNWQ2MjczYWIwNGNmODNkODk3YjJhODY0NDgzNjdkNzNhY2I0N2M3ODQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFhNGU1MGJhYzNjYzZmMDQyNjNmZDNkZTliNTcwZWM2NDUzYzcwMTczYjcyYjUzNDg0M2Q1M2UzNDUzYzQwODAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU1ZTUwOGMwODBkNjJjYjFmYjdjMjQ0ZDA2YmYwZDdjZjY4YWRmZDI4NjljNmIwZmM1OTEyOGEwNjRiNWFkYjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjZmZDRlNTk5MGI2N2I5MDgzMGZmMDg1NGFkZTExOGU4OWE4OTFjNDg4YWQzMGNiODg4YWI2YTAwYmQzN2VjNzUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_d686c6f964b1454291a468b16b8b90a2",
+      "statement": "apply_patch() re-runs five publication rules after every edit: max_active_habits, available_minutes, needs_cue, coverage and chapter availability. A violation raises ValueError, which the patch_proposal handler translates to HTTP 422 with the rule name as the message prefix.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/main.py#L268-L311",
+          "version": "repo-lines-v1:sha256:3ca6638329db55da41ab504005acdc8b07d72871b6e234dcbc2d46a1cd0ad451:eyJzZWxlY3RlZExpbmVDb3VudCI6NDQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUzZTYwNGQ1ZDRmMDQzNmI5MWIxZGQ3ZGJhZWEwZmRiZWJlY2I2Y2EwNDJkMDdlZWFjNGIwMzFkZjRiZTFlMGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZkMDAwNzg3NWRlOGY5MmQ5MmI3ODdhMDE4YzE2YzAwMDQxOGJkNWY5NDk5MjNiOTBmNGQ2M2M3ZWMxNmQ4M2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJkNWE0ODk0ZWFiZDM3YTk4MDNjNWM1YzJiMzUzMWU5YTE3N2Q2YzQwZTM0YTAwMzg0N2Y4NTQ1NjJhZTNkNTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlhN2NjOTI4MzY3MTFlMTEwNmZiYzgxYjUzZTNjODU0MGNkNTgxODhhM2RiMTUxYjU5NTUxNjY0NjZiMWU0N2EifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L234-L308",
+          "version": "repo-lines-v1:sha256:6d7c6cd74ab5fa4c39c8586b03b683222fb6d635d470ca713a50c50bd5bc3864:eyJzZWxlY3RlZExpbmVDb3VudCI6NzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI2YThjMmJlNDk1Y2U2MDA4ZmQ0NGFjYzBkZDEyM2VkMDdjZjhlYzNiZjg3ZmZlNDQwYTJhNmMzNGY0Y2VmNjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU5ZDQyZmU1Mjg0ZDM2NmI5NGFmZmNlYTM1Mjk2MDgzMzMwMGM0NGViMjZlZGRhNWRhMzc3MjYyNWY4MDg5ZDciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM3Yjg5NWRmOWM3MGEwYjEzMzA4NjIyOGY3YTIyNmIzMWVkYzljY2NkZjYyMWViZjBlMzFjM2U1ODZhNzhlNWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI3MTAyOTAwMThlMGE0Yzg2NDQzZTc5ZGFiOTNhOGFmYmFhZDQ1MDk1Y2I1ZGQ5NTlmN2U3NjMyMmIyZjMxNTgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0c83cb0b1aa6424ea2fce78644d612ac",
+      "statement": "The strict coverage rule requires that a weak habit-goal link (below PRIMARY_STRENGTH = 0.8) only counts as covering a goal when no cue-ready alternative for that goal remains inactive in either the shortlist or the future list. This prevents demoting a habit from silently leaving a goal uncovered when a dedicated alternative still exists.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/catalog/scoring.py#L12-L12",
+          "version": "repo-lines-v1:sha256:21c631bfac6f0b84be1696e06be99f338019fc2c0b940a5bc054e8244e9d81b5:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjFjNjMxYmZhYzZmMGI4NGJlMTY5NmUwNmJlOTlmMzM4MDE5ZmMyYzBiOTQwYTViYzA1NGU4MjQ0ZTlkODFiNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjFjNjMxYmZhYzZmMGI4NGJlMTY5NmUwNmJlOTlmMzM4MDE5ZmMyYzBiOTQwYTViYzA1NGU4MjQ0ZTlkODFiNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOWQ5YWI1OGEzNDNkZTMxNDE2MGE5MDMyZjQ1NjM2ZWEwMDk0MWU1YzVlMzdiMWZlM2ZiYjg0OTMwOGE4NWMzYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiN2RhZmY3NGExZjE1YmY1MmQ2MWFiMzU0MmZiMzJjMzRlOWNkOTg0ODE2YjBkN2ZhMWI5MTI5YjljZmRkNDgyOCJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L255-L288",
+          "version": "repo-lines-v1:sha256:a5b71805d9d83a0315d3616aa9fcbead6dfcd95351ef1eb80005981b1b0a951a:eyJzZWxlY3RlZExpbmVDb3VudCI6MzQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEyMzJjMjQyYzRiYmY4OGU5NDdjZDMwYjAxM2UyOGY1Yjc4YWU0NWJjNjE3MDE4MDBkOGZjY2E0ZGMxNDRjMjkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhOWY4YzJiYzdhMTQxYTAyMmFmM2ZlYjhhYjUwMDhlYzI1NzU3ZWYyNGFjZDA0OWY1MDg5YTc0YjdjOWFlODEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU2Yzc2MGRhMWUzODJjMmNjNGRjZTlkNWIzYmE2ZTgzZDVkNjc5MjhlNTg2MDg0YzZjODg1YWYwZWU5OWQxYWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVjYzlkODU2ODlmYmFjMGVmMzRjNzMwNGExNDk4ZjNjMTdjZGRiMGNhNmZiMzU0YWEwYWNhNjBhNzc4ZGYwYmMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_4b49055ab0e745c3b099f59cb602971e",
+      "statement": "The error-prefix contract distinguishes HTTP 409 (proposal/profile/plan/catalog version mismatch or expiration) from HTTP 422 (edit violates a structural rule or catalog source is stale). 409 means the parent must reload or request a new proposal; 422 means the parent must change the edit.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/main.py#L268-L311",
+          "version": "repo-lines-v1:sha256:3ca6638329db55da41ab504005acdc8b07d72871b6e234dcbc2d46a1cd0ad451:eyJzZWxlY3RlZExpbmVDb3VudCI6NDQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUzZTYwNGQ1ZDRmMDQzNmI5MWIxZGQ3ZGJhZWEwZmRiZWJlY2I2Y2EwNDJkMDdlZWFjNGIwMzFkZjRiZTFlMGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZkMDAwNzg3NWRlOGY5MmQ5MmI3ODdhMDE4YzE2YzAwMDQxOGJkNWY5NDk5MjNiOTBmNGQ2M2M3ZWMxNmQ4M2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJkNWE0ODk0ZWFiZDM3YTk4MDNjNWM1YzJiMzUzMWU5YTE3N2Q2YzQwZTM0YTAwMzg0N2Y4NTQ1NjJhZTNkNTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlhN2NjOTI4MzY3MTFlMTEwNmZiYzgxYjUzZTNjODU0MGNkNTgxODhhM2RiMTUxYjU5NTUxNjY0NjZiMWU0N2EifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L47-L60",
+          "version": "repo-lines-v1:sha256:627e62b76b6f2e1f430a2123f1641dabbf900b84e817f84b773e8564f385c0a2:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0MDIxNjE4MWJhZGE3NDc5NGJkYTM3YzcxNzVjODJkMDgzNjBhOGY2YzZlYjBhOGRlMjVmNjVkMDc5ZjAzODgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBiNzM0ZjE5YzJlNGNkYmRiMjA4ZjA4ZWQ1Y2YxMzc0NDNmNGYzMmM1NjEwMjRiYTY5M2UzM2RhNWQ5OTA0YTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhiOTc0ZGE0MDg2MzJhNGFhN2UyYWU4MGI4NjAzOTFhM2RjZDgyMTFjNzllY2FkN2NhOGU5NTEyOGIwMDE4MzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImEzYWRjN2UyZmVlY2YzMWQ2MjhmNmVkZDhhOTQwM2QwMzk2OTY0MWFlZjllZjY3ZWQxNmExMDc2MDMwYTgwMTYifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L63-L87",
+          "version": "repo-lines-v1:sha256:1db2cdee81bc2f792c062c7de4511a26fbaf8082a9a892c9613a6237e48d0f97:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI3Njg1NDM2NmM3MGRkNjZmMGI2ZmY5YjBjOWJlNTQ1ZTFkNDE4MTEyZWEwODFkNzg2ZjRjMzUyYWZhMmMzNjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQwYzA1NDk2NmI0ZTU4OGE0NzBkMGJkMGIzYmVlYTM5Y2MxNDI0ZTUxNjBhY2JkYjk4YjNlMmY4NmFiZTY2MTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU1M2NmZGZjZTMwYmI4ZWQ3MDc0ZjU5ZTk5YjgxMjhjMzQwMzE4OWU4YTg0M2ZlM2RjZDNkNzYwOTMzZDQ0MTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjgwNjRmM2Y4NWQ5MWQwY2IzYjc1MjFlNjBhMGM5OGMyMGIzZGIxZWE2MmFhZmQ4Y2Q2OTMyMDhhMTgxYWJiMDQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ef91d98ff2824b0b99226e8c7b5924eb",
+      "statement": "confirm() acquires locks in strict order: a row-level FOR UPDATE on the proposal; a pg_advisory_xact_lock on the child; a FOR UPDATE on the intake followed by hq.lock_intake(); and finally catalog/policy/habit SHARE locks via validate_sources() calling hq.lock_release(). This prevents deadlocks and interleaving with concurrent profile edits, intake changes, catalog withdrawals or policy updates.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L47-L60",
+          "version": "repo-lines-v1:sha256:627e62b76b6f2e1f430a2123f1641dabbf900b84e817f84b773e8564f385c0a2:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0MDIxNjE4MWJhZGE3NDc5NGJkYTM3YzcxNzVjODJkMDgzNjBhOGY2YzZlYjBhOGRlMjVmNjVkMDc5ZjAzODgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBiNzM0ZjE5YzJlNGNkYmRiMjA4ZjA4ZWQ1Y2YxMzc0NDNmNGYzMmM1NjEwMjRiYTY5M2UzM2RhNWQ5OTA0YTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhiOTc0ZGE0MDg2MzJhNGFhN2UyYWU4MGI4NjAzOTFhM2RjZDgyMTFjNzllY2FkN2NhOGU5NTEyOGIwMDE4MzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImEzYWRjN2UyZmVlY2YzMWQ2MjhmNmVkZDhhOTQwM2QwMzk2OTY0MWFlZjllZjY3ZWQxNmExMDc2MDMwYTgwMTYifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L63-L87",
+          "version": "repo-lines-v1:sha256:1db2cdee81bc2f792c062c7de4511a26fbaf8082a9a892c9613a6237e48d0f97:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI3Njg1NDM2NmM3MGRkNjZmMGI2ZmY5YjBjOWJlNTQ1ZTFkNDE4MTEyZWEwODFkNzg2ZjRjMzUyYWZhMmMzNjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQwYzA1NDk2NmI0ZTU4OGE0NzBkMGJkMGIzYmVlYTM5Y2MxNDI0ZTUxNjBhY2JkYjk4YjNlMmY4NmFiZTY2MTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU1M2NmZGZjZTMwYmI4ZWQ3MDc0ZjU5ZTk5YjgxMjhjMzQwMzE4OWU4YTg0M2ZlM2RjZDNkNzYwOTMzZDQ0MTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjgwNjRmM2Y4NWQ5MWQwY2IzYjc1MjFlNjBhMGM5OGMyMGIzZGIxZWE2MmFhZmQ4Y2Q2OTMyMDhhMTgxYWJiMDQifQ"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290003_profile.sql#L35-L44",
+          "version": "repo-lines-v1:sha256:810c4dc4455c6fb901d051904cba43d1108a9558c5a90e84ccf74c3018de9fac:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZjNTQxZGI2NWNlM2I4NWMxOTQ1MmM2MWJlNzIxYjc0YmUxZWQ4OGZhNTAwMTAzYmYzMTFkZDU2MzRmZmEzZmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVjYTNhYWE1MjY3NmJjNTRmNzZhZjVlMTg5MThkOTFkN2U5Y2ZhZDhlMTQ0Y2MxZjQ5MGFmMTMyNDQzNjIwZjUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwYjNlYzAzYTY4YTJiNDFhZWIzYzI0OTNiMzc5OTJjNDY3MTBhNWY0NWE3Nzg5OWUzZWVhNjFjMTRhN2VjMGEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk5OGM5MjEzYjFlZWFiN2VhMGUzODJmZTMxYjIzZmE4Yjk4Yjk3OWJlMzA0NWNlYjcxMTFjMjNhMDA1OWVjYzgifQ"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290004_intake_switch.sql#L36-L42",
+          "version": "repo-lines-v1:sha256:00262d082cbd5be3359daa8982c04854de8bcf648173d5fe2a1131ed2d31be32:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDkyODU2Nzg0ODg2ZDg1NDJhODg1NmE0YTdjMDJiZDRkYThiNzdmMGJjMTA0MTQ3OTk1NDY3YzQyNTBjZjExZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNWNhM2FhYTUyNjc2YmM1NGY3NmFmNWUxODkxOGQ5MWQ3ZTljZmFkOGUxNDRjYzFmNDkwYWYxMzI0NDM2MjBmNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZWZmNjE4NDY1MDQzMTkyOWY1NDk1YjFmYjYzOWQ1ZGFhMWExNzY5MjczY2Y2MGUyZDY5ZWI0MTIwMTY4YjQxNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjIsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzA3NmYxOGY0ZjFjNjYyZWYxMWFhMTEyMjZhNmIxMGFjMjYxODgxZmU0YTk2NDhhNjdhMTNlMzQyYjkxZjg2MCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_8dbde80e6ca342baa158280fd9ed5de2",
+      "statement": "confirm() is idempotent: it checks for an existing plan with the same proposal_id before validation, so retrying the same request returns the already-inserted plan. Concurrent confirmations both see no previous plan, one inserts, and the other blocks on the row lock then returns the inserted row.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L66-L69",
+          "version": "repo-lines-v1:sha256:0990981da84724ea1b02f090e2678ee67ae223bc6acfcc4e573926a850b6e1a7:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzkyMjA0YzY1ZjUwMmRjMTY0NTRiNjI0MDg1NmE5YWI3YWRlMDAzYThlOWY4NjMzM2VjMGI3YzllNDA5NDkxZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMTRiMjlmZjQyYTNiMjE0MDFlMjFhMjM1OWEyMTBmM2QyYzdiMGJlN2NhNmE1ZGJiZDEzNDU1YWViMzdmZDhiZSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTIwMDBiMmM5ZDQxMzExZTU0MmFiNWJiMzRiYjhiMjBkMDdmM2VkMmM1NDkxM2ExODk1YjA5OTQzNGMwNWE1NyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMTNmZTBhZWIzNGUxNzMzMjFlNGI4YTVkYmJiMDZmZmNjYzY3MWQxZjM2MmNlOGQwZTBkOTYxNjJkZTQ4MzBmYyJ9"
+        },
+        {
+          "resource": "repo://tests/test_security_and_changes.py#L149-L160",
+          "version": "repo-lines-v1:sha256:7563ead4fa9225a1f3ccdd41cbdda8672a492dd4699aeb2d7849d2e233bd56ae:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM4ODIwMTc3OWI1YTFiMGEzZDJmZGQyMzgwZDMyZDEyM2E1ODM5YTEyOTBiZGVkMzA4NDIxYjhkYzUzZTc1OTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlYjcwMjU3NTkzZGEwNmY2ODJhM2RkZGE1NGE5ZDI2MGQ0ZmM1MTRmNjQ1MjM3ZjVjYTc0YjA4ZjhkYTYxYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU5MzdmYjA3OGMyODFhN2I5NDNhZTNhNzE2YmNjNjNjYjRlZWQ2ZGNiY2E3NTZkNTc2ODNiMWNlMjA4ODUzNjQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImVlMmU2ZDkyYWMyOGJjZjExZWVkZTU3MDI1ZDM1ZmY5M2YwODhjNGRkMDNmZmI4MTFmOGJlZTUyNmJmNTcyZDEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ceb86c9fe27241c7880c563489b136ac",
+      "statement": "On successful confirmation, the transaction inserts a new immutable plan version, resolves all open plan_flags on superseded plans, and upserts child_goals for each covered goal with status active. Re-confirming an already-active goal preserves its original since_plan_version and source_intake_id.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L102-L117",
+          "version": "repo-lines-v1:sha256:e1339d3c96df9221f670ee79cd756d6ae6ab12f7fe0455e5217e2ddaec11a669:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwOTAzMzM1MjZjM2ZjZTI2NDBmMWQyMTgzOGM2OGY0OWIzOTBlZTE2MzY2YjE5ZWNlODVjZGI1NWUyMzI5YzgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZkMDAwNzg3NWRlOGY5MmQ5MmI3ODdhMDE4YzE2YzAwMDQxOGJkNWY5NDk5MjNiOTBmNGQ2M2M3ZWMxNmQ4M2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdhZmNlMDVhYTRiNGNmOTRlYjBlZGZkNGM1M2UyMDBlNjVlYmRlMTU1NmRhNzI3OWFhNzI0NzMyMDllY2ZjZTMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImNiNjI5NTIyNDVkZjlhOWQzMjdkMWM1MDZiNzYzNGQxYjY3NjRhYzExNzEyYmI4ZDllM2Y2ZjgyZThlMWEwNDAifQ"
+        },
+        {
+          "resource": "repo://tests/test_security_and_changes.py#L126-L147",
+          "version": "repo-lines-v1:sha256:aabf854d6fa6fc1fcf92011331c55f94200f619961bea2f2bbf11c7cdabd4c01:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRiNWRlOTA1YTBjMTRjYTg5MjhiZTRmODEyYTA2NjdmYTg1OWRjZmU0OTU1ZmM4ZmFlNDVhZGQ0ZGFiMGFkMDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlYjcwMjU3NTkzZGEwNmY2ODJhM2RkZGE1NGE5ZDI2MGQ0ZmM1MTRmNjQ1MjM3ZjVjYTc0YjA4ZjhkYTYxYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI5NzVhNTAxMmI4MzVmMWRkNGRhNDE1YjM4ZDRhNzFlNTdhNzE3NjU4MGNmYjFlZDQ4NDZhYTNhN2NhYmU3NjciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjliY2MxM2UyN2MxMjczNWJhZDRiNmVhZDM5NTcxM2U4NzY2ODEyMzZhNmIyNDljMTY1MzM1YjM4MmE1ZDBlZDQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c69e6f56b4d04cacaf496d49cfe4b38b",
+      "statement": "The checked limits (max_active_habits and available_minutes) are daily totals, not a remaining budget. available_minutes is the intake-defined daily total and max_active_habits is the policy cap; the sum of active habit minutes is checked against the total directly.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/main.py#L294-L303",
+          "version": "repo-lines-v1:sha256:8a8d4d230070b5159b2c837385e22d99d238133aac4fc563d5e18cf2a9c2a393:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjczMmI3MTM2ZjYyYzIwNjYxODJiOTIzZTQ2Yzk2MTg0ODI5NzFlOWJjN2U5ZGY0ZmIxMjFkOWI3Y2U5NjI4NzkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU2ZDMyMjJlNmI1MWIzOTg0MzkzMDg2MzYzZTU3MGRhYjU0YmNkMGZjY2I1ZWZmZDEyYmYwZGM2NDAxNDdkNjkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAzNzFjM2UwZTU3OTE4MDYzOTgwNjk4NmQ0Njc3NWFjZTEzMTM4M2I0N2FiZGFlMmEwNDBjZjliOWIzMDc0N2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjM0MDk2OTI3NGFlNzQxOWI4ZjgxNWIxMTgxZTdjN2IxOWQ0MjZmYWQ3ZWJhM2E2NTE4ZDE1ZjdkMDIzNzBjNDcifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L248-L254",
+          "version": "repo-lines-v1:sha256:6f19237c7c1b6a18dc07bae98ab47eeb0c3d9dbabef6302be48f2f185eb66f42:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMGM5MjMyN2UyZjU2NjdiYTE1OGQ2MDhmODA4NmQyNDRhYzdiNjQ3OTZlNjFkNzM0YTZiNGY3OTNlOTk2Y2JjYiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYmU0ZGU5OWQ4YjVlYTcxOTQzMDhlYjMxZGYxNjZmZDcyNmJkZGFlOTg0YTNkYWQyZjk5NDllMTQ0NjNiZDZkZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOTYxZGEyZmI5OTU5YmMzNjM5YzE1OTY1MzdhMzRkZDIzOGU4ZTZmNjZlMjQyMGEwOGE4YzkyOTQ2MzQ0YzMwOCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOTE0ZTE5Y2NkYzU3OTg5NjFhMTM2NzcxYWRiNmI0YjA3ZTY4NmFjNDdhOGRmY2YyOGI5MmM5ZWRmMWY1OGViYyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_19e39f80fd474db0aab6eb59f86facfb",
+      "statement": "Inside confirm(), version checks compare expected_plan_version, expected_proposal_version, intake_version, profile_version and policy_version against current database state, returning 409 on any mismatch. Source revalidation via stale_references() also returns 409 if a habit was withdrawn, superseded or removed, or a chapter version changed.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/catalog/revalidation.py#L4-L20",
+          "version": "repo-lines-v1:sha256:7fe3a97d7ab33aaa1a9d8f1492055282a4938bf8f002572b46f03fc47f7395b5:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU2MmM1MTM2NjYyZDAzNGU0MWFlYTA0ODEwYjBiYWRlZjE5ZDUwMTUxYTg5YTA3OGQwY2YyMmEzYWE4MzQxMTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcyOWQ0NTI5OThhZWE2YTYyY2MxMTA4ODgyNzk3Y2VmNmE1YTFiN2NlYTAzNjZlZWVmNTkxN2EzZDA3YTJjOWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNlNzA2Y2Y2ZjRkZDY1MDY0MmNjYTg4YTJjYmU4MDljZGU4MzFlZWZmNjYxZmExMTU1ZDc5MTc1YTVhOGRjZmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFhNWZjNjczMTM2YjYwOTg2Y2RiNjNlOTljMjFiMDZkNDNmZWM0Yjc3Y2I2MTUwNTUyMDFkYTgyMTQ5YzM2ZTAifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L63-L87",
+          "version": "repo-lines-v1:sha256:1db2cdee81bc2f792c062c7de4511a26fbaf8082a9a892c9613a6237e48d0f97:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI3Njg1NDM2NmM3MGRkNjZmMGI2ZmY5YjBjOWJlNTQ1ZTFkNDE4MTEyZWEwODFkNzg2ZjRjMzUyYWZhMmMzNjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQwYzA1NDk2NmI0ZTU4OGE0NzBkMGJkMGIzYmVlYTM5Y2MxNDI0ZTUxNjBhY2JkYjk4YjNlMmY4NmFiZTY2MTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU1M2NmZGZjZTMwYmI4ZWQ3MDc0ZjU5ZTk5YjgxMjhjMzQwMzE4OWU4YTg0M2ZlM2RjZDNkNzYwOTMzZDQ0MTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjgwNjRmM2Y4NWQ5MWQwY2IzYjc1MjFlNjBhMGM5OGMyMGIzZGIxZWE2MmFhZmQ4Y2Q2OTMyMDhhMTgxYWJiMDQifQ"
+        },
+        {
+          "resource": "repo://tests/test_security_and_changes.py#L119-L124",
+          "version": "repo-lines-v1:sha256:8b1df3d4a80c33f1743332fbe51dcfe89619f75cd87e58ecedac86290d8f0a1a:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTRiNzRhZDRiMTU4NWFlNjAxZTVkNzY2NjFkNTJiMjkzODY1ZDE4NGUwMmUxNWRkOTA3NDM0OTQ5NTU4Njk3ZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiN2ViNzAyNTc1OTNkYTA2ZjY4MmEzZGRkYTU0YTlkMjYwZDRmYzUxNGY2NDUyMzdmNWNhNzRiMDhmOGRhNjFhNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDUzZDlmMWVhZWIzNmQ0MzFlZmQ1ZjBhNThhZWI2MWRiOTBmMmNjZDQ1ZDEzZDJhYzg4NTdhN2U5NmI1NGVkMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjdkMzczYWFmOWI2MTVmODEwMjU3MDc0ODgzYzJiZmJiMjAyYmM3ODQ1MTEzODgzNWU4ZGY1NWY2ZjY0ZDVmMiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_d0f94dc6425343d19b9aea8c8611b111",
+      "statement": "Tests in test_apply_patch.py and test_proposal_patch.py verify unit-level and API-level edit semantics; test_security_and_changes.py verifies confirmation idempotency, goal lifecycle and household isolation; and test_final_boundaries.py verifies that confirmation is fenced by catalog locks, deadline expiry rolls back publication, and slow model responses are rejected.",
+      "evidence": [
+        {
+          "resource": "repo://tests/test_apply_patch.py",
+          "version": "repo-file-v1:sha256:20e7db9ab6b8928d5188db421bd56d7dbe4fa197f3bd5a34421809dee0905d34"
+        },
+        {
+          "resource": "repo://tests/test_final_boundaries.py",
+          "version": "repo-file-v1:sha256:4ba76060cb1622ce600d8c5c8487a089163eac10cf02aa3d154f70548cb2aa2f"
+        },
+        {
+          "resource": "repo://tests/test_proposal_patch.py",
+          "version": "repo-file-v1:sha256:9f764ba1495c9be7691f0082c5e5df0391ca5d7035f96d11dfc45c198284ff82"
+        },
+        {
+          "resource": "repo://tests/test_security_and_changes.py",
+          "version": "repo-file-v1:sha256:4dd0efaf977bd95d60c74b42d93ddb3af2702e2381b68bb4fc49672be40dab62"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-30T00:13:47.181Z"
+  }
+}

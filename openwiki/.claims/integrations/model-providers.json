@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:a2755955b89ed4f87ce4b69c720c73c57482990869af3b443c26852221edda6a",
+  "claims": [
+    {
+      "id": "claim_08f0862280f84989b28db00765578788",
+      "statement": "BoundedChat unifies four model modes (fake, ollama, google, openai) into a single LangChain BaseChatModel interface, with the active mode selected by the Settings.model_mode Literal.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/config.py#L11-L11",
+          "version": "repo-lines-v1:sha256:38c89f6454f535126424fb8fb47fcf41088c8068ec6a804a4273065b88c1d0f1:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMzhjODlmNjQ1NGY1MzUxMjY0MjRmYjhmYjQ3ZmNmNDEwODhjODA2OGVjNmE4MDRhNDI3MzA2NWI4OGMxZDBmMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMzhjODlmNjQ1NGY1MzUxMjY0MjRmYjhmYjQ3ZmNmNDEwODhjODA2OGVjNmE4MDRhNDI3MzA2NWI4OGMxZDBmMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNjIyYzM1NmRiNGRkZTA0OGEyZTZhNjJkNTlhMDZhNmViODg2MGYwODYxOWMyNjJmZmNkY2E4NDljYzYyOWFkZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZmQwNDVmNTNjMzFlMzI1OGNhYzdhYzBkZDNhZWJmZmFhZTU4OGE5YzZiMWI0MTc4OGY4YWMyNzM1ZDEyZjhmZCJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L108-L108",
+          "version": "repo-lines-v1:sha256:ad3bc81375568e7c78f0ada8f4cc0cdc76d93a4b8389e5751ce1011734e2ce2d:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYWQzYmM4MTM3NTU2OGU3Yzc4ZjBhZGE4ZjRjYzBjZGM3NmQ5M2E0YjgzODllNTc1MWNlMTAxMTczNGUyY2UyZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWQzYmM4MTM3NTU2OGU3Yzc4ZjBhZGE4ZjRjYzBjZGM3NmQ5M2E0YjgzODllNTc1MWNlMTAxMTczNGUyY2UyZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTkzN2ZiMDc4YzI4MWE3Yjk0M2FlM2E3MTZiY2M2M2NiNGVlZDZkY2JjYTc1NmQ1NzY4M2IxY2UyMDg4NTM2NCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMTI5YjM2YzM2ZDhkZmI3ZGIwNjRmNTcwZTc2OTEwODE0MTMxMzNkNmEyNDY3MzI5ODg0MmE2ZDk1ZjQ3Y2MzNyJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L125-L184",
+          "version": "repo-lines-v1:sha256:f8963d6a7a8efdab8111ffa9c762b47432c889fc826f19453358a562ea444283:eyJzZWxlY3RlZExpbmVDb3VudCI6NjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk5ZmEzYzMxNjMxZGFjOTk3MjU4NmU5M2IzZTc4YjRlYmJkNTY5M2I2Y2FkYmZiODU1YzU3YmQxYzcxN2FiMWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNhY2E4YjNjZTE2ZjcxNDg2MTNmM2EzNjIwMDZlYjIwNWUxMTJjYjRkZTJhZTBhODY1NTdjMzIxOGVhNWZjN2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjY3ZTI3NGRkM2Q2OTRiYTIyZjBjMzgwNzhhNDU1NmQ3OWQ0ZGMwN2M3YzRjMDAzZGIyM2ZkYzZmMzQwNzRjMGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdiNGU2MzA5YzA2MzczM2Q4YWM2NjQyZmIzOWNiNzQ4YWNjMTNkOWU4NDg2MjQ0MzI3ZmEwMjYwZTNlMDU5MGUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0560fb4a0f5f46cf91b372895d034ef6",
+      "statement": "Settings rejects incomplete provider configurations at validation time: google mode requires both GOOGLE_MODEL and GOOGLE_API_KEY, and openai mode requires OPENAI_BASE_URL, OPENAI_MODEL, and OPENAI_API_KEY.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/config.py#L34-L40",
+          "version": "repo-lines-v1:sha256:1e9335840a9cb8685754f9ef8b2a6074e6fcc61ba06f6a14fca43e08e7da8692:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDczZmIzNDkwMjEwMTgwOWIwMDgxYmVhN2FlZWY1OWQ5ZTY3YWE3ZTkyZDg5ZTUwMjAzMmIyYWI3YjVlNDNhNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjEzN2U2Mjc4MTEwODE5MzgwNDhjMzVlMTljOGUwMGQ5YWQ1NDZjODc5M2FhM2NiOWM3NjI2ZGYzNWM1NDZkMiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzg0MzljYWE3NzRkYzMxNjBmMTc0NmI2Yjk2MjU3OTcxMmI1ZTAwNWZhM2Y5MzgyNzQ1ZjBlMDEwMTBiNWFkNiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjEsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZGM1NDE3YzU0ZDFmOWJmOGUwMjNjZmZhYmRlZDA1YmJiYmVmNTUwMDljYjgwNDg3ZTViZmE3MDhkZWE1ZjhjMCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_0c2017778f96486e93fef46c4dd88b63",
+      "statement": "Fake mode is a deterministic keyword-driven stand-in that uses regex patterns against parent concerns, not language understanding, and returns hard-coded AIMessage responses for mapper, director, planner, and reviewer roles.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L186-L236",
+          "version": "repo-lines-v1:sha256:779fe846d84909447934599da60336b9069e8a8134a6b55608b2a67602c2fda1:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRkMGNmY2M1YTdkYmQ4ZGU2Y2UyZjE1YmE2MTgzNzIxNGY0MzE0NjkzNjJmMWQyYmY2MzY2NzljMjAzMTcwZmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhOWY4YzJiYzdhMTQxYTAyMmFmM2ZlYjhhYjUwMDhlYzI1NzU3ZWYyNGFjZDA0OWY1MDg5YTc0YjdjOWFlODEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjllOTgyOTM1ODkwNmQ2YTc4NzkzMWNiNmQ1YzM1N2JhYmIyYTlmZWUxMGVkMmZhN2MxNzk2MDUxMzVmNGVhNDAiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjY0ZDA4NjljYmQ5NjAwMDU5NzlhM2E2NmQ4MDEzNTFkMGFkMmU1ZDZlOGZjYjhiZWRmODgwNjMyZjFhY2U2MGMifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L84-L105",
+          "version": "repo-lines-v1:sha256:6c6edd2d7ccab9cf7f96ffa6880885b1f1700b39e1e24f95246c474733c431d9:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjY5MjM1ZmRjNWRiNjY3NTRiOTNlN2E4ZTdjOTQ5ZTFmYTQ0MGJlZmQxNzliMGEwNTM1ZjAyZWRiZWFjOWYzNGUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE0MTlhNmRjYzA0ZTIxM2EzYzdhNzdhNDU2YjAxZTc2ZDFlZjc4Y2QwMGJiZWMxZDhmODE0NThmZTkzZWRjNTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQwZGM3NTRjODRhYzE2ZGMxZDM1OWMzZDE1ZmM5ZGViN2U3N2Y3ZDNiMjAzYmRiZWZiMDNkNjRlYmM0OGM3YTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk4Y2NiYWIwMzA0ODlhOTA3NDQ0NzBkYzFkMmQ0M2JlOTY3MWJhY2M1YzE2NGE1MzlkOGFmN2Q4MDkwYzhjNDcifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_be3c16020f3a4e009aa44e06e0c9aec9",
+      "statement": "Each real provider mode constructs a specific LangChain client class with temperature=0 and a hard-coded output cap of 1024 tokens: ChatGoogleGenerativeAI (max_output_tokens), ChatOpenAI (max_completion_tokens), and ChatOllama (num_predict).",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L141-L148",
+          "version": "repo-lines-v1:sha256:923fb679536190f7a1f3a9d93eea250fcd94acd2423b1bc96913148e27040a80:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzU5YzNlMWM2MzliM2Y4MmM4MGRkNWFiYzJhZWNmMjkwYTE0NmZhYmNhZWNhOTdkOTg1YjQ2NTFkZTFjOWQwOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNmQwMDA3ODc1ZGU4ZjkyZDkyYjc4N2EwMThjMTZjMDAwNDE4YmQ1Zjk0OTkyM2I5MGY0ZDYzYzdlYzE2ZDgzYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNzg5NmJmYWZkYTFlNmU2ODM4YjQ0YWI2MmQxYTM3NDE5NGM5Y2I2ZTgxYjYwNTY0ODQ3ZmY3NDg1MGNhOTFjMSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOWZlMGQxZmMwNTM4ZGNmMTYwNDRmNjQyZjcyZmVhMjlmZTI0MzEzMTY3NGEzMWQ5NTQ0ZDUwMjVkN2I3ODk4MSJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L155-L163",
+          "version": "repo-lines-v1:sha256:c96c8c430f397c76fe8ee13ec59b7444525da1521639c75ac39121eaf5656ec1:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjBhMmZmMGZjODExZWU0Yjg4YmZlZDkwMzM0MWI2NjQxYzIxMTU3OTU2ZmMyY2E1NzMxNjE5Y2RlMjkxMDkzMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNmQwMDA3ODc1ZGU4ZjkyZDkyYjc4N2EwMThjMTZjMDAwNDE4YmQ1Zjk0OTkyM2I5MGY0ZDYzYzdlYzE2ZDgzYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYjc4OWYzYTE5NmU5NjgzMmJhNmVkYTc0MzJlZjQ0MGFiMDM2MDE1NTM4M2VlMDIzYjMwMmYzZDkwZDRmOTZmMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOWZlMGQxZmMwNTM4ZGNmMTYwNDRmNjQyZjcyZmVhMjlmZTI0MzEzMTY3NGEzMWQ5NTQ0ZDUwMjVkN2I3ODk4MSJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L168-L174",
+          "version": "repo-lines-v1:sha256:9e8445fa45211fb342ec25e0c9832294d7a4d2187662cfe2724ae2cab9462da4:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMTNkYTY3ZjYwNzQ0YWY2MjI5Y2M0NjljYzE1NzIzNGNkMzc4N2I0ZWEzM2I1MDc0MTdmZWRhYzBmMTBlNWYxMyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNmQwMDA3ODc1ZGU4ZjkyZDkyYjc4N2EwMThjMTZjMDAwNDE4YmQ1Zjk0OTkyM2I5MGY0ZDYzYzdlYzE2ZDgzYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMTUzZDZhNWNlZGZkZWM5Y2IyYzc3NzhlNWE5NWFkOTJjZDJhMzA0MGJmZmRmMDA2ZDQxMWQxNDJkYWM3ZGY1ZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOWZlMGQxZmMwNTM4ZGNmMTYwNDRmNjQyZjcyZmVhMjlmZTI0MzEzMTY3NGEzMWQ5NTQ0ZDUwMjVkN2I3ODk4MSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_878a6e887a4f4d87ae71745c66a4a84a",
+      "statement": "The timeout passed to every provider client is computed dynamically from the remaining run budget (started time and optional deadline) on each invocation, and no client is cached across calls.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L125-L128",
+          "version": "repo-lines-v1:sha256:c6a44e89fcb422045552e213dd362d3c24b78a1e9615428b3099fa2170ab7842:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTlmYTNjMzE2MzFkYWM5OTcyNTg2ZTkzYjNlNzhiNGViYmQ1NjkzYjZjYWRiZmI4NTVjNTdiZDFjNzE3YWIxZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiODMxZGM5MzAwMTBkMmZkYmViYjQ3MzQyZTE1Y2EyYjAwNDRiOTZkZjFjYmRhMTZiZDdlMDYyOGExODMxNWFkMyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNjdlMjc0ZGQzZDY5NGJhMjJmMGMzODA3OGE0NTU2ZDc5ZDRkYzA3YzdjNGMwMDNkYjIzZmRjNmYzNDA3NGMwZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjVjYmRiMTE2YWYyYjgyOGYyMTg1MmMxYTFiZDIwNjNhOWQwY2E4NGU4MzkxOTczNzNjM2I1OGVkYjc4ZDE0NSJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L146-L146",
+          "version": "repo-lines-v1:sha256:d2e63ec83a42af9739d4bae4984092114f29a21ff6d65df942d4d4ced8493c08:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDJlNjNlYzgzYTQyYWY5NzM5ZDRiYWU0OTg0MDkyMTE0ZjI5YTIxZmY2ZDY1ZGY5NDJkNGQ0Y2VkODQ5M2MwOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZDJlNjNlYzgzYTQyYWY5NzM5ZDRiYWU0OTg0MDkyMTE0ZjI5YTIxZmY2ZDY1ZGY5NDJkNGQ0Y2VkODQ5M2MwOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiM2ZlOTllMDg0ZjA4NzdjNTRkOWQ5NWIwNDQ3ZmE2Y2M1MGIyMjhjZmQ3OGVkY2EwMmY1NzNhMmQ3MWI4Yzc1MyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMTI1M2IzYTExYmRhNjUyMjdhNjBlNzUyNjQ5Y2Y1YTljMGJhN2RkYjZmMTE2ZDU1MGRlMTZiZTI2OWI5YzZlOSJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L161-L161",
+          "version": "repo-lines-v1:sha256:d2e63ec83a42af9739d4bae4984092114f29a21ff6d65df942d4d4ced8493c08:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDJlNjNlYzgzYTQyYWY5NzM5ZDRiYWU0OTg0MDkyMTE0ZjI5YTIxZmY2ZDY1ZGY5NDJkNGQ0Y2VkODQ5M2MwOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZDJlNjNlYzgzYTQyYWY5NzM5ZDRiYWU0OTg0MDkyMTE0ZjI5YTIxZmY2ZDY1ZGY5NDJkNGQ0Y2VkODQ5M2MwOCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMmI1NTJkM2I3MzFiMjFiNDA5MDg3MDVlMjVmNmYxZDM2YzgzMDY2ZDVkZDcyNzdlMDEwMzFjMzEyNTIyZDFmZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMTI1M2IzYTExYmRhNjUyMjdhNjBlNzUyNjQ5Y2Y1YTljMGJhN2RkYjZmMTE2ZDU1MGRlMTZiZTI2OWI5YzZlOSJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L173-L173",
+          "version": "repo-lines-v1:sha256:c3c8c3124a7403480de6082fdd086657434ed0afbdc8c011680a6753fc2d1eac:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzNjOGMzMTI0YTc0MDM0ODBkZTYwODJmZGQwODY2NTc0MzRlZDBhZmJkYzhjMDExNjgwYTY3NTNmYzJkMWVhYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYzNjOGMzMTI0YTc0MDM0ODBkZTYwODJmZGQwODY2NTc0MzRlZDBhZmJkYzhjMDExNjgwYTY3NTNmYzJkMWVhYyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYjM3MzMzNWI0OTVhNzA4M2E5OTc1MmM2M2NkOGJkMjQwYWM0YzRmY2JhZDY4OGM5YmUwMDgyYzU2ZDFhYTk3YyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMTE0NDZhZjljMDgyZmQ1MzRjNTIzOGY2MDlkNGI1OTExYWZmNWNhYmZmYmUzY2IwMGVlNmFlZTZiODhkODQwZSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_2d870e70fdd848fea85d19701c23fa0d",
+      "statement": "The emitted proposal records model provenance as a single string <mode>:<model id> and a fallback boolean, which are the only per-run indicators of which model and path produced the plan.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L410-L519",
+          "version": "repo-lines-v1:sha256:2246a1eaa53837fb0f7c1e5f2b395a067915f911cc7d888b84de558f286cdb52:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEwLCJmaXJzdFNlbGVjdGVkTGluZUhhc2giOiJjMjQ4YWVjZmZiMWFmODVmYWQxYWIyNzVhZjVlMzVjNjdiZGU2YzljZTljYjA4YmE2ZjY5NDVkNjQ1ZGUyZTc5IiwibGFzdFNlbGVjdGVkTGluZUhhc2giOiI5ZTk4MGRlYjcyMDg2MDQ1ZDdiMGY3M2VmM2VjMTYzZTE1M2IyMjg1ZDUxYTExNmVkNTYxNGNkY2VkNzExOTVlIiwicHJlY2VkaW5nQ29udGV4dExpbmVDb3VudCI6MywicHJlY2VkaW5nQ29udGV4dEhhc2giOiJlZWEzYzVhZWNlYzViNDkwNmVlYmE5ZmMwMWZkZDdlOGI2Y2JmYzVjZTllOTE3NzY0ZWViZWMxMWE1MzVmMjBjIiwiZm9sbG93aW5nQ29udGV4dExpbmVDb3VudCI6MywiZm9sbG93aW5nQ29udGV4dEhhc2giOiJlOTM3ZmIwNzhjMjgxYTdiOTQzYWUzYTcxNmJjYzYzY2I0ZWVkNmRjYmNhNzU2ZDU3NjgzYjFjZTIwODg1MzY0In0"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L682-L687",
+          "version": "repo-lines-v1:sha256:0cffdc2110fb17c04a35e1488191b717dcf40accb2c44db68bc8bfddeda2708d:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOGExOWIxZjEzZmRlZmY2NzM4NzljNDM2MzgyNGRjZjk5ZWVkZTY4NTA3ZDZhNGJlNWQwMDRjOTkxNDhjZmE3ZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYzE0M2Y5NzRjMTAzMjE4NTUzYWM0YTMzOTRhYzViOWM1MGQzOGJiNmQ1ZDNlYTg1NTIyOTM3NWQwMzMzZjNmMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZmIyNmI0ZjY4MzAyZDRlOGZkOGYwNjM0NmM0YjBiZWExNGNkODUzMjYxMjM5MDNmYmM0NjFjOWU4OTY4MjE0NiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiM2RmNDkwN2Y1OTFhZjU3YzQ4YjViNzExZWM1ODdkYTc1MWM3OGM2NzdlNTc5MTVjZDMxYTJiNjZhYmFkYjk5ZCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_2d0f0b35a6044d749f5cd826087bfcb9",
+      "statement": "LangGraph persistence is provided by PostgresSaver, wired to a dedicated psycopg connection that sets ROLE hq_worker and search_path hq_checkpoint, so checkpoint data lives in a separate schema from application tables.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/setup_db.py",
+          "version": "repo-file-v1:sha256:fabe4e1185d9cc7afbc493012499cd3661e4e60336b6939f3ccd6575a87bf291"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/worker.py#L150-L163",
+          "version": "repo-lines-v1:sha256:e8a8ffd1fe66f8c98794b5a6bf749487934d5bc8dbdd5a69f5ce9d75da32e4a0:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZiMDc4ZjRkYWNjNzVjYmM5YThiMGQxNDQzNmYxOWQxMjVmYmI2YmFiYjQ1YWU2YjAxNjEwZjdlNDY3MmViYTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImUzMjcyNTZkNDA1YzY0NDE2YTVjZjJlYzJmY2JjNGMzN2M3ZDFmYTVhNzFhZjFkNWVmNmM0NGVhMWMyNjI4NzkiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdkYmRjMjY4ZGViNzIzYzBmYmQ4M2ZkZTA3MTc4ZTkxMjNkZTU4NDk1MTI2NGE1OTRiYWRhMWIwYmYyYTQ4MjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU1MTlkOWQ4Njk0ODkwMWU4MTdmMTk0MDIzNTliMDk3MWE0OGJhMWJjZDYxYjQ2MDk1NjI0Y2YxNDlkODE1NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_fe97d1b091bb437aaa49b8d918181d9f",
+      "statement": "When a job is retried, the worker copies checkpoint values from the previous thread into the new thread via director.get_state and director.update_state, allowing the run to resume from the last model turn rather than restarting from scratch.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L590-L594",
+          "version": "repo-lines-v1:sha256:c6057bfffe8e6bcd36dd190dacccdf7aca302b83ee69614498e64101942a3385:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMmQzMmRiMmZhNDg3ODFkYzAwZDViOTZkZjY1MjNlMjM4NjMyOWQzZjE4N2NjNzYxNGJiYTg1MWQwM2I5N2E5NSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTk1ZTIyZTY2NzNjNmUxYTAxMTdkMTNhNmU4YmQxMWE4Yjk0ZjI3NzhmMGRlN2FmYjYxOTMzNjBkOGMyMTMzNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTQzMTZjOWM0ODJlYWFmMTc4ZjgyYmZhMzVlNjU5MDU2MmY2NGI2ZjA4ZDgwMjgzOWM4YzZlZjYzYjJhMGM5OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYWVhZmI0MThhNzU5Njk0OWI4NzhjMTI5YWEwNmNlNTgwOWU0M2IyN2IyNmRkMDc1OTU4NGJhMTVhN2I4NTliYiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_14ed6dd7236149698e5a30a439d732c4",
+      "statement": "LangSmith tracing is intentionally disabled around the model workflow via tracing_context(enabled=False), and both LANGSMITH_TRACING and LANGCHAIN_TRACING_V2 are set to false in environment configuration, forming a deliberate data-residency and operational-noise boundary, not an oversight.",
+      "evidence": [
+        {
+          "resource": "repo://.env.example#L9-L10",
+          "version": "repo-lines-v1:sha256:0f2d4faa24b4df288a1b691e722fbff7cc42bef0906627d70894cdc9f589c06d:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMmQ3ODdiZGI2OWQ1NmVlMTM2NzYyOWZmYmYyOTExMWZjODQ0Y2MwNmY2N2YzNjU5ZGQxMzAzMDRlMDBkYmNlYiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWI0ZmUxMDM2ZjRjZDFkNGQyZTg1N2Y1NWFmN2E5YzA5MGVkZjhlOTQzYTEzZTZjNTU5OWU1MzA5M2YxN2Y2YyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOTQ2ZjNhZDUyMWJhMWY4ZTRlMDU0MDc5YjFlMmY2NzE2OWM0ZGQzNjMxZjRkMjNiZmQ4MDgyZWFjMWZiZDdkNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjEsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGMxNDg4NDUyZWE5OGI2MzdmYjdjMDc0ZDU5ODczZDU3Yzc1MWZkNGIwZGUxMjQzNDAyNzgzZDY2ZWY0ZThiMyJ9"
+        },
+        {
+          "resource": "repo://render.yaml#L63-L66",
+          "version": "repo-lines-v1:sha256:b7a863048a486991a1b73c2d47cbbe56fd4db03f4feb26951822b2c29f4c7717:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTg2YjEwMTgyNmY0ZjI4ZmJjNTFhMjAyYzMwOGQ4M2ViM2IyOTc3YmRlNTE4ZGY4YWVhOWE2NzU1NWMzNDdmOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOWU1MTBiZmU2YjdkNTExZDhhY2YxZDMxN2RiNjVkZTk3YjhiYmI0YjYyZTZmYTIwNTA0YjQwMWE4M2QyYjY3ZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiY2IyMWFkMTU4OGJkODUzMWY3MmNiYzQxNWViNjA2YmNiMTI0NDlmNzAyMTY4NmVhZjFkNWZiYmVhZTEyMjc1ZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/worker.py#L155-L155",
+          "version": "repo-lines-v1:sha256:32555aad835868ae23f83773c091703cd7310124a1a1fb7c907c7936d5b9c3b4:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMzI1NTVhYWQ4MzU4NjhhZTIzZjgzNzczYzA5MTcwM2NkNzMxMDEyNGExYTFmYjdjOTA3Yzc5MzZkNWI5YzNiNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMzI1NTVhYWQ4MzU4NjhhZTIzZjgzNzczYzA5MTcwM2NkNzMxMDEyNGExYTFmYjdjOTA3Yzc5MzZkNWI5YzNiNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTAwNGZlNmM4MjZkOWNiNTM2NWQ3MGE4NWZmZjY3NWNlMjMwOTg4NmI5OWI1ODg5NzBjNzQ2ZmNlMGFhYzNlZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMzg0MWMzMWQ0YzUyMWI1NjA0OGE1ZjY3OGU0NDBjZDc1MjgwZmI0NjM4ZDNhYjI2ZDZiZTJmMzEzYzZmYzE1MSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_4602d0ee8261421eb2e0a84c3c73b4f5",
+      "statement": "The Deep Agents harness profile disables general-purpose subagents and excludes file-system, shell, and browsing tools (ls, read_file, write_file, edit_file, glob, grep, execute), so the planner's only external action is the code-controlled search_catalog tool.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L565-L573",
+          "version": "repo-lines-v1:sha256:6c6e35f50f1ecd0dda465097fc695e9f55333097eaa9455fab76c2af3f034ddb:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDA4MmYwMzlhNzgyYzU5NmUzNzhiMmNiY2QyOWUyMTMwNjI4ZWQyZDBlMTNkMDY2NzU3Y2I2NWNiNzE5N2U0MiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYzkyMjA0YzY1ZjUwMmRjMTY0NTRiNjI0MDg1NmE5YWI3YWRlMDAzYThlOWY4NjMzM2VjMGI3YzllNDA5NDkxZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMmRjMDlhZGIyNTMwOGI2Y2QwN2ZkMmE2YWE1OWJjZWI3MzM4ZjgzYzVkMzYxOWExMTYzZjc4Y2ZjODQ4OTc1MiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNzRjNzdlZWVmZDdhNmY1M2Q2MTQ2MmEwYWFlNWYxMDA3OTkxYzIwNmYzNGEyNzhhN2ZhMmMzNWZjMjRlZTkxNSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_16a0c175368c4b5f825c658818705ad6",
+      "statement": "BoundedChat enforces three budget guards: a time limit checked before and after each model call, a model-call count limit incremented by the charge callback, and a token-reserve limit sized pessimistically as payload size plus 2048 bytes; exceeding any guard raises BudgetExceeded.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L125-L130",
+          "version": "repo-lines-v1:sha256:2bb53c9e5a1c6c1d27ee1830b360708274f76292dc9d57911e297f167c983765:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTlmYTNjMzE2MzFkYWM5OTcyNTg2ZTkzYjNlNzhiNGViYmQ1NjkzYjZjYWRiZmI4NTVjNTdiZDFjNzE3YWIxZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWQ2ZjNmYjY3NWI4MmExMWJiN2IxOGFhZjVkNTVlZDVmNzQ0NWNmMWUwNDNjYTg3ZWIzNTk2NDM5ODQ4NTBlYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNjdlMjc0ZGQzZDY5NGJhMjJmMGMzODA3OGE0NTU2ZDc5ZDRkYzA3YzdjNGMwMDNkYjIzZmRjNmYzNDA3NGMwZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDBjNDE5NWQ2MWE4MDk4YTJhZTBlMmYzMWU2NWQwODBhZDUwOGFjNDVlMTljMDQ2MzVjMjkzZTY3N2EwMjkxMiJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L133-L137",
+          "version": "repo-lines-v1:sha256:85a1735705ef262519a6c9e8cc8ea00f2b741dc4f4b1f081d09874fb5f912893:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzYxYjc3MDdiZTAzZjgyYWZhMGZjZTQ2N2NiYTIxNGMxN2ZkZDJlM2RjYWI5MjA0MzljYmZmMDc5NzVlNDc4NyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmQwYjJjYWY4MTI3ZjBhNzZhZmM5NWUwZGRlNWQzZDA0NmQ5NTlkNmE3N2RkYWQ4YTI1NzczYWQzMTMxZjNiZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMjA4YzI5ZGQ1NzVjYjZlNWFiYTk1MWFmOTQyMDc3ODI0Yzk3NWM3Mzc1Y2FlMzU4YTZmMWY4NDg0M2UwMzY0YyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNzg5NmJmYWZkYTFlNmU2ODM4YjQ0YWI2MmQxYTM3NDE5NGM5Y2I2ZTgxYjYwNTY0ODQ3ZmY3NDg1MGNhOTFjMSJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L180-L183",
+          "version": "repo-lines-v1:sha256:e41360a2b567351c42b2022fd080b2a127371b60440bb21eaf01cbed74223fd5:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMmYyOGU3YmQ0YWZkMjVmYzY5OThmYjdhNzE4ZjY4OTgwYThjMmZjNTc3OWQyYjc1YWYxZjk1YWY4ZGJiZWUzNyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNGUxMmExOTFiZmY4NGUzNjY4ZGE0ODAzYjY1YWQzN2ExODA0NDEzZjkzOWEzZTIwMmE1YmVkZDE5ZWQ3YmU1ZSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTNkOGEyYzQyODQ0MTk4OWNiN2Q1N2Y0MGU3ZWE1ZTMzYzZmNWJlYTlhMjdkNDg2N2M1YzAzMmJkMGU5YjM4MyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZjliMTllNTUzNGU1MTZjOGE1MjhjZjViNDQyODk5YTdmNWVkNWQ0ZDIxM2I4YjBhZGFkYmExMDJmOTA3ZGI1MiJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L80-L80",
+          "version": "repo-lines-v1:sha256:0fe2169fc391f89455a067c6fc9b47edec0f1eb20438f5560b97acfb8991bf89:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMGZlMjE2OWZjMzkxZjg5NDU1YTA2N2M2ZmM5YjQ3ZWRlYzBmMWViMjA0MzhmNTU2MGI5N2FjZmI4OTkxYmY4OSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMGZlMjE2OWZjMzkxZjg5NDU1YTA2N2M2ZmM5YjQ3ZWRlYzBmMWViMjA0MzhmNTU2MGI5N2FjZmI4OTkxYmY4OSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYjM3OWIyNjQ5YzU3Y2Q3M2JiNDhjZWY4MDY3ZDM0YjZlMDU1ZWJiNTIyNzg4NTRmZDI4ZWU4NmVlZTg3M2U4YiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDBkYzc1NGM4NGFjMTZkYzFkMzU5YzNkMTVmYzlkZWI3ZTc3ZjdkM2IyMDNiZGJlZmIwM2Q2NGViYzQ4YzdhNSJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/worker.py#L96-L110",
+          "version": "repo-lines-v1:sha256:692edc5bbd22d506b632aab540447ab01f07793c5abdef5e7ae2226c1b121c1a:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc0YzNjZjkxOTViMTBkNTRlMTMyOTQyZjk1ZWEwMTBmOTIxOWNiOWZmOGQ2MWJlZWQxZjdjZTY1NzRlOTNmYzAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk1NDVjNDg0ZmFjYzYwMTBkMjJlMmQ2ZWNhZjFkMjQ2YjNlNDIxN2U4MjdlMDBjNDVjZWRlZGY0NGFiNzZlYWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEzNjI3OGE5ZGVhZjEyZGQ1OGIwZWFiNjNhOGExMmE2NTAzOWRkMjM4OWVjYjQxOTA0ZDc1ZTQyYmMwZDEwMTgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFjMGQ0ZjA5YmJiMTAwNWE3ZTJhMTMxYzdiMTM0NTA0YjBhNTExNDRjNzAwOWUxN2Q0MGM1YmI2Nzc4NDUyOGEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_0916e3fca4604e31a19b5498d261c98e",
+      "statement": "Tests verify provider adapter contracts without network access by monkeypatching the LangChain client classes (ChatGoogleGenerativeAI, ChatOpenAI) and asserting that captured constructor arguments match the expected model id, credentials, temperature, timeout, token cap, and tool bindings.",
+      "evidence": [
+        {
+          "resource": "repo://tests/test_hosting.py#L15-L39",
+          "version": "repo-lines-v1:sha256:24f941c42e9f854bcb3507d264fbf2b106f9e9fda23b6c4eabdff4d768b597fe:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRkYTBhNWQ2M2Q2MzRhOTY4MDcxODJjYzQzYTcxM2I0MzJjYTIwOGU4YmQ1MWQyMzZlOTkyYjZhN2MzM2RlMTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImEzYjBmNjZmYzdjNTQ4MWZhZWEzYmE0YjgyMDkyZDJkNDVlMmEzNjA0NGQ0YTliYWZlMmZhMGMzM2JlZWNmOWEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVjMTBiODE4NGMxMjk4N2FiY2QxOTY2ZjQyMmQzOTVkNjcwMzJmM2MyOGU1MjczOGUwZDc3NDg2MDZiNDRhOTEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImYwMzNiZjZmOTJiMzM4MWRmMzI0ZDE4YzkwMGRlM2UxNTlhMDE1N2Q4YjE3MmYzNTgyMmI4ZDQwMTI5M2NmNjQifQ"
+        },
+        {
+          "resource": "repo://tests/test_hosting.py#L78-L112",
+          "version": "repo-lines-v1:sha256:6f5c7044d494399afc46377bbf059a4958b37c82669a68d58093cd9043df9432:eyJzZWxlY3RlZExpbmVDb3VudCI6MzUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI1YTkxNjAzYmUxNDRlOGQxMGI0ZWUzODAxYzg3ZTNjNWQ4MDM2ZWU5M2U2NWY0NzQzZTM4YTQzZTE2NGEzYmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI4YzlhYmJhNDNmYWU3MTRmNzIxZDQ4YWU1YTE0MjVmY2U0MWExMjZkMmJkZThjZWViYmQwN2IyODYxZjEwZDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUwNDBmMTEwZTE4NGNjOTcxNjJkOWRiY2EwNGE5ZjZiMDJmOThjZjJlZDExZDYyNWUyNDYxOWUyZWZiYzU1MzYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxOTIzNjYyMjQ4ZDllOTI4MmQ3ZWQ3Mzk2ZjkxZWE1ZDQ1MGE5ZDkyZjllZjA3ODc4MDJiMjRhMTU3ODMyNGIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_47f033e8eec9473eab8dcde6d532bcbc",
+      "statement": "Tests assert that Settings raises ValidationError when google or openai mode is configured without the required fields.",
+      "evidence": [
+        {
+          "resource": "repo://tests/test_hosting.py#L115-L121",
+          "version": "repo-lines-v1:sha256:c0619852ee74f01ab652202cb673af507db8db9ee6a0b2e5758a657c46ad2804:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZTI4ODM1MWMzMmE5Y2ZiNDkzYjMzOGE2MTFkZDBhNmU2YWFkMTM2NzIxM2EzMTdmNzhkOTczNjM0YTZkYmU1ZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNzc3MWMzYTdkMDIwYTQ2OGNiYzdlMWY2OTc5MThjOGEwOWExN2E3MmUwNWNlYjBiODNjZTIzOWMzYTIyYjcwMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMTY0YWUxODA2YzljYWNiYjEyZjJlMGU2Njc1MjkwNWYwZGUwZjU1OTRjYWNmNWIyOGEzMmIxMjczMTE4OTFhYSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjczYWRkZThmMjQ2NmZmZmM2NGU1M2Y0OWJkYzgyZDMxMjU2MTdiMjU4NmIxYjMyYWY1OTliYTZmNmU2NjAxZCJ9"
+        },
+        {
+          "resource": "repo://tests/test_hosting.py#L42-L47",
+          "version": "repo-lines-v1:sha256:97efde6d88dcaa8fb8707ef3d2ed7458cedb3b96296bff1bb76bf49b553035b4:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTNjMTVmMzAzZTYxMDExOGUxNDg4Njc3MmE3OWRkNTgyNDc4MTkxOGI5Nzc2MzlmMTNmYzgwNzdkZGExYTFmMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYzkyMjA0YzY1ZjUwMmRjMTY0NTRiNjI0MDg1NmE5YWI3YWRlMDAzYThlOWY4NjMzM2VjMGI3YzllNDA5NDkxZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYzEyM2YxYzYxM2YyZTE2ZGQ2MTFiMjQ0YzRlYzMwODdmYWNlNDM5NjNmZmYzYzgwYjBlOGI4YzdkY2VkMzdmYiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjUxNjQzNWRmNjUzMzM0NTc3YTBjN2RhMmJlY2JlNDdhMjkwMzIzNjU0M2M4YTRmZTc5NWMwMjVmY2Q5NzJkNSJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-30T00:13:47.181Z"
+  }
+}
