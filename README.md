@@ -5,7 +5,8 @@ child's pain points, and pick habits from a pre-approved catalog. Kids submit co
 them, and children earn **Sparks** (progress that is never spent) and **points** (spent on rewards the
 caregiver records).
 
-The MVP is being built in steps (see [docs/mvp-plan.md](docs/mvp-plan.md); current status and what is left in [docs/status.md](docs/status.md)). Done so far: the lean schema,
+The MVP is being built in steps (see [docs/mvp-plan.md](docs/mvp-plan.md); current status and what is left in [docs/status.md](docs/status.md); connecting the frontend in
+[docs/frontend-integration.md](docs/frontend-integration.md)). Done so far: the lean schema,
 the seeded catalog and catalog endpoints (step 1); accounts (step 2): Google sign-in, families with one or
 more caregivers, invite codes, the family PIN and kid mode; children and AI onboarding (step 3); and the daily
 loop (step 4): kids submit, caregivers approve, children earn Sparks and points; and spending points (step 5).
