@@ -6,8 +6,8 @@ them, and children earn **Sparks** (progress that is never spent) and **points**
 caregiver records).
 
 The MVP is being built in steps (see [docs/mvp-plan.md](docs/mvp-plan.md)). Done so far: the lean schema,
-the seeded catalog and catalog endpoints (step 1), and accounts (step 2): Google sign-in, families with one or
-more caregivers, invite codes, the family PIN and kid mode.
+the seeded catalog and catalog endpoints (step 1); accounts (step 2): Google sign-in, families with one or
+more caregivers, invite codes, the family PIN and kid mode; and children and AI onboarding (step 3).
 
 ## Stack
 
@@ -27,6 +27,30 @@ Python 3.12, uv, FastAPI and Pydantic, PostgreSQL with row-level security, psyco
    for that child (8 hours). Kid tokens work only on `/v1/kid/*` endpoints and run as the `hq_kid` database
    role, which sees only that child. Leaving kid mode is guarded by the frontend with
    `POST /v1/families/{id}/pin/verify`.
+
+## Children and onboarding
+
+1. **Children.** `POST /v1/families/{id}/children` with `name`, `age` (3-13), `buddy`, `world` and optional
+   `routine_times` per part of the day (`morning`, `midday`, `after_school`, `evening`, `bedtime`).
+2. **Describe a problem.** `POST /v1/children/{id}/pain-points` with the parent's own words. The backend
+   offers the AI the active goals and, per goal, the habits that suit the child's age and unlocked tier; the AI
+   picks one to three goals with a one-sentence reason and recommends up to two habits per goal. Its answer is
+   checked against that list, so it cannot invent a goal or habit. The goals are saved as `suggested`.
+   - Only the child's age and the parent's text go to the AI provider.
+   - A local safety screen runs first, and the AI can also flag risk: if the text suggests a child may be at
+     risk, nothing is saved and the response carries guidance (emergency number, doctor, helpline).
+   - If the AI fails or times out (`AI_TIMEOUT_SECONDS`, default 15), keyword matching on `goals.keywords`
+     suggests the goals instead, without recommendations (`mapped_by: keywords`). If nothing matches,
+     `mapped_by` is `manual` and the parent picks goals from `GET /v1/goals`.
+3. **Pick habits.** `GET /v1/children/{id}/plan` shows each suggested or active goal with its habit `options`
+   (recommended ones flagged). `PUT /v1/children/{id}/plan` sets the goals and up to six habits in one step;
+   each habit must belong to a listed goal and suit the child's age and unlocked tier. Times default to the
+   child's routine time for that part of the day; days default to every day. Use the same call to change the
+   plan later: unlisted habits are removed and kept as history.
+4. **Adjust one habit.** `PATCH /v1/child-habits/{id}` changes its time or days, pauses it or removes it.
+
+The plan also reports the child's `progress`: Sparks, level (Sprout 0, Explorer 5, Adventurer 15, Hero 30,
+Legend 50) and the highest habit tier unlocked (tier 2 at Explorer, tier 3 at Adventurer).
 
 Browsers may call the API from the origins in `CORS_ORIGINS` (comma-separated; the frontend's dev server
 `http://localhost:5180` by default).
@@ -110,6 +134,7 @@ PostgreSQL 17.
 | `JWT_SECRET`, `JWT_ISSUER` | Sign and check our access tokens |
 | `GOOGLE_CLIENT_ID` | The Google OAuth web client id the frontend's sign-in button uses. Not a secret. Without it, `POST /v1/auth/google` returns 503 |
 | `CORS_ORIGINS` | Comma-separated browser origins allowed to call the API, e.g. the hosted frontend's address |
+| `AI_MODE` | `fake` (default: deterministic keyword stand-in) or `openai`: any OpenAI-compatible chat endpoint such as Nebius, with `OPENAI_BASE_URL`, `OPENAI_MODEL` and `OPENAI_API_KEY` (a secret; set it in the dashboard). The model must support JSON output (`response_format: json_object`); if it rejects the request, the logs show the status code and onboarding falls back to keywords |
 | `DEV_LOGIN`, `DEV_LOGIN_PASSWORD` | `true` and a shared tester password of 12+ characters (set it in the dashboard). Setting `DEV_LOGIN=true` without a valid password stops the service from starting |
 
 The first migration replaces the earlier versioned schema: it drops the old `hq` and `hq_checkpoint` schemas and

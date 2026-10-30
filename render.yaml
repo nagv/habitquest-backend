@@ -32,6 +32,14 @@ envVarGroups:
         sync: false
       - key: CORS_ORIGINS      # comma-separated frontend origins, e.g. https://app.example,http://localhost:5180
         sync: false
+      - key: AI_MODE           # openai once the three values below are set; fake otherwise
+        value: fake
+      - key: OPENAI_BASE_URL   # any OpenAI-compatible endpoint, e.g. Nebius
+        sync: false
+      - key: OPENAI_MODEL      # must support JSON output
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
       - key: DEV_LOGIN         # /docs username/password login for testers
         value: "true"
       - key: DEV_LOGIN_PASSWORD  # shared tester password, 12+ characters

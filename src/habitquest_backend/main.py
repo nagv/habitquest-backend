@@ -6,7 +6,7 @@ from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 
-from habitquest_backend import accounts
+from habitquest_backend import accounts, onboarding
 from habitquest_backend.auth import TOKEN_URL, dev_login, issue_token, signed_in
 from habitquest_backend.config import Settings
 from habitquest_backend.db import one, transaction
@@ -21,7 +21,9 @@ at `POST /v1/auth/google`. In /docs, click **Authorize**: when the development l
 `parent` (or `parent:<label>` for another test parent) and the shared password.
 
 **First steps.** `GET /v1/me` → create a family (`POST /v1/families`) or join one with its invite code
-(`POST /v1/families/join`). Kid mode: a caregiver gets a kid token for one child
+(`POST /v1/families/join`) → add children (`POST /v1/families/{id}/children`) → describe a problem
+(`POST /v1/children/{id}/pain-points`): AI maps it to pre-approved goals and recommends habits → pick habits and
+activate the plan (`PUT /v1/children/{id}/plan`). Kid mode: a caregiver gets a kid token for one child
 (`POST /v1/children/{id}/kid-session`); kid endpoints accept only that token.
 """
 TAGS = [
@@ -32,6 +34,11 @@ TAGS = [
         "description": "The signed-in user, their families, caregivers, invite codes and PIN.",
     },
     {"name": "Kid mode", "description": "Kid tokens for a shared device, and what a kid token can read."},
+    {"name": "Children", "description": "Each child's profile: name, age, buddy, world and routine times."},
+    {
+        "name": "Onboarding",
+        "description": "Pain points mapped to goals by AI, and the child's plan: the habits they work on.",
+    },
     {"name": "Catalog", "description": "Pre-approved goals and the habits parents can pick for each goal."},
 ]
 GOAL_COLUMNS = "id,title,description"
@@ -126,6 +133,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             ).fetchall()
 
     application.include_router(accounts.router(settings))
+    application.include_router(onboarding.router(settings))
     return application
 
 
