@@ -1,0 +1,386 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:5827cc59a80ef4a28e3f64cf8f0e3fb2d142c43b085879cdf6c1bde6c71edb27",
+  "claims": [
+    {
+      "id": "claim_f324a9f9f05f4c6cba2c49f74237ea77",
+      "statement": "Durable child profile facts live on hq.children (interests, accessibility, opted_in_topics, preferred_world, routine_schedule jsonb, profile_version) rather than on hq.households, which holds only the timezone; profile_version acts as the optimistic-concurrency token that PATCH /v1/children/{id} increments and copies into each proposal's data.profile_version so stale proposals cannot be edited or confirmed.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/catalog/models.py#L92-L103",
+          "version": "repo-lines-v1:sha256:db558193d4e301a132bd78a73aca4334965c9a6aed3933930cdc090a6acdf090:eyJzZWxlY3RlZExpbmVDb3VudCI6MTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ0Nzk0Mjc4OWYyNjE2NDhlNzFkY2U1YThkMDZjYmEwMTc1YTYwMDhiZDZhNGViZjY1NmQ0NDBjZTc5YWU3NGUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM5MjIwNGM2NWY1MDJkYzE2NDU0YjYyNDA4NTZhOWFiN2FkZTAwM2E4ZTlmODYzMzNlYzBiN2M5ZTQwOTQ5MWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjllMjg5NzNiNTVjMjMyY2NlYjgxOWJmYjU4MmQ1NTllNDVkMDdiMjg4NmU0NmY2NmQ1MDdlNGViNDM3NDJmYWUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/main.py#L162-L198",
+          "version": "repo-lines-v1:sha256:6db2e4ff998fcf07eeebbcee865f185b6eeb248fa83b5295b5575394c98faa0e:eyJzZWxlY3RlZExpbmVDb3VudCI6MzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA0ZmZmZWZkNWRlYTliNzNkMWE3ZmEyZGM0MWIzMzYwMzBlNGNjM2M5ZmY3OWYwYzBlZDRjN2NkOGIwMGZiZGIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIwZmIwMGM0ZjQ4YzliMDZiNDg5MTE0NjkzNDQ0NmY3NDAyYmU2Y2JhMGE1ZGE5ZjRhYTk0YTQ3MThjMjMxYjIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImY4ZDg2ZTkzYjMyZmVjODMwYzFlNjI4OTRmZmNlNDhiYTQyYWYwYTY5MjNiNjQzZTI4NTk1NzQ5ZDZjMTY5ZDIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk2YWRjYjJkZmU0NDhhMThhNjgwYzM3YzI5YTVkYjkyNzk4OTJlZDg0ZThiYzAxNDhhYTcyZmNkMzUzZjQ0NjUifQ"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290003_profile.sql#L3-L12",
+          "version": "repo-lines-v1:sha256:ce7d439c65621d627f93fe09992cf3fa93e68367337151b6cc6dc1ce776f05e2:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcxYzllYWQ3MTBlYjlmZGUxOWZiMWYzMmYxYWJlZDEzZjcxYjI4YTE4NjI4NGM5OWNjZDUxMzZhZTcwOTc1ZDUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA4MDg5NDBhOGMzNmI0OTgxZWE2NzQ3MzE4ZWE3MzI3NGQ3ZmRlODNmZjFiYWE3MGQ4ZWUwNjY1ZjIwNGFhOTciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjoyLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImNjNDYwNzQ4ZTdiNzYzMjgxNTc5MjNkZDUyMTAyNmE3MDM4YmRjMmI5YWYzOTZjNDc5MjhjZmMwNzBhNTNmMTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBjZTU5NzJjNzc1NGU0OTdlNDJlYmY3ZjNlMzYxNTM3YzZhMWFlY2I4MDFmZmE4OWUyM2JmZmQyOTVlNDhjMjAifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c3a28879d8d54def9843489bc2b649af",
+      "statement": "The intake tables and columns are historical renames from the older 'session' concept: hq.sessions became hq.intakes, jobs.session_id became intake_id, and session_version became intake_version, while hq.goals_confirmed and hq.preferences were dropped in the same migration, so several surviving names still carry the pre-rename meaning.",
+      "evidence": [
+        {
+          "resource": "repo://supabase/migrations/202610290003_profile.sql#L14-L22",
+          "version": "repo-lines-v1:sha256:ef89c7af1cfe377e28c60b5173d45e3a0dfd19e95535716215aa69810e3b2bd4:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZmRiY2EwNjkzMTUwNjZlMjQzZDUyZjdkNDk3MjhjYTgwNjFlOWIwNzkxYzY3YjNlNmViZGI3MDEzNjZhMjBhYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjdiYWEzODRjNDQzMDNmZTVjMTg2MTBiYmNkZjE4OTQ3ZmViOThlZjg2ZjM2ZTY5YTMzZTc2MmJiMmJhZGU2MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzkzYTkxYzc4ZTQyNmEzODk5MzZhZGQzMWZhNjYxNWQ1YjAwOWEzMWEzYmExZjk5MTA2NmZkNzdlYTk5MmE1OSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDI3MzkxYTJhN2Y3ZjkyYTcxNWM4NDE4NzQwYmJlMzg1YTk5YTZiZWRlMzczZjQwY2M5MjcyMmU5Y2Y2YjdkMiJ9"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290004_intake_switch.sql#L1-L33",
+          "version": "repo-lines-v1:sha256:5a947e3f6b98bec847450da468ad204a829f0e6f63d98a8dc0529483778150f6:eyJzZWxlY3RlZExpbmVDb3VudCI6MzMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFkYTljY2U5MDU4NjU3ZDJiODYyN2UwODE0ZWMzZmIyMzFkYTJkZjUyZjEyODEwYmRkYTQ1Y2M3NzQ0MTU2ODMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjljZGZjYTgzMDc5MDM4YzQ1YTYzNjM0ZGZmMzI0OWZiNWI5MDQ4ZDA1NzI5MDc4NDY4MWVhZDA5NTIwYTg2ZTQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijg4ZWY2YjgzMjk4ZGM1ZmI4NzQ3NDUwYmQ2NDJmOTEwZjNmZjNiN2JmOGMwMWM2ZDRhNmNiZGU2YmI5NmZkODUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_9843c047b7e045b69ff64d24ec6be9f0",
+      "statement": "hq.jobs is simultaneously the work queue and the run record: a status CHECK over queued/running/ready/failed/cancelled, a UNIQUE(parent_id, request_key) idempotency key, at-least-once claiming via attempts/available_at/lease_until/lease_token, a kind discriminator restricted to plan or analysis, per-run budget counters, and a partial index on available_at for the claim query.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/worker.py#L38-L58",
+          "version": "repo-lines-v1:sha256:5b6e0a2091b83beec9ada826cad518842ce79bb9dd64c402652d34ee2694d95e:eyJzZWxlY3RlZExpbmVDb3VudCI6MjEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE3ZjM1YjMwNzg1YzIzMGI2YjFkZmZiYmQyMTc2ZjhiMDUyZTA4ZTAyYWYzY2Y1ZmY4YmEyNmY3YmM3ODFiMzMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhOWY4YzJiYzdhMTQxYTAyMmFmM2ZlYjhhYjUwMDhlYzI1NzU3ZWYyNGFjZDA0OWY1MDg5YTc0YjdjOWFlODEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI2YWQyMzM1ZDM5NGEwMTE2NjAyYjcyMGNiNzJjNDdmN2NiNDk5YTM3MzM0MzMzMmEwNGU4OTRjMDE3MjkxMmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImIzM2MxNmVhODlmYTFiZDVkNThiYmRlNTdmZDE4MmViMDY0ZmEyMjE2M2I0YzE5MTJhMGUyMjg3Zjc5MTVkOTMifQ"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610280001_onboarding.sql#L14-L19",
+          "version": "repo-lines-v1:sha256:9c307e4c27b069ff3d703876db51e82d07d65e6db67225c0ceb9acb0b8213342:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYmYyMjY1NGE4NTk4YjRhNDg1M2E5YWM0YTk2ZmM2ZjAyNjNkZGY5ZTBiYzIzYmM2NWQ4ZTE1OGYxMTdhODU3NSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjZjZDllMjgxYTg0NmNkZjJmMDg3MWViOGMyOTNmZjE5Y2JlMTEyMzkwOWU3NTI1MmUyMjgwY2IyYTE2NWU0YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTVjNWM4MGQwMzE1NWY3Mzk4NTE4NGMzYzk3OWRiYWRlZDZhNjhhODg1YjNhNWQ3NzExN2Y4MzJhZTdhMDRkYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDQ3NDY4ZjFiZjFhMDY1NjUzYTljMDY2OWE0MTM1YThhZjExYmEyNzc5YjIxYzYzN2RkNjNhYTI5ZWJmNzk2OCJ9"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610280002_budgets.sql#L1-L2",
+          "version": "repo-lines-v1:sha256:002879f9f73415a7e8dd24a346530892099a1e1d4a8eed825626b30907d69027:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTgzMWI5YjFhZDY3ZGQ2NjU5NTQ5NzYyMDlkNWViNGNmNGUzYmRmMzY1NDlkMjA4ZjE5MzE4OTE5OGI0ZTE3MyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZTNmNjE3MjdhNDY5MWUyZmYxZWQ1ZjA1MGMwMDJlZjc2MzM0MjE5YjM3ODA2NjA4N2VkODJiNDUwYTQ5YjZiMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610280003_analysis_policy.sql#L1-L5",
+          "version": "repo-lines-v1:sha256:8949d6bf08169312177ca3d2aa5a844dfe14ac998b3623b7efc880104bf1d12d:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjY2MjFkZWZiYjBlZTVhMTVlMGFlNmEzNTY2OWM0YmMyZWVjNjg2NjczZGRkYTU0ZWQ1OWU0YzYyNTQzMDcyZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDcxNmRkZGEyMmE3Yjc1N2U2NGM2YmQxODZlYzgzMTIxMTczNTVkYzE0MDg0ODgxNTk3YzI1MzJhNjNkNDNlZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_b220f57ae9094df5a2d68739eb34f78a",
+      "statement": "hq.proposals.data and hq.plans.data each store the entire plan document (goals, active habits, future candidates, shortlists, routine links, chapters, unresolved reasons, questions, rationale, review, fallback) as a single jsonb value, so changing the plan document's shape is a code change in planning.py and service.py plus the schemas, not a migration.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L432-L520",
+          "version": "repo-lines-v1:sha256:d576765b144d28c002ae81d026edd6a12f7fa2519bc95e3fae7cbe090271d700:eyJzZWxlY3RlZExpbmVDb3VudCI6ODksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM4NjYyYjM1NDQwNjExMGEwOTk4YTg1MGI2ZjFhYWU2YTI5NTkxZTFkNmExYjA0ODA5Yjk2MTIyY2ZkMDQwZDIiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE0MTlhNmRjYzA0ZTIxM2EzYzdhNzdhNDU2YjAxZTc2ZDFlZjc4Y2QwMGJiZWMxZDhmODE0NThmZTkzZWRjNTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQ3OWM4ZmZkNDNiYWUxYjIwNzAyYTYwOTdhNjA2OGExYTU5ZjA1YzNlMjM2ZmRjZWZmZDM0M2UwMGUyN2U4ZGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjczODEzZTMzZmI4NzZhODgwNDNhMWE5ZjNjMjk0MWEyYmMyMTM5OTFjY2E4MWMwNWM1ODhiZjUwOWZiZDIwZWQifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L155-L231",
+          "version": "repo-lines-v1:sha256:0f58cb2466236b99d4e1dc96ada88f3e4e0e9fed61fee64b2b39a78141a6ccb1:eyJzZWxlY3RlZExpbmVDb3VudCI6NzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUwNTE0OTBjODUzOWE5NzMyODFhY2IzN2VmMTY1YzlkZWQzNzQ4OTZmZGM4ODg0N2M2MzQyOWZkMjVlMTU3OGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg0ZmE3NGRlOGIyNWY5ODUyZDVjMTdiNDdjMzM4NDdiNzNiNjE0NjZkNzA5NzJhYzVmNjU3ZTU3NDc3OGI3ZTQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImM0M2VjNTk1MTY2ZjViNzgwYjdhNzc5NGI2OTVkM2M5NTdkNWY3NWJkMDY2ODVhOWE4NmM4YWRjNzA1ZThhYTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjI4MWZiMGQ3NzliZTQ2NmJiNzliNWFmNjI3NGJmZTk2NjVhYWY0MmRlNDE1NDY5Y2VkMzlmZDlhODZlMDRmMjAifQ"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610280001_onboarding.sql#L15-L16",
+          "version": "repo-lines-v1:sha256:90ad75be548b080a62ce6d44d4c1ef3ac588c91b4fc08f79c487872099f38ec8:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDM5ZDBiNTJjMTE1MTZmNWJiMzc4ZGI4NGE1NTI1NmU0NjM1ODEzMDg4OTg0M2NhZjAyMzIwZGEwNGYwMTlmOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTk5ZTEyM2QzNjUzYzhmNDcxNmRiNjUzZTczZDU0MTg1OTI2ZGYxZjkwZmEzN2I4OWQ3ZWYxZDdmODA4ZDFkZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTk4MjM2YWM2OTM0OTlmNGU3OWYzZGFhOGU3NTJiYmI5NGMxMjdmMjJmZDNhZTUzOTk1OWYzODkxODhmMDMyZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjkxYmY5YjM4MTUyNTYyMWNkNjlkODJiNGVmNDllY2FkOGFlZjNjNTYwMTg1MDQ2OThkYjg5NzI3YTY5MTFkMCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_b4754a7660ef4eee82ab69ad00a1edd4",
+      "statement": "Because the plan document is denormalized, relational columns and constraints around it carry the invariants: UNIQUE(child_id, version) and plans.proposal_id UNIQUE give one plan version per child number and one plan per proposal, proposals.version is incremented on every PATCH to detect concurrent edits, expires_at defaults to seven days, confirmed marks a consumed proposal, and release_id records which catalog release the document was validated against (NULL meaning the retired pre-release catalog).",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/main.py#L268-L311",
+          "version": "repo-lines-v1:sha256:3ca6638329db55da41ab504005acdc8b07d72871b6e234dcbc2d46a1cd0ad451:eyJzZWxlY3RlZExpbmVDb3VudCI6NDQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUzZTYwNGQ1ZDRmMDQzNmI5MWIxZGQ3ZGJhZWEwZmRiZWJlY2I2Y2EwNDJkMDdlZWFjNGIwMzFkZjRiZTFlMGMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZkMDAwNzg3NWRlOGY5MmQ5MmI3ODdhMDE4YzE2YzAwMDQxOGJkNWY5NDk5MjNiOTBmNGQ2M2M3ZWMxNmQ4M2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJkNWE0ODk0ZWFiZDM3YTk4MDNjNWM1YzJiMzUzMWU5YTE3N2Q2YzQwZTM0YTAwMzg0N2Y4NTQ1NjJhZTNkNTIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjlhN2NjOTI4MzY3MTFlMTEwNmZiYzgxYjUzZTNjODU0MGNkNTgxODhhM2RiMTUxYjU5NTUxNjY0NjZiMWU0N2EifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/worker.py#L131-L135",
+          "version": "repo-lines-v1:sha256:ccfaf93d4f4afdbf5e9d007a7ab3319790b8b9e3de6ebd89cd410a4081e71c8e:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDMxODU0ZWVlYWZkYTdjMTU1MjdiZmFhZjMxOTMxYWMyYjNiZGVmYjFjMmNkNzBjZTQyZDVkNDUwMDI3YzdlNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNGQyNjgyN2MzNmY5MzcyMDI5NTk4ZGU5NTNkYTg0YTA0N2QwOGUzZGU0YzA4ZGU5YTlkMmE3Mjk0ZTkxM2QwNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMmI0YWY3MjNhZDNkYzgwNGQwY2FlNTFiY2NkMjAzNTMxODZiMDE1YTM1NWQxODA4ZjUzYzJlZTMxZWUzMzQ0NyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMTE2NjgxMzRkYTMzNGI5OGU5ZmZjNmVmYjFjMjYxODQyNDUyYTc4ZjJlYWExMzFkMGRhNDdkODFmMDI0ZmJmZCJ9"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610280001_onboarding.sql#L15-L16",
+          "version": "repo-lines-v1:sha256:90ad75be548b080a62ce6d44d4c1ef3ac588c91b4fc08f79c487872099f38ec8:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNDM5ZDBiNTJjMTE1MTZmNWJiMzc4ZGI4NGE1NTI1NmU0NjM1ODEzMDg4OTg0M2NhZjAyMzIwZGEwNGYwMTlmOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTk5ZTEyM2QzNjUzYzhmNDcxNmRiNjUzZTczZDU0MTg1OTI2ZGYxZjkwZmEzN2I4OWQ3ZWYxZDdmODA4ZDFkZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNTk4MjM2YWM2OTM0OTlmNGU3OWYzZGFhOGU3NTJiYmI5NGMxMjdmMjJmZDNhZTUzOTk1OWYzODkxODhmMDMyZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjkxYmY5YjM4MTUyNTYyMWNkNjlkODJiNGVmNDllY2FkOGFlZjNjNTYwMTg1MDQ2OThkYjg5NzI3YTY5MTFkMCJ9"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290003_profile.sql#L27-L31",
+          "version": "repo-lines-v1:sha256:5df12fbd14aa9cdaf928831e00c7842a8d2cecde03c375fbe5511620dffb2d61:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOWY3NDVlYjVkNjE0Nzk4Y2QyNTYxNWVlODc5YTM5ZTQ4ZmRjMjczOGJmYjVlN2M2OTU1ZGZhYmIxNDI2NzJhMyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiODE2YTA0MmJhOWE2MWM1ZjcwNzk1ZmFhZDYxNjQ5OGQyYTQ3OTNhMWJmNWFhYzVjZTcyM2M1ZGJkNGE3ODE2YiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOWM0ZDYyZWQzMzM1Zjg0Mzg5MWYzZGZjZmI4NTIyNTEyNTBiYjcyMDZhZDc5ZmQ0YjJkNDNhM2VjNzgyNDk5ZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDBiM2VjMDNhNjhhMmI0MWFlYjNjMjQ5M2IzNzk5MmM0NjcxMGE1ZjQ1YTc3ODk5ZTNlZWE2MWMxNGE3ZWMwYSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_f1eff092afcd454b96828d9b1b3b3246",
+      "statement": "Confirmation is append-only at the plan level and is idempotent: service.confirm() returns an existing plan when one already exists for the proposal, otherwise inserts version expected_plan+1, marks the proposal confirmed, resolves open flags on superseded plans, and upserts child_goals only where the row is not already active so goal history stays attributable to its originating plan version and intake.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L63-L118",
+          "version": "repo-lines-v1:sha256:020cfec24e50996c1814cd45bf7a415f185b5bf81474201e7c03e98692a5d20a:eyJzZWxlY3RlZExpbmVDb3VudCI6NTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI3Njg1NDM2NmM3MGRkNjZmMGI2ZmY5YjBjOWJlNTQ1ZTFkNDE4MTEyZWEwODFkNzg2ZjRjMzUyYWZhMmMzNjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJkYjMyMjljMmEwMDQzZDE5NDRiOWJjNzBlYzFiMTNiYWMzMzFlNWMxYzFhMDMzYTA0ZGI1Yzc0YzdmMDZhZWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImU1M2NmZGZjZTMwYmI4ZWQ3MDc0ZjU5ZTk5YjgxMjhjMzQwMzE4OWU4YTg0M2ZlM2RjZDNkNzYwOTMzZDQ0MTkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVhNGVkZmNmNTQ0ZmEwNGVlZTMzYzM2MWI1YjVmYzU1OGMxMWVlYzEzMTJiMGViNjhjNTNjNTAwNjUxZjA3YjQifQ"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290003_profile.sql#L14-L22",
+          "version": "repo-lines-v1:sha256:ef89c7af1cfe377e28c60b5173d45e3a0dfd19e95535716215aa69810e3b2bd4:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZmRiY2EwNjkzMTUwNjZlMjQzZDUyZjdkNDk3MjhjYTgwNjFlOWIwNzkxYzY3YjNlNmViZGI3MDEzNjZhMjBhYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjdiYWEzODRjNDQzMDNmZTVjMTg2MTBiYmNkZjE4OTQ3ZmViOThlZjg2ZjM2ZTY5YTMzZTc2MmJiMmJhZGU2MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzkzYTkxYzc4ZTQyNmEzODk5MzZhZGQzMWZhNjYxNWQ1YjAwOWEzMWEzYmExZjk5MTA2NmZkNzdlYTk5MmE1OSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDI3MzkxYTJhN2Y3ZjkyYTcxNWM4NDE4NzQwYmJlMzg1YTk5YTZiZWRlMzczZjQwY2M5MjcyMmU5Y2Y2YjdkMiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_5c3ff2209f9846899a550dba33ae8546",
+      "statement": "hq.plan_flags records staleness against a confirmed plan with kinds habit_withdrawn, cue_removed and level_removed; only the first two have writers (hq.withdraw_habit() and the profile PATCH handler via service.flag_plan()), and only resolved_at is writable by hq_api, resolved either explicitly or when a newer plan is confirmed.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L311-L315",
+          "version": "repo-lines-v1:sha256:602ea83d72834829ce5f87f0272f5ad7e6f53d9cd09e0a1f840f8d37553320bd:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNjE0ODY3MTM3ZWViZDAwZmQxNTg3ZjViMzkxYjkzN2U5YmU1MTA0NTljZmFjNzRkOTc1ZDc4YzM1MWVjZmM2NSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYzkyMjA0YzY1ZjUwMmRjMTY0NTRiNjI0MDg1NmE5YWI3YWRlMDAzYThlOWY4NjMzM2VjMGI3YzllNDA5NDkxZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYjNkNWI5ZWYwMjgxMTBlOTEwNDcwMjM4ODQ2Zjk4M2Q4Y2Y0OTRiMWY2MDNkMGNlNWZmYTFiNDVjZGEyNjc3ZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYWZmMjc0Yjc5MmEzMzUzOTdhYjA1ODYzNTRkZWM0NzY2YTUwMTc3N2MyOGFjYzQ3YTI2MmZjZTUwMmQ3ZTg2OSJ9"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290005_2b_schema.sql#L3-L17",
+          "version": "repo-lines-v1:sha256:830fe2d7d2d31376b45dcee21323163eb95eba0cf13bd3b020a4cf33486bec03:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNiY2EyYWZlNDVhYmVhZjUwYmIwNjY4ZTliYTQwZGEwYzgxMzdkMTM1ZDE0Y2Y0NWE3YjQ5YzM0NjUwZGJjYjAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijc2YWJiNDgwMDMzOGZmMTVmNDE3OGZiMGE4ZmJkOGZmMTJiMjdmMjFmNmExMWU3OWNlMjkyYWY0YTkwNTA3ODYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjoyLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjAwYTliYmI3ZGIwMTRmNWY4ZGMwZGE4NDIxZDg1NzU1NDE5YjJhOTEyOGJjZjI5MmZlN2JiN2I5Y2E3OWE1ZjkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQ5NzUyMTdiNTgxNTljOTFiMTQyMmNkYzA5ZDFiZGViYWIyZTg4ZjdmYmE3MmVmYmU2NDgyZDg1YjM2MjAwOGUifQ"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290006_editorial.sql#L297-L302",
+          "version": "repo-lines-v1:sha256:19edee08004f955026bacafff5b970f6ce6d6645fc7cea8c4d0ae478bc600b4c:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzgyNzcyMWYwMDk3ZjQ3ODQxN2IxNjgyMTMwM2NmY2RlZjY1MGJmOTk3OTk4ZjY3MjY5MTNlOTg5ODk2NDVjMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOTQ2NzQ4MzUyZGMwYmVhYmNlN2JmNzc2Yzk5NDQ1ZjQzYjE0MGM1ZTdlYjZiZGQzNjRiYzBkM2JkMThmYzk4ZSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNjU0ZWVjMjhkMDU4N2Q2ZTE0MmQzMzU5NmUwOGU4ZDMyMTM4MDI2ODhiZTk5YmM4MjlkNWE1ZThjY2RjOTA5ZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOTdjOWZkYWI5ODZiY2VkNzE1NTc2Zjg3OTYwYzk1Mjg1YmQ2ZDlkMzhlNGE4YTcyNDNkZWJlMWE0ZTc4ZGNiMiJ9"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290007_resolve_plan_flags.sql#L1-L2",
+          "version": "repo-lines-v1:sha256:1934b6cc0a4c8a2da286d96667fc7d29a710d432318f72a0d18194bd166a80a8:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTg5N2Q2YmM5NjUzNTRlMzk5Mzc3NjM4Y2E5YmIzMzEwMzUyZTk2YzAwNjE2OTc3NmNiZTAyM2I2NjY1NmNkOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiODBiZjJkOTJhM2Y3ZTMwZGNkN2I2MWMxYjRiNTkxZDU2YTI3YmM4OGIyNDQxNDE4YmUwMzVkNDIwOTY5NjhmYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_61c4dc67203c47f1bfe9e85807ae3ce4",
+      "statement": "hq.catalog_requests is the schema's only aggregate table: the worker normalizes each unmatched concern phrase, hashes it with MD5 into a 32-character phrase_hash, and upserts a count with no child, parent or household identifier, which is why it is the one table with neither RLS nor a household relationship; rows are written only when the intake set store_feedback.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/worker.py#L137-L137",
+          "version": "repo-lines-v1:sha256:8a50df0ac1ae44ccbbc6bcafc31d110e42e8ed4e01dc38edc1ee125fdd66682c:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOGE1MGRmMGFjMWFlNDRjY2JiYzZiY2FmYzMxZDExMGU0MmU4ZWQ0ZTAxZGMzOGVkYzFlZTEyNWZkZDY2NjgyYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOGE1MGRmMGFjMWFlNDRjY2JiYzZiY2FmYzMxZDExMGU0MmU4ZWQ0ZTAxZGMzOGVkYzFlZTEyNWZkZDY2NjgyYyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMGY3Yzc1NjIxMmNiYzdjZThkYWMzMDMxZDkyMTJlOTU3OTE1MDhjMTE5ZjI3NGE0ODEwOTE2ZjM2ZjQzNzlhYiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTJkNjY1NTNlZTQ2NTVmNjVjZDNhYjcyZDFkOGM4ZDA1YWY4NTY2YjY4NjcyMjJjODJhNDk2Njg1ZGUyYjM1MyJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/worker.py#L25-L35",
+          "version": "repo-lines-v1:sha256:e7564eee03dad4b8fa1244bfaa0a47916c8e0d9217bc590962e08dc952b23516:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE2MjRlNzQyNWFmNWVkYjA3ODg1MzBjZmEyNTFiOTFhN2YzNzhiYzczYzNjMzg1OGY1ODdkNWE2YjJlMjkxZDQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhOWY4YzJiYzdhMTQxYTAyMmFmM2ZlYjhhYjUwMDhlYzI1NzU3ZWYyNGFjZDA0OWY1MDg5YTc0YjdjOWFlODEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI3NzgwMzM2NzhkYzk0ZTZjMGIzOGYxNjYyNGM4MjA2NzM3MmViYjM1Mzc1YzhkNGU4NGQ1ZmNjYjY2NGNjY2YiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVjZWYyZGYzZjhlNTM4NWVmZjY0MTA2MjM0NmI5ZTA0NjI5OTdmM2YwN2FiOWMxYzk1NzhjZjk3YWU1MWYxYzYifQ"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290005_2b_schema.sql#L19-L28",
+          "version": "repo-lines-v1:sha256:bc81b0b2f1e29c74575c75e33d1223b02f5e0e5dcd19229cb05c2b24c0e93fc0:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNlZDMxM2RjNDgzOTIzMDcyMzhjZTJiYjZkYmQ0NjBiNGE0YTE4NThkYjg3MDE5NDRkNjljYzhmOWE3OTEwY2UiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdhNWMwMjI3YzQzNjg3MzA2NWMxY2FmZGI4YTg2NzE0NDVjNzY5NWMyYzUxODUwMzZjMGFlN2I3YzM2NDhkZDgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjVmZWFiMDYzNDVkNjllNTljMzAzZDQ1ZjMwYjg0MjA3MjIxMmU2NjU1YzZmODc1OGMwYTZmYTAxZjA1MTU3MmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_81553a5e0fb94d4180ccdea7702b3d09",
+      "statement": "hq.events is the per-run audit log keyed to hq.jobs with ON DELETE CASCADE, into which the worker records model, tool, validation, review and fallback events carrying IDs, roles, counts and outcome metadata rather than raw prompts.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L642-L657",
+          "version": "repo-lines-v1:sha256:ed13fa439dcd15f143dfea3d02c774237a376aed30e23b9839d7f240d616d7c6:eyJzZWxlY3RlZExpbmVDb3VudCI6MTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFjNjNmOGVlYjllZjg3ZmI5ZjhlZTIwZjczODI1MTUyYWVhZDc4ODQ3NjQyZjJlMWUyZTU0NjJlNzlhZTZhOGUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE1NTEzY2M3ZjY1NzlkM2E2MDY4ZWZkMjIwNThhMDY2NjFjOTg0MjVmMGRkY2Y5OTkzMzdkOTcxNTVlZWU5ZmMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijk2MzQ5NDExYTEyNWE3MTg0OTQwZjI2N2YzMmI4NTc1NTM4ZDE1Y2FhZjhjZDhiZTJmNjIxYjI1YzViZjY2NzUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImRiOGQyYzY5YTcwOGZlOTI3OWE0YmI0NDk3MzBmMTEyNzczMmM5YjI4Nzg2OGI2MmE1MGFlNTY4ZTczYTRlZGUifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/worker.py#L90-L119",
+          "version": "repo-lines-v1:sha256:d326c27626fa320875dd56d105fd76c119dcb07bf30c7fda1968513a3a113b5f:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVmNmFmN2M2NmQ5NzQ4NGFmOWU0MTEzN2E3MThlMjlhNjFhZDc5YmJjNTU1NWVlN2IyMTUyZTE4MWNlMmQwNjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhOWY4YzJiYzdhMTQxYTAyMmFmM2ZlYjhhYjUwMDhlYzI1NzU3ZWYyNGFjZDA0OWY1MDg5YTc0YjdjOWFlODEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNmN2NhMzA0NDU1NmQ4NzRhNjFjOWQ4NDgyNDZhYmFlZGRiMjIxOWU1YmQxOWI1NDk2NTFmNzNiNmRmZWVjMmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjEyYTQ3ZDljN2EzMjgyMmM2OWJkYmUyODk1YmExYTg1OGNkYTU5ZTMxYjRlOGZjMDc3OWQ0ZDAzMTVmOWU1NjUifQ"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610280001_onboarding.sql#L18-L18",
+          "version": "repo-lines-v1:sha256:eae58a63315b811774f6538a390fa51625b83fd7e7837991f8779e4ed5dd139d:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZWFlNThhNjMzMTViODExNzc0ZjY1MzhhMzkwZmE1MTYyNWI4M2ZkN2U3ODM3OTkxZjg3NzllNGVkNWRkMTM5ZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZWFlNThhNjMzMTViODExNzc0ZjY1MzhhMzkwZmE1MTYyNWI4M2ZkN2U3ODM3OTkxZjg3NzllNGVkNWRkMTM5ZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDE3NGM5OWU5ZTQ2N2IwMWQ2NWQ5Y2RlZjlmOTFlMGY2ZjQxYjY0NjBjOTgyYTQxZjhjYTU4NTFlZTcxZWYzZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMzk5OWYwZjllOWIzYjgyMjAzZDZmOWRkZjY0MjczNWRmZDIxMjk4NDU2ZTMxMmEwNWYyMDk0M2M5ZTI1YzcxOCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_fcacc0863cec4b7a98d2ece8064ed6ec",
+      "statement": "Catalog entities are (id, version)-keyed rows with a draft/in_review/approved/rejected status lifecycle and a table-level CHECK making approved rows require a reviewer distinct from the author, with habit detail (levels, goal strengths, prereqs, tags, interest variants) hanging off (habit_id, version) by ON DELETE CASCADE.",
+      "evidence": [
+        {
+          "resource": "repo://supabase/migrations/202610290001_catalog.sql#L60-L136",
+          "version": "repo-lines-v1:sha256:e180414636583107a5a299bce2a388885737c1870ea856f475276776596fcc16:eyJzZWxlY3RlZExpbmVDb3VudCI6NzcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU0MjBhYmVhZWE3YmYyMjY1NDQ4ZmU3YmI4NDk5MTY0N2Q4OTNlMWY0ZjA0ZDZlZjExODQ2NmIwYjY4YTdkY2UiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE2NmU3NGFlMTA5MDI0YTFjMmRmOTI4YmRlNTVkM2ViNDU1ZTYyMTgyMjYzZmI5NjIxOTQxOTUzYzM0OWQ3N2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU3NjMyZTI4MTg3M2FkNDNkNDMxNzZjNzI1YjUzMTc2ZjFiNjliMWJlMDgxN2MwZGM0MThmN2IyMDAyNzFhMGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQzNjEyODcyZTFlZmJiNDMyZWQwYjFjMjBhYzkyNzJjYTFlZTdlMjFhZmI2Y2I3OWFmZWRkN2NkNzhlNTRlMDMifQ"
+        },
+        {
+          "resource": "repo://tests/test_catalog_schema.py#L64-L71",
+          "version": "repo-lines-v1:sha256:c22569fb7f199a0d322b5ad76e7b87e0f9fc9c235e2d90fdbb94b8a967f25a75:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDk3NmNiYjQwMTAxOTlmNGZlNDEyZmZmN2FhYjM4YTE1YWUyY2QxOGUxYTBmMzJlNWI1MDk0ZmZmZTJkZTQ0OSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiN2ViNzAyNTc1OTNkYTA2ZjY4MmEzZGRkYTU0YTlkMjYwZDRmYzUxNGY2NDUyMzdmNWNhNzRiMDhmOGRhNjFhNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZGM5OGVkZGVkYjQ4NTc1MmVhMWQ0NTI5NTNmMGQ4YjY0NDczZmRjMjIxOTA2MDY5OTA0MDY1MzYwOTg1NDU1MCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYTlhMmRmZjFlODE2MjVlODJiZDEyOGQzMzU2NWY0OGRlNzAwYmUyNzZkNDFhYjRmYzNiODI3MmY1N2RlMzUyYSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_b9bd4668846949089c5f84dcc46eb4a1",
+      "statement": "Catalog immutability is enforced by trigger functions rather than by convention, hardened to lock the parent version row FOR SHARE before checking status, to make withdrawal permanent and un-rewritable, to freeze published releases except for is_current and notes, and to freeze versions while status is in_review so only the lifecycle functions can move them.",
+      "evidence": [
+        {
+          "resource": "repo://supabase/migrations/202610290002_catalog_guards.sql#L4-L99",
+          "version": "repo-lines-v1:sha256:ac6bbbb0e976e8695b9e01e08a49fe5ffaecb6d7d46675fa940d4ba96c37e383:eyJzZWxlY3RlZExpbmVDb3VudCI6OTYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIxMDQ5ZjQ5ODhkNDRiMjE4MjM3N2I3OTFiZDIyYmM2ZDdiZTEwMWIwOWYxNDJlZTk2MTcxMWNlMDc0OTAyYmQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ2M2RhZGQ5NzhjYWVjMjQ1NWM0NDgyMGI3MGViNjZlZTAzNzA0YjZjOTNmMDY5YzI4ZmQ1OWQyZDUwY2FhMjYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJhYTRiNjUzMjJiY2E0ZTA4OWI1ZTFjZjNjYWIxMmI3NDJlZTc4MTU1NGNiNDhlNGUxODI3ZDA2Y2RmOTQ3ZDkiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVjYTNhYWE1MjY3NmJjNTRmNzZhZjVlMTg5MThkOTFkN2U5Y2ZhZDhlMTQ0Y2MxZjQ5MGFmMTMyNDQzNjIwZjUifQ"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290006_editorial.sql#L19-L59",
+          "version": "repo-lines-v1:sha256:2de2d501c2ea288714217d4b53b06c8909d7d15222d69c32f087d37cf59d8669:eyJzZWxlY3RlZExpbmVDb3VudCI6NDEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZjZWMyNzA1MjZjNmIxZjRhZGZiZTVkZDk0OGQ3Yzk4M2UxODUyMjFjOTNkMjY3MDhkYTA1ZTY4Zjk1MzM5ODYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVjYTNhYWE1MjY3NmJjNTRmNzZhZjVlMTg5MThkOTFkN2U5Y2ZhZDhlMTQ0Y2MxZjQ5MGFmMTMyNDQzNjIwZjUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjE1MzA4MWZjZTE3MDU0ODY3NzgyYTNjN2ZlYzI4ODljNjlkNWY0ODQwMDVjNDU4M2JkNzdjMjA1ZDdhNDE3MGQiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQwM2NlY2ZmYzI1OTQwMDQzMThjMmZkZDMwZjgyMGE4NmU4ZGQ0ZjkxMTdhMWQwY2Q2YmY0ZmQ0YTQzMjMxYTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_2760248a0cae416891d96af914e883e1",
+      "statement": "A catalog release is a pin list, not a copy: hq.release_items holds (entity, entity_id, version) triples naming live catalog rows, at most one release can carry is_current via a partial unique index, published releases require a publisher distinct from the builder, and build/publish/withdraw run inside SECURITY DEFINER functions serialized by advisory lock 29102026.",
+      "evidence": [
+        {
+          "resource": "repo://supabase/migrations/202610290001_catalog.sql#L138-L150",
+          "version": "repo-lines-v1:sha256:0613eb8ba25df0a443e29e4eef820f8415d7abd44af75b47fa8a19445b7b6eb3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIxZDllZmU4MWU1ZWFlM2E2YmI5NGViNmI0YWI3ODYyYTU1YmFhMzQ3MjZlNTk4YWMyYmY5YWRhYWQwOGNlMTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcwYTkwYjM2Nzg0MzQ2ZDg3NDU4OWMyMmM4NTM5ODNlOWI2YmU0YjVkZDExMzc3MDg5MzkwYzFlYzJmZDM2YzMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImVhNTYxMzQ3YzhjNTcyMzRmMDNiNWJjNWVjYWU3N2VlZGQ1NjM1ZmI2YTI0NjVjOWU4NjgwY2QyYTk2ZmQwY2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImY5NjcyYWM1NzI4YzFjNDQ5ZDY2YzE1ZmE2OThjOTM3ZDY4NzQyYWY0YmE4YWZjZWZlZjM5ZjZlMTI1YmZjMGQifQ"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290006_editorial.sql#L209-L303",
+          "version": "repo-lines-v1:sha256:c26f2709a8448560a9fd17d01504848dd635d8d41876585e7c052f055b6af84f:eyJzZWxlY3RlZExpbmVDb3VudCI6OTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjEzMjI4ZWFlZGIxMTJhYWYzN2Y0YjFmNzhmNmFmZDE1M2FlYjliY2FjNjQ5YmMzYjU3Njg1ZWU5N2RiMjIyZTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjVjYTNhYWE1MjY3NmJjNTRmNzZhZjVlMTg5MThkOTFkN2U5Y2ZhZDhlMTQ0Y2MxZjQ5MGFmMTMyNDQzNjIwZjUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg4OGY3ZjY1M2I0NjMxY2Y3ZmY3YWU3NDIzZmZiZTVhODc1OGMyMjBmYzFjNmU2YTFkOTBhYjk0NjY4MmY1MDIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjBhNzExZjI2OTUwMDBlMWY3MWU5MjU5ZTNiNjZiOTJiY2NiYTVhOTU5NmZhMjVjZWNmMzJhMGJkNmQ1MDU0ODIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5907d5ef3492416ea40acd1c85fc7930",
+      "statement": "The released_* views are the only catalog read path for the hq_api and hq_worker service roles, requiring both a published release and an approved row; hq_editor uses a parallel set of release_*/detail views that expose any status and unpublished candidates, and load_release() reconciles the two families by switching the view prefix between 'released' and 'release'.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/catalog/repository.py#L7-L55",
+          "version": "repo-lines-v1:sha256:a3571657172d0f3bdce0309836b6ce0dbdaf9d53fc7f4ab78803fdc830219404:eyJzZWxlY3RlZExpbmVDb3VudCI6NDksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNlNzgzMzY4NGI5ZmIwZjExN2FiYWVkN2M4MGJkNTdjMmRhYmVjOTA2ZDI5YTJlOWVmNzYwZTIzZGI4YmEwYWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE0MTlhNmRjYzA0ZTIxM2EzYzdhNzdhNDU2YjAxZTc2ZDFlZjc4Y2QwMGJiZWMxZDhmODE0NThmZTkzZWRjNTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBhYWMwNzE4NTIzMjBiODRhNjhmMjI2NDcxNWZmODg1NmUyMzJmOGQxMTEyM2Q2NzIxZDI5MjVhNzA3ODBmNTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImM3ZDBmMWUxMGIzNzM2ZDYzYzI0ZTg1Yzg4MDczY2Q5ZjE4MGVjZWZkZjYzZjZkZTUzNzFjZWYyMjdhYjc3NDUifQ"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290001_catalog.sql#L171-L217",
+          "version": "repo-lines-v1:sha256:1d117ac0711767852d9e1dcd7a9f925e07e53f7ca83d78f2a1fb66327c1cbcc3:eyJzZWxlY3RlZExpbmVDb3VudCI6NDcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImI5NGM1NTdhZDIxMzFmMmE4ZDQ5MTNhOTM2YjJmMTliZDNjNWQ5ZjRkMGE2OTk1ZmJmMDFiYTljMGFmMTYwNzUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQyYjU4NmUxMDNiMTYyYTBiMDdlOGM4Y2QwNzIzMGE0ODdlMDkwN2Q0MDk5YjgxMjA2MWE0ZDJlM2VjMWI0MTUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUwODI2Nzg3ZjE2M2M5MTEzZTc5N2U1MzhiMWM2MjMwYWVjZDFhMjk1Yzg1ODZmNzgwZjRhNTBkOGI2OWUxNDIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290006_editorial.sql#L103-L153",
+          "version": "repo-lines-v1:sha256:d571517efe58fa8a40a21297c6eaa65ec98529e737162c56a199d88014822450:eyJzZWxlY3RlZExpbmVDb3VudCI6NTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM0MTljNmQ5OTk3ODE4MWQ4ZjhiZGE1MzdkZGQ2MjVjMGUyNWJiNDRjMGY3ZGVlNDA0Nzk5OGY5YTg1YmYyNzUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU2NTBhZGIzODBkMDUzNWUzMjVkZGEyNzhiOWEyNjQwZjA2Zjc2YmFlNzFmNTEwMTVmZGNkYmU4YWM2ODFjMjgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhjODdkNzM0YmJiN2JiMTJiMTg4MjM2NjRiNzczMWNmMDNkYWE1MDc2ZGViNjFjYzAwNGNkMGQ3ZDk4NTYxN2MiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjU5ZDdhNWE1MGJlZTg1ZjU4NzhlMDUwOWNiNGE3ZmEzZThmMTI0YzE0M2FmNTY4ZTA5OTk1ZTE5OGEzNjE4NWEifQ"
+        },
+        {
+          "resource": "repo://tests/test_catalog_schema.py#L251-L259",
+          "version": "repo-lines-v1:sha256:2b4f524c1dc66201175ccc603e69503d43e67bea2b523dfe89ad203d4b801e1e:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2YwYzU1M2YwNjJjOWNkZmNjODg2NWZkMWUzMjMyMjIwZmQ2NjI1NjMzNTM4YzE5ZjhiOTVlNzhhMzIyNTEzZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZDQwZDhmZTg1MzE5YzA0NThiZThhZTM3MjA1MTIzNmNjOGNmMGJmZDZiMDY2MGE0N2IxNGIzZmYxNjlmOThhMiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMTFmNDZjYjRjODBhYTU4ZWViMjliMjY1OTVjNTNiYzhlZmIzNGI0NGM4NWY2YTZjNGFhOWM0NTY4ZGUzYWUxMiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjEsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiN2IyMzJkOTllMjJmZTcyOTZmMDA0N2M1YzA2YzBiNGExMmQ4MGNmOTM1MjRiYjk3MzdiZTA2NDFjMzI2YmQwMCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_e7cc14656f1e40deb6e712e9bd49272b",
+      "statement": "Content locks are implemented as lock-only SECURITY DEFINER helpers with a fixed search_path and no write permission: hq.lock_release() takes FOR SHARE on the onboarding policy row, the current release and the referenced habit versions so publication or withdrawal cannot interleave with revalidation, and hq.lock_intake() replaces the dropped hq.lock_session().",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L47-L60",
+          "version": "repo-lines-v1:sha256:627e62b76b6f2e1f430a2123f1641dabbf900b84e817f84b773e8564f385c0a2:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0MDIxNjE4MWJhZGE3NDc5NGJkYTM3YzcxNzVjODJkMDgzNjBhOGY2YzZlYjBhOGRlMjVmNjVkMDc5ZjAzODgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBiNzM0ZjE5YzJlNGNkYmRiMjA4ZjA4ZWQ1Y2YxMzc0NDNmNGYzMmM1NjEwMjRiYTY5M2UzM2RhNWQ5OTA0YTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhiOTc0ZGE0MDg2MzJhNGFhN2UyYWU4MGI4NjAzOTFhM2RjZDgyMTFjNzllY2FkN2NhOGU5NTEyOGIwMDE4MzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImEzYWRjN2UyZmVlY2YzMWQ2MjhmNmVkZDhhOTQwM2QwMzk2OTY0MWFlZjllZjY3ZWQxNmExMDc2MDMwYTgwMTYifQ"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290003_profile.sql#L33-L46",
+          "version": "repo-lines-v1:sha256:ce0a2498e038763d8aa8dd9e23aaea1c5605a90970fd8ce2f0b0ffa8ad550cc1:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjM3ZjcxZTIxNTI0MzlhOWY0MDFmZTAzZWNmNmYwZTY5YjE4NGVkYTA0Y2IwNTczYTQ0MjAyZGYzZDRlZjg5MGEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ5YzA5MTgzZDNhMzEwNmZiZDY1YzEwMmNiODY4NjEyZmRhOWJkNGU3OTkwODhlNjVmYjJjZjFlMWI2ODhjZDMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImViMWZmY2NjNWI1ZjFkODBiYjUyNzE2YzA2ZjZkMmM3MDgxZDM0YmExZWU5MDI1NTgyNjkxMGNjODBlMTgyNmMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610290004_intake_switch.sql#L35-L44",
+          "version": "repo-lines-v1:sha256:8ac35f37bab2b24f85caec2a9dc19113dd7cc3a7220eb5b634d80c1d40dd9cef:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjA2ZjExNjViOTI0M2VlYzcyN2RjZjU5YTNiOWMyMTFjMzA5MWIwM2RjZTQ1ZjEwZjA4ZWM4MDUwYmJlNGZhZjUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImRhNjRkZWRmNzdlNDQ1NWI0MDUyNDM2YTRiN2MzYjNlZmNhZjQxOTYwOTQzMGY1YzEyMGUwNGU0YWMxNTNlYWYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjFkMjE0NmE1NDBlZDdiNzc0ZTIyZDJjNGUxYzkzMmZkNDAwOTUyNWQzMzAxNWFlMWQ2NGNlOWFhYWY5NDM4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_a15de59858a946c9a6ccab828beec691",
+      "statement": "Migrations have no framework: scripts/setup_db.py serializes concurrent runs with advisory lock 28102026, records each file's name and SHA-256 digest in public.hq_migrations, raises RuntimeError when an already-applied file's digest changed, skips files the Supabase CLI already applied, and never resets an existing database, making schema evolution forward-only.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/setup_db.py#L11-L40",
+          "version": "repo-lines-v1:sha256:35d606710deb7bdf91a6b079d9e9f3be56970444fc78ab20b54c89a3f2db6667:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFjYmI5MGZhZDkwM2ZiOGU3YzJiOTFkZGJmMTY4N2U5NjE3YTBkODU3OWY1Yzc1NGVmY2ViYWM4ZjA0NWRlZmEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU1MjcxNWVjNzgxMTE0YWYyOTFmYmQ0ZmZkYTlkNDY1MWZkMTk5NDNkZWYxZWRiM2Y4NGZiODU5NTliNDczMzAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImEzMTNlNDRkODUyOGI4YzE4OWE1NWJiOTE2YjNjZjg0NmQ0MjUwZDI0ZWQxMjhmNjkzMDM3MmUzODhhZjU2OWEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjFkMjQwNGY1ODViMjc5NWJhNWEzZjIzNTVlY2U0NWE4YTY1NjExZDIzOGJiYjRkZWM0Nzk4MGVjZDQwNzAxMmQifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_8232c1d7eb524597b4dff180dab5955f",
+      "statement": "After applying migrations the setup script grants hq_api, hq_worker and hq_editor to the connecting login (needed because SET LOCAL ROLE would otherwise fail), runs supabase/seed.sql, then calls LangGraph's PostgresSaver.setup() with search_path=hq_checkpoint and grants hq_worker usage plus DML on that schema's tables.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/setup_db.py#L39-L45",
+          "version": "repo-lines-v1:sha256:ecdbcf7bab58c529744de671fc4b197c5bc725b937fa230f4999567e9f44263d:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYTM3NzE1NzRmMTZkNGRiODI4OGI5ODI1ZjZjYjEzNGUyYjgxYjhiOGNhNTRmNDBhOGEwZGEwNzExYjYzN2ZjNiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMTUwMzYzMmU4ZjY4NzBkNjRiODZhZDg2NDk0ZmRhZTY5ZmUzYmY4NTFlYzcwNGRiNzhkMjVmOTg0ZGE2Y2YwZSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYzQyNTYwOTNlNTZjYTgwY2UxMTI1MDUzYmIwNTMzNGUwZmZjOWQ2MTU4ZjY0MDdlYjRiMWI5NGE5NTZiYzliMiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjEsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZWE1YTU0Njk2MDk2MzNiYjYwZDhiNGNkOTY2Mjc4MGI5M2Y5NGVlZDZmZDNhOGQ0OTEzMjBiNDczNGZkZTcwNSJ9"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610280001_onboarding.sql#L1-L7",
+          "version": "repo-lines-v1:sha256:b8a298221539fc3171005521c2ca52b35153a0fafc152c3459e6f7be1d3dad94:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjM3MTM0NDFhYzg1M2NkZTc4ODg3OWQ5ZDI1NTVkOWY1ZDk2NDUzMzJmMDg1ODY4MDE3MWRmYTJiNzUyZGU3MSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOWY0MGQ1NjQ4MjU3MmQyMmYwYjRhOTczMzliODM0ZWJiMWIxN2E3YTU0NjQyZWRiMGFlMjQ0MWUyNzFjNDMwNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNWJlNzkwMWVmM2RhZTljNWIyOGUwY2U1ZjQ2NDY2YjAyODQ0MmQ3NzFlYjdiZmU2OGRmOTJiYWJjZTJlMzFlYSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_ece2f6109cb04ec9b88276d7841265a9",
+      "statement": "supabase/seed.sql is an idempotent DO block that builds development release 1 (five goals, four concerns with weighted goals, five habits with levels/goals/prereqs/tags/variants, fifteen chapter templates) by setting status to approved with a fixed reviewer distinct from the author, then inserts and publishes catalog_releases row 1 as is_current; it is a labelled development fixture that scripts and tests depend on verbatim.",
+      "evidence": [
+        {
+          "resource": "repo://supabase/seed.sql#L1-L88",
+          "version": "repo-lines-v1:sha256:10487d29b4f390bded94ce643e134a416cb531ee422fa2dc93827d07ce691f35:eyJzZWxlY3RlZExpbmVDb3VudCI6ODgsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMzYzhlODllZGM1OGY5OWFhZDE3NjY0NmUxYzZhM2NkZGJjZGVkYTY1YzhiMDAxYjExYjNlZjdhODY1ZjY1NWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIxOWEyOThhOTM4NTEzZTIxNDEzZjlmZGQ5NzJkZjRjYTAzNzU3M2QxOGU5MDkzMWU3YTQ2ZTRkYzMxODExYTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjowLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjVjYTNhYWE1MjY3NmJjNTRmNzZhZjVlMTg5MThkOTFkN2U5Y2ZhZDhlMTQ0Y2MxZjQ5MGFmMTMyNDQzNjIwZjUifQ"
+        },
+        {
+          "resource": "repo://tests/conftest.py#L55-L71",
+          "version": "repo-lines-v1:sha256:54b4eecea3ffcc95badbe0ce8d15950c664f4b538315186b8557f0f6b865ffb3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhjNWIwNTkxNWNkMmVlNWQ1Y2ZhYzI3OGQxNjUyYTllNzViYjYxZGExNTk0NTg0OTJjZjU4OTFkYmNkMDYxYTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlYjcwMjU3NTkzZGEwNmY2ODJhM2RkZGE1NGE5ZDI2MGQ0ZmM1MTRmNjQ1MjM3ZjVjYTc0YjA4ZjhkYTYxYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhiOTc0ZGE0MDg2MzJhNGFhN2UyYWU4MGI4NjAzOTFhM2RjZDgyMTFjNzllY2FkN2NhOGU5NTEyOGIwMDE4MzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZiYjk4YjdlZWVhMTMyODU2N2QxY2UzN2JiY2NjNThiMWVjYzEwMDk4NTMxY2Y2ZDViOTQ0ZTBjYTllMDM0M2MifQ"
+        },
+        {
+          "resource": "repo://tests/test_catalog_schema.py#L232-L248",
+          "version": "repo-lines-v1:sha256:c9968881abbe88d91fb5a22530b0000d7730ac85e4ac15ec77c15785528c8210:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMwZGY2OTRjMGM1MWFhZDU0ZDQwYWZlOTRmNDA0NTljOGE0MzAwYWQyNzJlZWVjOGY1MzdhZGNiYWM3MjI0YjgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImViNjg0ZDRkYjcwYTZkZDA5MmUwN2ViMjIxZjY0NTE3MDBjN2IxYjdkMmMzYjNhZmIyODk1M2NiNzM0NTJkOTgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImJlYjBhMmYyNzYxYTIyNjRiOGNiMzRiYjcyMTRjOWQ1ZjJlNDY3NDBmY2YxMDc4YWUyYmQ4Y2Y5N2ViMjVkYzgiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImQwZmUwMDgxNTllZDRiMjdkOWQxM2FhYTI3OTM1MzJlYTQyNTg4YmE2MDkwNzY5YTUyMThjZjVkZTRhZjI0MGIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_5e7911b260f643ab89c34e8a2ac9db40",
+      "statement": "hq_checkpoint is created as an empty schema by migration and populated by LangGraph, and worker.run_once() opens a separate autocommit connection that sets ROLE hq_worker and search_path to hq_checkpoint; each attempt rotates checkpoint_thread to '<job id>:<lease token>' and copies a prior branch via resume_thread, so an expired-lease worker cannot mutate the active checkpoint branch.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L588-L595",
+          "version": "repo-lines-v1:sha256:ae115af76e55e688ad33cdb8cdbe1494ae16ff178f6e67bd33f83e86f6f59b11:eyJzZWxlY3RlZExpbmVDb3VudCI6OCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODBlODE0ZTViOTc0MTEzNGRhZWViNTJiYTAyMDIzOGQ3ZDFlZDBlMmY4MDcyZTc0MmVhN2MzNzE1YzI4M2FmMCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYmIyYWNkODIzODc4MTM3ZTFkN2RiNWZjZjI2NDYyNGFkYzhiMjZlNjU5Nzg1YjI1OTFhY2QwN2Q2ZWJjMDMwNiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYjA0YWNiMzhiMzY3ZjdlMGI4ZjM5MGM2ZjFkZDliZmRhYjNiZDIyZTMzZjIzOGE0YThiMDA5OWM0OWIxNzViMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMDkyM2E4YjU1OTgyZmI2NmJkZTMwNTg1MGRhMWFmNjE2ZTM3ZDYwZjM2NjQ2NmFkM2RhOGU4NWQxMjkzNmRkMiJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/worker.py#L150-L169",
+          "version": "repo-lines-v1:sha256:7ab96bd870c0ce88bf0dfbba218f3acb63b4180099141b162c5b8e9e070227c4:eyJzZWxlY3RlZExpbmVDb3VudCI6MjAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImZiMDc4ZjRkYWNjNzVjYmM5YThiMGQxNDQzNmYxOWQxMjVmYmI2YmFiYjQ1YWU2YjAxNjEwZjdlNDY3MmViYTciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU5Y2U4NDUxMzIxZjk4MjZmNWQ2OTczZTQ1OTA4ZTc2ZDczNjk0N2M1MTU5NTc0ZGMwMmIyZjZmMTdmNTUyMjUiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdkYmRjMjY4ZGViNzIzYzBmYmQ4M2ZkZTA3MTc4ZTkxMjNkZTU4NDk1MTI2NGE1OTRiYWRhMWIwYmYyYTQ4MjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjJhZDJmYThjYTE2ZTNhZjEwZWYwZjY4ZDg1YmI3NTI5MTg5MjAwNzgxNGY5Yzk5OThiNDQ0NTEwNWExZGU4NjQifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/worker.py#L53-L58",
+          "version": "repo-lines-v1:sha256:4070d8ffd28d453dd84aada0067fcffd7c16cc5a892c89adff148546923d226b:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNjY4M2VhZDVjNDRhNjE0MzM0OTM0NDExYWMyZWY5NzZlOTRmYzE2MWIyZjAyNzRjOTU3ZGY1ZWU5OTE3MmMzNCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMmE5ZjhjMmJjN2ExNDFhMDIyYWYzZmViOGFiNTAwOGVjMjU3NTdlZjI0YWNkMDQ5ZjUwODlhNzRiN2M5YWU4MSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiNDc2YjliYWUzYmU5YTU1N2E0MjdkYjE4Yzk0Y2E5ZDc1YjFkYjhmZjIzOWViMjkxYmEzOTFlYTY4MzI0MmUwNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjMzYzE2ZWE4OWZhMWJkNWQ1OGJiZGU1N2ZkMTgyZWIwNjRmYTIyMTYzYjRjMTkxMmEwZTIyODdmNzkxNWQ5MyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_3055f84e7ced426c934d9f5dee3fabd6",
+      "statement": "Publication fails closed in a single transaction: the worker re-reads the job FOR UPDATE while verifying lease_token, lease_until and deadline, re-checks intake version and current plan version, re-checks profile version, then revalidates sources before inserting the proposal, so any state change yields no proposal row; only provider or infrastructure exceptions requeue with attempts*2 backoff.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/worker.py#L170-L221",
+          "version": "repo-lines-v1:sha256:3496b2e25adde7ad1da879c4110620d34bf654ccf664fb856ffd316eb4f20acd:eyJzZWxlY3RlZExpbmVDb3VudCI6NTIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImQ4NjMwMjRhNzJiYWVmM2JkZmI2NGNkZDM4NjZjMjFhZTcyNTdlZjY5MmQ4N2NhMGRjNTliZGYxNTdiNGRmY2UiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjZkMDAwNzg3NWRlOGY5MmQ5MmI3ODdhMDE4YzE2YzAwMDQxOGJkNWY5NDk5MjNiOTBmNGQ2M2M3ZWMxNmQ4M2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEzNzcwMThhN2QwYTBkMTU2OWRhZmQwNTY2YzQ4NWFjNWI3YTJkZTZiYzQwYjcyN2MwMjM2ZTczMTdhNzVmNTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjAyYTgwOWIxNjg4ZTkzYWI3NDI3ZDBjZThjZGI0ZTQyNmQ1YTk5NmNhMWIzNjQ5NDAzZmI3NGM4NTBkMTRjNDIifQ"
+        },
+        {
+          "resource": "repo://tests/test_recovery.py#L19-L58",
+          "version": "repo-lines-v1:sha256:58ce2815a67085f7b54648e9d9ef95aa8ef7d65f0ca0121a790dbd453dfccad4:eyJzZWxlY3RlZExpbmVDb3VudCI6NDAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU4N2JmOWZiZTRmOTNhMDhjNjRhNzBmZWMxMTY0NDkzODQ5YmVhMzRhM2YzMjViYmM3OTBkYzVjNjI0MzM2OTgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY2M2UzNTJjOTM3ZjdiOWNlNmNhYjkzODBiMTBjOTVjZTAxMDFkMzhhMDU1ZWZhNDQxMDk5ZjNkZTk4YjJiNTQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjdiOGRkZWUyYTdlYzhhMDZkNWZhN2UwZmM3ZjdmZTdkMGUwMGViODc4YjFmYTIwZjdiMWY1ZDNmZGE3ZTkzOTUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjUxNWViYTZlZmU1OTQzZTRkMGM3ODkxYjRlODIwOGM0YzY4YWE4MmYzNDU2NGE4NTNhYjJkNDAzYjcxM2I5NDgifQ"
+        },
+        {
+          "resource": "repo://tests/test_security_and_changes.py#L108-L124",
+          "version": "repo-lines-v1:sha256:4e1bc26da2a93bf38ac5f6b2914a6defbc936d85b1f06db0b13f69d068b49c95:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQzODVjZGRlMzhhY2IwYThjNDgxNGJmNGU0ODAwNDFiNWY2NjcwM2VlNjVhMDJiNzBmNjk4NjdkMTk5MTVmNzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlYjcwMjU3NTkzZGEwNmY2ODJhM2RkZGE1NGE5ZDI2MGQ0ZmM1MTRmNjQ1MjM3ZjVjYTc0YjA4ZjhkYTYxYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjU2NTczMzdkNDY0YWI2OWFjYzU5NzQwMTFiMDYzMTYzN2I2NDRiNGViZjc2ZTdjYzZkNDMzOGFjZWU1N2QwNWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI3ZDM3M2FhZjliNjE1ZjgxMDI1NzA3NDg4M2MyYmZiYjIwMmJjNzg0NTExMzg4MzVlOGRmNTVmNmY2NGQ1ZjIifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_519ee4a43af54d979d383edddec981e0",
+      "statement": "hq.policy holds a single onboarding row with version and max_active_habits; the version is copied into each proposal as data.policy_version and compared under the release lock at confirmation, so a policy bump invalidates in-flight proposals rather than silently applying new limits.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L47-L60",
+          "version": "repo-lines-v1:sha256:627e62b76b6f2e1f430a2123f1641dabbf900b84e817f84b773e8564f385c0a2:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0MDIxNjE4MWJhZGE3NDc5NGJkYTM3YzcxNzVjODJkMDgzNjBhOGY2YzZlYjBhOGRlMjVmNjVkMDc5ZjAzODgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBiNzM0ZjE5YzJlNGNkYmRiMjA4ZjA4ZWQ1Y2YxMzc0NDNmNGYzMmM1NjEwMjRiYTY5M2UzM2RhNWQ5OTA0YTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhiOTc0ZGE0MDg2MzJhNGFhN2UyYWU4MGI4NjAzOTFhM2RjZDgyMTFjNzllY2FkN2NhOGU5NTEyOGIwMDE4MzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImEzYWRjN2UyZmVlY2YzMWQ2MjhmNmVkZDhhOTQwM2QwMzk2OTY0MWFlZjllZjY3ZWQxNmExMDc2MDMwYTgwMTYifQ"
+        },
+        {
+          "resource": "repo://supabase/migrations/202610280003_analysis_policy.sql#L3-L5",
+          "version": "repo-lines-v1:sha256:38fe19e8cf6cc81c66ea38e908e32a94dbe834d88f16c7768711d8ff6571b93b:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMDk2ZGFmZDMwMTcwODBkYWVlMWViNGI2ZDUwNTQ0YjhjMDFhZmEyMDkzOGQxYmZkZTY2Y2I5NDE4ZmNlNTEyZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMDcxNmRkZGEyMmE3Yjc1N2U2NGM2YmQxODZlYzgzMTIxMTczNTVkYzE0MDg0ODgxNTk3YzI1MzJhNjNkNDNlZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjIsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYWQyYjY5MWMzZDNlNDcyODE1MWI5ZjU1NDc5ZGE4ZjgxYzU5YmMxZDgwOTI1OGNlYjBjNTcyZWUzMDc5Y2QwNyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_042f10693f6d4e39bcd60ff7385646c6",
+      "statement": "Readiness is a schema smoke test rather than a liveness check: GET /health/ready executes SELECT 1 FROM hq.children LIMIT 0 under the default hq_api role and returns 503 on any psycopg error, collapsing 'database unreachable' and 'migrations not applied' into one probe, which scripts/render_start.sh relies on by applying migrations before starting uvicorn.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/render_start.sh#L1-L6",
+          "version": "repo-lines-v1:sha256:b76d669ab718f7575beef5266acad9ff90c2936c9ecd00832185331cae726521:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDhjNDEwOTc3NjNiN2U5MTc5MzMyODY5YmI0NjlmMDcyODUzMWFiYmE1MTE1ZmQ0NjAzYjQzNzkxNjU0MjAyMiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYTZhNzMxYTY1Y2UxNmQxNDVjODE3MzgzY2ExYmM1ZDc1Yjc2YTU5ZmEyMWI0NmQ0MDQwZTk0Y2VhODYyMTlmNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjAsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjAsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTNiMGM0NDI5OGZjMWMxNDlhZmJmNGM4OTk2ZmI5MjQyN2FlNDFlNDY0OWI5MzRjYTQ5NTk5MWI3ODUyYjg1NSJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/main.py#L123-L133",
+          "version": "repo-lines-v1:sha256:b87c34cbb8f799662dff2c026c2b775c708b9db571d6674acc302d4d7bb69d00:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjkwNTEwZTAzODBjMWZkMTJlZDZhN2M4ZWZmNTgyZTdlZTQ0MDcyZjYxYmY3MWQzZjM5MDQyYTRjZmMzZWZhZDYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijg5MjUyYTJiZjYzODYwY2U5MWM0ODA1NDg0ZjFhM2IxOTYwODFiNGU5OGRlNDdmZTdhMWJmZmZhYWUwMTA4YjEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijg0ZThmMTE5ZTRkZWVkZmExMDg2ZjZjM2EwYTg1ZTllNWM4MjQ5MWZhM2NkNDUxZTI2MTNlODY3MmNlOTQ0MmYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjIwNDNkOWQyMDdiY2Y3N2VlMjllOGUwOWQ3ZTIwMjExNjU0ZmViMWU1ZmU2N2Q4Y2I4NTc4ZDRkYzQ0MzgzZGMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_dbabd1a91c8c4adc9aecfc079d65acd3",
+      "statement": "Schema behaviour is pinned by database-backed tests rather than only by unit tests: catalog immutability and view visibility in test_catalog_schema.py, profile defaults and column-level grants in test_profile_schema.py, flag and catalog_requests constraints in test_plan_flags_schema.py, and a conftest fixture that truncates the household and catalog tables and replays seed.sql so release-1 content is itself a test dependency.",
+      "evidence": [
+        {
+          "resource": "repo://tests/conftest.py#L55-L71",
+          "version": "repo-lines-v1:sha256:54b4eecea3ffcc95badbe0ce8d15950c664f4b538315186b8557f0f6b865ffb3:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjhjNWIwNTkxNWNkMmVlNWQ1Y2ZhYzI3OGQxNjUyYTllNzViYjYxZGExNTk0NTg0OTJjZjU4OTFkYmNkMDYxYTUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlYjcwMjU3NTkzZGEwNmY2ODJhM2RkZGE1NGE5ZDI2MGQ0ZmM1MTRmNjQ1MjM3ZjVjYTc0YjA4ZjhkYTYxYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhiOTc0ZGE0MDg2MzJhNGFhN2UyYWU4MGI4NjAzOTFhM2RjZDgyMTFjNzllY2FkN2NhOGU5NTEyOGIwMDE4MzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImZiYjk4YjdlZWVhMTMyODU2N2QxY2UzN2JiY2NjNThiMWVjYzEwMDk4NTMxY2Y2ZDViOTQ0ZTBjYTllMDM0M2MifQ"
+        },
+        {
+          "resource": "repo://tests/test_catalog_schema.py#L28-L50",
+          "version": "repo-lines-v1:sha256:bde1122db7dfd7dad43af6c51010d5659cdeabb95e703f04657871ae988de95b:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQzODVjZGRlMzhhY2IwYThjNDgxNGJmNGU0ODAwNDFiNWY2NjcwM2VlNjVhMDJiNzBmNjk4NjdkMTk5MTVmNzEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM5MjIwNGM2NWY1MDJkYzE2NDU0YjYyNDA4NTZhOWFiN2FkZTAwM2E4ZTlmODYzMzNlYzBiN2M5ZTQwOTQ5MWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhiOTc0ZGE0MDg2MzJhNGFhN2UyYWU4MGI4NjAzOTFhM2RjZDgyMTFjNzllY2FkN2NhOGU5NTEyOGIwMDE4MzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjExM2M2MjIxMmUzYzI2YWJhYWRmNmE4OTM0M2Y3N2YxMzEyZjllODM2ZjkyYjRhNThlYmQ5N2NlMzVlYTAwNGMifQ"
+        },
+        {
+          "resource": "repo://tests/test_plan_flags_schema.py#L10-L54",
+          "version": "repo-lines-v1:sha256:11d9f01612fccd78aa38562561d81a5576b27c2df78ba62a7fcb3042e6742cbc:eyJzZWxlY3RlZExpbmVDb3VudCI6NDUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdmOTE4MmFiYWIyMGIwNTc4YjQ0ZGQ3MzdlYzUzZTVkODExNDVhMGZhMGRiNzY5MGJkNDk3NmMzMjhhYTBhZGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlYjcwMjU3NTkzZGEwNmY2ODJhM2RkZGE1NGE5ZDI2MGQ0ZmM1MTRmNjQ1MjM3ZjVjYTc0YjA4ZjhkYTYxYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjEwNGYwYjNkMjIyMDk4MjBhYWU0NjMwNTA0NTNhMDNlZDIzZTkyMjAwYjc3ODM2NTRjZGYzZDc1NDAyN2YzOWUiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjYwY2RiYTAzYTEzMjUwZjg5MDhkOWM5Njk0YzY1YTVkMzAxOTEzNmUzYmY3YzUxZDExNzNhMGU1NDFjZWE5ZWEifQ"
+        },
+        {
+          "resource": "repo://tests/test_profile_schema.py#L23-L69",
+          "version": "repo-lines-v1:sha256:a96e60da44feb41c7c9acb5ec8214764c2e310a3aa915f2be70a8998a9fb4806:eyJzZWxlY3RlZExpbmVDb3VudCI6NDcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjYzNjQzNDhiNWU5MTNlZWQ1MDdkZWUxOGI5ZWJmYWY5ZTJhOWJkMDFkMmQwMDc2MGMwN2RiNTIxNzc2OTZlNWQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNlMTA0MDQxZDYyNjQwNjM2ZTU5OTAzOTY5MjJlZGZiNzhmYmVmNjE4MDU5YjBlNjI3MWYyODZlNTMwMmEyYmEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ0MjUwOTUwMjFkNDA1YWY1ZTFkYjIyZGY2M2M3NmUyYTBjNjgwY2Y2ZTY1ZjEyYTVlMTk4YTMyZDE1MWNlOGYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoyLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjczZTJkZDc0ODhhYWJkN2Q2MWEyNjJjM2ZjMzk1OTJjZWE2YzM3MDZmNjk3ZTlmOTRhYjBiMWM4NzdjNTExMjcifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-30T00:13:47.181Z"
+  }
+}

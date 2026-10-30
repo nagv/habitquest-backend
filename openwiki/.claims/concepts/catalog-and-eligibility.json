@@ -1,0 +1,206 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:2a7cb2c83a46e4f89daf02c03a4eee01b5dd1c1f9ff299bcddb24c370bc2196f",
+  "claims": [
+    {
+      "id": "claim_0db2f92c2c184557851ec295090afae5",
+      "statement": "The catalog domain consists of immutable versioned entities bundled in a Release: Goal (objective with title and description), Concern (pain-point label with synonyms and goal weights), Habit (activity with levels, goals, tags, variants, supports, and withdrawn flag), and Chapter (world-goal narrative title). Habit.presented() selects interest-based wording variants without changing the underlying activity.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/catalog/models.py#L10-L75",
+          "version": "repo-lines-v1:sha256:48d1784c4a6f166d52990dd92228cbf0c462278d07b447a7b209c30b287ed9b3:eyJzZWxlY3RlZExpbmVDb3VudCI6NjYsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImU4ZDhiN2VjZGYyZjU1NmNjNzVlYzBkNjE0NjZlZjZhYzI2NTRkMDRhNTcxMjkyNmJhMTFlODVjY2M4YmQ5MGQiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjdlYjcwMjU3NTkzZGEwNmY2ODJhM2RkZGE1NGE5ZDI2MGQ0ZmM1MTRmNjQ1MjM3ZjVjYTc0YjA4ZjhkYTYxYTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjM4NjdlOTcwODI4MzlhMmIwOTI5NTM4YTA4NzA3OGQ1ZDBhMjUzZGZjODEyMDFjOWU0NjU2YjY0MjI1ZDQwNWYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImI2MmYxMjVhMGUxOGQ0ZmI0OGRjNTJjODI0ODkzZTZhYjY2NGE2MWRhZWZjZTRlMWQ5YTE1OTM2NDc2MDdkM2EifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_521d1a152aef4f12855fdb054fcaa637",
+      "statement": "The eligible() hard-filter applies predicates in code order for each habit: withdrawn, serves at least one requested goal, not already active, covers the profile's age band, all topic tags are opted-in, all accessibility needs are met, a level fits within available_minutes, and routine_anchor presence sets needs_cue. Any failing predicate discards the habit.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/catalog/eligibility.py#L16-L45",
+          "version": "repo-lines-v1:sha256:1cabea1ddb243a3b508e4a9a292847a6b8be68c8ee02065b9f6d85d268daf4c1:eyJzZWxlY3RlZExpbmVDb3VudCI6MzAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI3ZjVhNDE3MTdhZTY1YmI0ODUzNzQ2MzFjMTI4YzFkNmFmNWVhYTY1YWUwNmEzMzQxOWZhMGFmYzBlNTgxN2MiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImNhMWE0MDNlZDllOWNkNzVjMmIzZTljNWM2YzI2MjM2ZjhhMTc0ZWZjYjY3MjgwMDBhMmE3MzA2ZWEyNTAyMWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjRiN2JlN2UxZGU1OWMzYmEwNDZhNmZjOGJkY2M2ZTFmMjBmNWU2ZGQ0YzE1NmNiNTAyZWNmM2QxOGYxOTdiN2EiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFiY2MxZDEwMGEwMGZiN2Q4MjhmYzllOTgzOTMyNGZkMmExNTNhNjYzYzg5MTQyZGEwMGUwNDBiYWMwNDhiYmYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_ffdcf80690594a62ae97dd44c5f5f8a1",
+      "statement": "A Candidate.needs_cue equals True when the habit's routine_anchor is absent from the child's routine_schedule. The habit remains eligible for ranking and shortlists, but cannot be picked by the reviewed template plan or confirmed without adding a cue.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/catalog/eligibility.py#L45-L45",
+          "version": "repo-lines-v1:sha256:ca1a403ed9e9cd75c2b3e9c5c6c26236f8a174efcb6728000a2a7306ea25021d:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2ExYTQwM2VkOWU5Y2Q3NWMyYjNlOWM1YzZjMjYyMzZmOGExNzRlZmNiNjcyODAwMGEyYTczMDZlYTI1MDIxZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiY2ExYTQwM2VkOWU5Y2Q3NWMyYjNlOWM1YzZjMjYyMzZmOGExNzRlZmNiNjcyODAwMGEyYTczMDZlYTI1MDIxZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOGI1NThiMTI5ODk4ZDQ4MGEzNDU0MTZhMDY4MGQwZTkwODMxOTU5Y2JmOTgwZTlhY2Y1YTY0NDc3ODMxNmMxOCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjEsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYWJjYzFkMTAwYTAwZmI3ZDgyOGZjOWU5ODM5MzI0ZmQyYTE1M2E2NjNjODkxNDJkYTAwZTA0MGJhYzA0OGJiZiJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/catalog/scoring.py#L102-L105",
+          "version": "repo-lines-v1:sha256:0c36361df53e8a83d9b7ec9e2b80828ffe9b197c381fa3a4f93ba5d60e500142:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjhkMDZlYjJiOGY4MzgyYTBlOWMzYjhiZjExYTUyNjEzNTFkOTRkNzY3NTIzYjQ0MWVmNzQ2NDZmMDI5NDI3OSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiY2YwZjUwYjE5YzNiNDYyNTM3ZTdiM2ViMjBmMWYyODVlNDEwMDY2OTEwMGI1YmQyYTdiY2Y3OWQ1Zjc0NGEzMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYjFjZTY3YWNkZmQ3MmFmYmU1Yzg5OTAwNThkNzcyODRkZjkwNmZhZWMzZGMyMzBjNDBlODhkOTJjNmRmNTRkZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjNkNjE0ZTAyZjI5MmNhOTRmOWY4ODYzYjc5NGEzYzE1OWNmMTAyYWJkOTdhMDAyZmZjZDk4NWEzNGQwOTRhMCJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/catalog/scoring.py#L94-L94",
+          "version": "repo-lines-v1:sha256:f678c57f73bc3457d2a601df0b15274aa773fbd4090542c54854493878076b54:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZjY3OGM1N2Y3M2JjMzQ1N2QyYTYwMWRmMGIxNTI3NGFhNzczZmJkNDA5MDU0MmM1NDg1NDQ5Mzg3ODA3NmI1NCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZjY3OGM1N2Y3M2JjMzQ1N2QyYTYwMWRmMGIxNTI3NGFhNzczZmJkNDA5MDU0MmM1NDg1NDQ5Mzg3ODA3NmI1NCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYmM2MjE3NDc1MDE0OTA1ZmQyZmQyZGUxYjc4OGE2NDIwNmNhOTI3Yzk1NGFiMTEwMDQzZDA4OTQ1ZWU2NjE1NSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTQ4MWMxNzZjNjg4OTYyOTJiOGYzYjUzMWIwMTJiYTBjNTBlY2Y2YzVkYmYxNzFlNTM1MzMzNDNmNmVjMWNhZSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_bdccd90c4c79469fb0fa1e8873914b24",
+      "statement": "score() ranks candidates using four deterministic components: goal strength weighted by parent priority order (first goal weight 1.0), INTEREST_BONUS (0.5) for matching interest tags, PREREQ_BONUS (0.3) if the habit supports another eligible habit, and LEVEL_PENALTY subtracted by chosen level (simple 0.0, standard 0.1, stretch 0.3). Ties break by habit.id ascending.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/catalog/scoring.py#L29-L43",
+          "version": "repo-lines-v1:sha256:650d5e8d986bdd7b6c689303b3f0cd4106e8c0b828a9d44d84130d37bb6bc545:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJkMmY0NzQ2YWUzYmNjZDhlMmQyMTk2M2I5NzQxYzRlYzQ1YjllMGRkMzk1ZWZkZWZlYjljNzAwYzRiYzhhZTAiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6Ijk5OTgxYmJlOGVhNjZkNzkzMjlkNWE0M2ZjNDk2OGYwNzFiZWRkNWM1MTA2ZDQ5YmFkMTdiMjA1NDY1MmI5OTEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNkZWU0YjIwYjlmYmMzMDMxN2Y3MTg0ZmIwMGI5NGQwZjQwMDY0MTU1MjA2MDBjYmE5YTYyYWVlZmFkMzhmNzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjQxNGIyZDczNDM1ZWI4NmNlM2YzYTEzMTZkMzBkNjMyYjQ3YmI1MDE2MGNlMTc1ZDE2ODEyNWQxM2Y5ZjNjMmIifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/catalog/scoring.py#L7-L12",
+          "version": "repo-lines-v1:sha256:7a6a2e657a67f09baa5c4bd9940ec5fb44ce265deff4af18fffe41abb762919e:eyJzZWxlY3RlZExpbmVDb3VudCI6NiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNmY5ZGZjZDA2NGVmN2Q5OTVlMTUxMjI2YjMwNzE4N2ZlZmIzOGY0MWRhOGVmZmE4NTQwMDY0MzI4ZTNmNTdjZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjFjNjMxYmZhYzZmMGI4NGJlMTY5NmUwNmJlOTlmMzM4MDE5ZmMyYzBiOTQwYTViYzA1NGU4MjQ0ZTlkODFiNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZjljZjE0MmFlNzQ4MjNjMTdlYTU5ZGIwNjI3OWUxNTM5ZjhlZDkzYmNjYWIxYWNkOTQ2M2EwNzFlMWI1MjU1ZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiN2RhZmY3NGExZjE1YmY1MmQ2MWFiMzU0MmZiMzJjMzRlOWNkOTg0ODE2YjBkN2ZhMWI5MTI5YjljZmRkNDgyOCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_e5dbcb2e8f9e4641bbbb445b22b56d1d",
+      "statement": "RANKING_VERSION is stamped into every proposal document to trace which deterministic scoring formula and template logic produced it; any change to scoring weights, penalties, tie-breaking, or template_plan behaviour must update RANKING_VERSION.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/catalog/scoring.py#L7-L7",
+          "version": "repo-lines-v1:sha256:6f9dfcd064ef7d995e151226b307187fefb38f41da8effa8540064328e3f57ce:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNmY5ZGZjZDA2NGVmN2Q5OTVlMTUxMjI2YjMwNzE4N2ZlZmIzOGY0MWRhOGVmZmE4NTQwMDY0MzI4ZTNmNTdjZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNmY5ZGZjZDA2NGVmN2Q5OTVlMTUxMjI2YjMwNzE4N2ZlZmIzOGY0MWRhOGVmZmE4NTQwMDY0MzI4ZTNmNTdjZSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZjljZjE0MmFlNzQ4MjNjMTdlYTU5ZGIwNjI3OWUxNTM5ZjhlZDkzYmNjYWIxYWNkOTQ2M2EwNzFlMWI1MjU1ZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZTczMzQyNDJmMTAzOGE1ZGMyZDhjOTgwNjQ2ZmU5MWQwMjMyNDc4N2Y1ODEyODUzNGNhM2E3NGJiZmE0YTcwMiJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L43-L44",
+          "version": "repo-lines-v1:sha256:64207f016c4cccc7ab09125a7ee56250968c8c072927d94b9c4491f4d381d7d4:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMGI3ODQ2YzYxMDBmYzExNDQxNGI4MjZhMzRjYjlhYTI3NzEwMzRjMTlhMmY4MWI5OGJmZmY3ZjJkMGVlODI0ZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYzNjYTA4MGE2ZjUzZmU4MmIzMjE5OTI0ZmUwYjc1Yzk4OTJkNDVjM2I4N2VlYjliOTQ5OTY1M2YzY2MzNmQzYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiM2RmZDY4ODQ5MzhmOWI1YzJkNDY5ZjUwZjYwYjMxOGZlZjU4NTYyODdlZDlhNzM0NmExNTRmYWQ1ZWFiODg5YiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZWIyMjRmZTViNmRkZWEzZTc5YmZmYzUwNWNhZGU5MDRjZWE3ZDM1YmIwNzA2NDY3ZjYxOWQ5MzQyZjYyZGM0ZSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_b1f60bb14a394c0db1d765dececf67df",
+      "statement": "PRIMARY_STRENGTH is 0.8. A habit covers a goal strongly when habit.goals[goal] >= PRIMARY_STRENGTH. A habit covers a goal weakly only when every cue-ready alternative for that goal has already been chosen, so no unpicked dedicated option remains.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/catalog/scoring.py#L12-L12",
+          "version": "repo-lines-v1:sha256:21c631bfac6f0b84be1696e06be99f338019fc2c0b940a5bc054e8244e9d81b5:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMjFjNjMxYmZhYzZmMGI4NGJlMTY5NmUwNmJlOTlmMzM4MDE5ZmMyYzBiOTQwYTViYzA1NGU4MjQ0ZTlkODFiNSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjFjNjMxYmZhYzZmMGI4NGJlMTY5NmUwNmJlOTlmMzM4MDE5ZmMyYzBiOTQwYTViYzA1NGU4MjQ0ZTlkODFiNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOWQ5YWI1OGEzNDNkZTMxNDE2MGE5MDMyZjQ1NjM2ZWEwMDk0MWU1YzVlMzdiMWZlM2ZiYjg0OTMwOGE4NWMzYyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiN2RhZmY3NGExZjE1YmY1MmQ2MWFiMzU0MmZiMzJjMzRlOWNkOTg0ODE2YjBkN2ZhMWI5MTI5YjljZmRkNDgyOCJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/catalog/scoring.py#L63-L71",
+          "version": "repo-lines-v1:sha256:6edbc710fbfaa867e331e391cb75b9a3155a83ac3630dec5583c6ac2e021bb46:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZTdkZThkNzY1NjRkMzZkZjVhM2Y5ZmZhMThjZjZmM2ZiZTcwMjM5ZDRjMDNjMjcxN2ZmYWI5MzRjNjQyNmMzYyIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMTQxOWE2ZGNjMDRlMjEzYTNjN2E3N2E0NTZiMDFlNzZkMWVmNzhjZDAwYmJlYzFkOGY4MTQ1OGZlOTNlZGM1NiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYjQ3N2JjY2Y4NDc4MzU2YThiMzNjZGMxMWJhMzg3YTY3MTU2YjQ5NzExZWM3ZDBkMTU1ZjFkZWFlMzY2OWZiZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjczMTIwNmE5ODZiNDNkOTRmYTBhNzk1M2JjNDkxYmY3ODUyNTBiNGEyNzAzOTY4ZjAzZWE5N2RlODZjY2M5NCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_4917449c61fe4989812230eabbfe0428",
+      "statement": "template_plan() walks goals in priority order, greedily selecting one cue-ready habit per uncovered goal within max_active and available_minutes. Weak links are allowed only when no stronger cue-ready alternative is left unpicked, so weak links never block dedicated habits. Chosen habits are deduplicated by ID.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/catalog/scoring.py#L79-L128",
+          "version": "repo-lines-v1:sha256:c074618a3ff62ce39c6008ad0813a3fe12fa57396abec4e80ed764604d825deb:eyJzZWxlY3RlZExpbmVDb3VudCI6NTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMyZmIxMmVkODY1YmJjYTdlMTA4MWQ5ZDJjYjIwYzIyYzlkNjI3ODczOTU3NTNhYmI4NzVlMDFhOTJhMWIwYjEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjFiYmI1NGE5M2Q2Zjg3NGRhY2VlNGVlNjJhNTgxNDgwNjhmZTlmN2UwNmYwN2NiYzg5MjQ0NDljMjI2YzE3MzgiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6Ijc0NjdiZGFjMDcxZmY0OGM0NDJmNWY2YTZjYzFhMjhmNTY1YzhjZmU5YjUyNWM1MGIyMGNkYjEwYTMzNTFhYjMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_36ec52f9c45b4f00b40091ce37edde67",
+      "statement": "The template plan marks unresolved goals with one of four reason codes: needs_cue (no routine cue configured), no_catalog_entry (no habit serves the goal), deferred (active-habit cap or minutes exceeded), or paused (parent explicitly pauses the goal in the LLM selection).",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/catalog/scoring.py#L107-L109",
+          "version": "repo-lines-v1:sha256:28b3055978791aea6dbc6185c4f91099f0f5116072392878d50ac36b3414347e:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjRhM2U0ODI0MTllZjhkOWMzYzBlMGNlZWIwYzgzNDEwYzZlZTAwN2E0ODRjZmM2N2M3YzVhYTkzODI5MjkyZiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYWI3NjBmNDkxOGIyOGE2NTFmOTAxNzFiOTg0MTAxODNkMjJhMTEzODQzNWMzOWRkMzJjNDA2NDM2YmQ2NjkxYiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZTc5YmM1MTVkOWViMDYxOTlmYjczNmFmMjViN2I2MDYwMTk0NGRiMzgwOTIyMTFhY2NlMjUwMzIxN2I4N2FjZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiN2Q1NjBjYTk4YmI5Mzc1ZTEyNDE0MTU4N2Y4YjUxZTkxZWIwMWQzMzMyZjczYWIxMDIyM2RmZWVlODk1Nzc0YSJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/catalog/scoring.py#L96-L100",
+          "version": "repo-lines-v1:sha256:4c0c9e3b13865c63118fbcbfdba5220ec7af87c470f5ed1fb6f64c48487c030b:eyJzZWxlY3RlZExpbmVDb3VudCI6NSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYmZjNWEzOTIwMTM5MTIxNzVmZTM4MTVkYWRjMDJmNTM3NDA2MmJjMjcxMTIyMmQ5NmFhMDdjNTg2YTI0YTY1MSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNGEzODc3ZjMzNWZiYzRjMTBkYmYyOTM5MzY1MjE1OTMwOWQ0MTY5ZmEwNTYxZmVkNmFjNDNhN2YzNzgyMWIwNSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZWY2MDEyYTQxNjZkN2JhNGNiYTY0N2VjYjBkNmE3NzYxZGI0YjYyNGEzYzBkODQ4MTg4OTFhMzRkNDVhMjcxZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMzc3OTg0YzliNWFjYTFjZWVjMTQwMzA4MDdlMmE5ZjgyZjNmZDQ3ZjYzMGQwZjJhZWJkMGRkYmUxMDU0ODM4ZCJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L451-L454",
+          "version": "repo-lines-v1:sha256:f8577c2f62eb32e6f9f19341e7a41d884f882762708eefac04463b335fb8b41c:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYzAzNDk4Yjg5MjEzM2VhMDYwNTcxNzdjN2ZiMGEyMGQ0OTYwODA2MmI0NzZlZjg5NGZmZjEzNWMxYWNhMjEzZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZWYyZTRjYmI3NTAyZDU1Mjg0ZmU4MDFkMDk2NDc4NDI4NjliM2IxZmU2NjIwYzc5ZWJhOTVjNTExYzE5ZTM2ZCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYzU2YmZkODA1M2VhMGFlZjgyYzhhNWE4MmQ5YzllYzY5ZGI3MzA1MTAzM2ZmNmRkOGYwNWIxNjAzNWE1ZjBmNyIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYTVjNzMzMGNlYjY3NjhmOGU3OWVhMmY2MDNjNTMzMDcxOTMzMDcwYmRlMGU3OGVjZWYyYWFiNTgyNjI1NDdlZSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_f6c58c7063924651bf600f69664b2333",
+      "statement": "planner_shortlists() returns cue-ready top-ranked options per goal plus any template active pick for that goal, guaranteeing the LLM planner can always reproduce the reviewed deterministic baseline selection.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/catalog/scoring.py#L50-L60",
+          "version": "repo-lines-v1:sha256:1ddea4e1fc7af12c8a66997b65514c87cb5114c492d404df31416c4e09d04196:eyJzZWxlY3RlZExpbmVDb3VudCI6MTEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImY0YjJkNTM1ODkxZjc0Nzk0NDM5ZTlmNmEzMmE0MGYyOWE4ZThlMTQ1NTgzZTE3ZTE0ZGJhMjM3ZjZkZmM3YjciLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFiY2MxZDEwMGEwMGZiN2Q4MjhmYzllOTgzOTMyNGZkMmExNTNhNjYzYzg5MTQyZGEwMGUwNDBiYWMwNDhiYmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjUwN2M5MzAwZDBlY2FhZDdlMzgzNzQzZmRkZjk0YTkzOThlM2ZlZTYyMDE0MWU1OTJlOWZjOTEyYTM0ODEzZmEiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImU2MDg0NWQ0NThjOGIwZTFjNDI1ODEzZTI3N2E2YzdkMjQ3ZWNhNTY1ZmM0N2U0M2ExNDg0MDY4NWYwYTQyMjgifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_fb33a3614176453583c3c9a671ed131a",
+      "statement": "validate_picks() enforces that a Planner selection uses only habits in the reviewed shortlists, does not duplicate IDs, does not pick unknown levels or needs_cue habits, stays within max_active habits and available_minutes including carried habits, and does not drop a goal the reviewed template covered.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L285-L325",
+          "version": "repo-lines-v1:sha256:b7e13cfb11a16bdd46beb00d57582ed016fc235891e5291323cf0090e71c5437:eyJzZWxlY3RlZExpbmVDb3VudCI6NDEsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU1ZDhhYTY1NTBlMjBjNzdkMjE3NzJkNTUyYzFjYTRmYzgxYjZkYjA2OTNhNjI3OGJiYTdjOTM0MThmZTBkZmUiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjI2M2IyM2Y4M2MxOTAxZWUzYmRjZGJlYTQzNTZjYjhjOTQ1YzcxOGNmYjZkOGJmOGU0OGY1ZmJhZWQxMjE1ODciLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjA4MTZmN2QzMGI3ZWNjMmU3ZGYwODhlODI0Mzk4NWJiNDI1MzUzOTJmYTRhNzhlMTEzOGNmYTg5NmNlYjkxOWMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjYyNjVlOTcyOThjYjljYjM2MTM4YTZlODUyZTJjNTU3ZjYxZDgxOGFmZDI3MmFjNzkxYmZjMDkxNDM2YTQ5YjEifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_1e7dca5a7b0a46dea3d026093f95ffda",
+      "statement": "PROMPT_VERSION is written into every proposal alongside RANKING_VERSION; changes to planner, mapper, director, or reviewer prompts that alter behaviour must bump PROMPT_VERSION.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L43-L44",
+          "version": "repo-lines-v1:sha256:64207f016c4cccc7ab09125a7ee56250968c8c072927d94b9c4491f4d381d7d4:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMGI3ODQ2YzYxMDBmYzExNDQxNGI4MjZhMzRjYjlhYTI3NzEwMzRjMTlhMmY4MWI5OGJmZmY3ZjJkMGVlODI0ZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYzNjYTA4MGE2ZjUzZmU4MmIzMjE5OTI0ZmUwYjc1Yzk4OTJkNDVjM2I4N2VlYjliOTQ5OTY1M2YzY2MzNmQzYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiM2RmZDY4ODQ5MzhmOWI1YzJkNDY5ZjUwZjYwYjMxOGZlZjU4NTYyODdlZDlhNzM0NmExNTRmYWQ1ZWFiODg5YiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZWIyMjRmZTViNmRkZWEzZTc5YmZmYzUwNWNhZGU5MDRjZWE3ZDM1YmIwNzA2NDY3ZjYxOWQ5MzQyZjYyZGM0ZSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_f3ccfa90205c46019e7c5c461cf88294",
+      "statement": "load_release() reads the current published release through the read-only released_* database views by default. Editors pass candidate=True to load any release, published or not, through the editor-only release_* views for diffing and validation.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/catalog/repository.py#L7-L16",
+          "version": "repo-lines-v1:sha256:5a88ad181cbf9aeb2d1f2e6847172dc1f0d8ffee6017d1e2922572d247663da9:eyJzZWxlY3RlZExpbmVDb3VudCI6MTAsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNlNzgzMzY4NGI5ZmIwZjExN2FiYWVkN2M4MGJkNTdjMmRhYmVjOTA2ZDI5YTJlOWVmNzYwZTIzZGI4YmEwYWEiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcxMDVmMjJhZjJiNzRhOTRjOWI4MTA2ZjY4YTQwMzI4NzdjNDNhOGJmZWQyODcyNzFhNzcwYWIyZTYyOGI5MTYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjBhYWMwNzE4NTIzMjBiODRhNjhmMjI2NDcxNWZmODg1NmUyMzJmOGQxMTEyM2Q2NzIxZDI5MjVhNzA3ODBmNTciLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6Ijk5OGIzY2QwODFmZTQ5YzkxMTI3MzdlOTU3NDI1YWU2YmUyNmY4ZTJkNDFkMDRmZTA3MGZiOGFlZGExYmMwODMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_664857054ead4e2288951c94c543e85e",
+      "statement": "validate_release() blocks publication with errors for missing world x goal chapters, references outside the release, withdrawn habits, habits without levels, and concerns without goals.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/catalog/releases.py#L8-L51",
+          "version": "repo-lines-v1:sha256:fd53edf05936999f03563f0a8b81c90b0d4cd5bcb9486bc496f8589e4bb41974:eyJzZWxlY3RlZExpbmVDb3VudCI6NDQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjIwZmVlODZiY2I1Y2UzZTIxOTE5OGUxNTMyNDNlODk2NzFlODFhYjE0ZjhmN2MzMGNiZjU1ODk0NTg2ODgwZjMiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImFhNGRiMjJhMDU3ODRmZGVmZTgzYzE3MzczMWM0ZWFiNjVmZmU3NGE4MTM0MDE4NjEzMDNkNGU0MDNlOGQ5NWMiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImYyZDUxMDQzNTA4N2E2MmEzN2VhYWNhYjZkYzhiN2EwMGRlNmIxN2MwODZiMzVlMTJmOGU2NTYwMWUyMDc2N2UiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjMyYjU1NGY1YzQzYWQ1N2Q5MjBmMTM4YWIyYWNiODdiZTYzZDU5Yzg0Y2ZhMTFkNWY0ZjAxYmMyNGFmMTAwZGMifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_c645cc5ef17a4d6ebb7a7c23db7bde6c",
+      "statement": "On proposal confirmation, stale_references() revalidates every active habit and chapter version against the current release, raising replan_required if any habit was withdrawn, superseded, or removed, or if any chapter version changed.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/catalog/revalidation.py#L4-L20",
+          "version": "repo-lines-v1:sha256:7fe3a97d7ab33aaa1a9d8f1492055282a4938bf8f002572b46f03fc47f7395b5:eyJzZWxlY3RlZExpbmVDb3VudCI6MTcsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjU2MmM1MTM2NjYyZDAzNGU0MWFlYTA0ODEwYjBiYWRlZjE5ZDUwMTUxYTg5YTA3OGQwY2YyMmEzYWE4MzQxMTYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjcyOWQ0NTI5OThhZWE2YTYyY2MxMTA4ODgyNzk3Y2VmNmE1YTFiN2NlYTAzNjZlZWVmNTkxN2EzZDA3YTJjOWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjNlNzA2Y2Y2ZjRkZDY1MDY0MmNjYTg4YTJjYmU4MDljZGU4MzFlZWZmNjYxZmExMTU1ZDc5MTc1YTVhOGRjZmIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjoxLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImFhNWZjNjczMTM2YjYwOTg2Y2RiNjNlOTljMjFiMDZkNDNmZWM0Yjc3Y2I2MTUwNTUyMDFkYTgyMTQ5YzM2ZTAifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/service.py#L47-L60",
+          "version": "repo-lines-v1:sha256:627e62b76b6f2e1f430a2123f1641dabbf900b84e817f84b773e8564f385c0a2:eyJzZWxlY3RlZExpbmVDb3VudCI6MTQsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjQ0MDIxNjE4MWJhZGE3NDc5NGJkYTM3YzcxNzVjODJkMDgzNjBhOGY2YzZlYjBhOGRlMjVmNjVkMDc5ZjAzODgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjBiNzM0ZjE5YzJlNGNkYmRiMjA4ZjA4ZWQ1Y2YxMzc0NDNmNGYzMmM1NjEwMjRiYTY5M2UzM2RhNWQ5OTA0YTAiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhiOTc0ZGE0MDg2MzJhNGFhN2UyYWU4MGI4NjAzOTFhM2RjZDgyMTFjNzllY2FkN2NhOGU5NTEyOGIwMDE4MzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImEzYWRjN2UyZmVlY2YzMWQ2MjhmNmVkZDhhOTQwM2QwMzk2OTY0MWFlZjllZjY3ZWQxNmExMDc2MDMwYTgwMTYifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_fc130a7c66ab4304add74a3c55a68658",
+      "statement": "If the LLM planner produces an invalid selection or fails reviewer validation, the system falls back to the reviewed template_plan picks; a test verifies the model cannot silently drop a template-covered goal.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L758-L782",
+          "version": "repo-lines-v1:sha256:3352f00449abac9c83a9f1f0cc5c228c0c65de1bd89b8df42ba999a79a876e24:eyJzZWxlY3RlZExpbmVDb3VudCI6MjUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6ImYzNmE0NzhjYjM2ZTcyZmFjZGI3ZWJiNjdkZjdhY2ZjM2JmYjdkY2ZlYzE0OWI5ODllNjJmYTBjNjk0NTcxMWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjJhOWY4YzJiYzdhMTQxYTAyMmFmM2ZlYjhhYjUwMDhlYzI1NzU3ZWYyNGFjZDA0OWY1MDg5YTc0YjdjOWFlODEiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImI0ZDQ5NTAwMWQ5MTJiN2ViOGM0N2IxNDEzYzZjZjU2NDc2OThjN2NjZmRmZmE4ZTZkZmI3MTYzYmExYzBjMGMiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        },
+        {
+          "resource": "repo://tests/test_goal_coverage.py#L9-L30",
+          "version": "repo-lines-v1:sha256:ff3bde0f378a75d38acaa3e76f0b7ecf92007baa4dbe560e04e8c5cac093c7e7:eyJzZWxlY3RlZExpbmVDb3VudCI6MjIsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjRhZjk2YTAyY2Y1YzQ4ZDY3NGNiNWQwOGIyYzVlYTUzNWZhMTlkNzdhOGU2MTUxNjdhMGFiOWJhOWY0NTlkMDgiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6IjMzYjcxOGJmNzdmZDU5MTY0ZmNhMzA0MDJkNjJhMTQ4NzIwODY1MjVmNjE5YTgwNjAxNTMxOTAzMWNiZTM1ZmYiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjQwM2ZiNzZjZWE0NGYwNzQ0ZmM2ZDQ4YThiYTRhZjY5YzMzNTBmZTMzNTRhNmQ1OTUzYmNjN2U2YjVkM2RkZGIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    },
+    {
+      "id": "claim_dcc7331b70f14e909a2ccbef168f9de1",
+      "statement": "A Hypothesis property test asserts template_plan invariants across random inputs: active habits are unique and within max_active, total minutes fit available_minutes, no active habit needs_cue, every goal is served or unresolved, and goals with strong coverage are never unresolved.",
+      "evidence": [
+        {
+          "resource": "repo://tests/test_catalog_scoring.py#L203-L225",
+          "version": "repo-lines-v1:sha256:5083b12ef80dee5c3abdaae0c8310081e4b58bb21aac835075af651d92201f9c:eyJzZWxlY3RlZExpbmVDb3VudCI6MjMsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjUxYjQ0ZmIyMzcxMjhjZjMwNjA3MmI1M2RkNmY1NGEwM2I0YmRjMDUwMDAzYjA5NzAyZTYwZTdlYzg4MzYxOTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImIzMTkxMjAxNmRlMzRjZmQ0OGYyODdhODFkOWUzZjcwZTI0NzlhNDI3M2JjMDk5Mjk0Yzc3NTI4YzRkM2UwMGIiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImFkMTQ2ODdlMWU4Zjc5YzE0YmJjZTdjODZjMTAwNTU2NDVhZmJjMDU4OGJhYzZkMzJkNjZhZjNkZTI3ZmQ2OTYiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjowLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6ImUzYjBjNDQyOThmYzFjMTQ5YWZiZjRjODk5NmZiOTI0MjdhZTQxZTQ2NDliOTM0Y2E0OTU5OTFiNzg1MmI4NTUifQ"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-30T00:13:47.181Z"
+  }
+}

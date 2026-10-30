@@ -1,0 +1,230 @@
+{
+  "schemaVersion": 1,
+  "pageVersion": "sha256:6e548ff2fd3d945796476680c271390ce7c5614d9e7e750cd805e025c5a9564e",
+  "claims": [
+    {
+      "id": "claim_3ac87d6657d2464e9813621750479d8f",
+      "statement": "pyproject.toml declares 16 runtime dependencies under [project] dependencies, including deepagents, fastapi[standard], httpx, langchain, langchain-core, langchain-google-genai, langchain-ollama, langchain-openai, langgraph, langgraph-checkpoint-postgres, langsmith, psycopg[binary,pool], pydantic, pydantic-settings, pyjwt[crypto], and python-dotenv.",
+      "evidence": [
+        {
+          "resource": "repo://pyproject.toml",
+          "version": "repo-file-v1:sha256:c8f9644b246fece55fe685e5f6651e6f5f5bb3f9d31eea4b2ca0013325ca8571"
+        }
+      ]
+    },
+    {
+      "id": "claim_beb85e66cdcf4cd79529150ffef43bc1",
+      "statement": "pyproject.toml declares 7 dev dependencies in the [dependency-groups] dev group: hypothesis, mypy, pytest, pytest-asyncio, pytest-cov, pytest-socket, and ruff.",
+      "evidence": [
+        {
+          "resource": "repo://pyproject.toml",
+          "version": "repo-file-v1:sha256:c8f9644b246fece55fe685e5f6651e6f5f5bb3f9d31eea4b2ca0013325ca8571"
+        }
+      ]
+    },
+    {
+      "id": "claim_273560b5cea04f1c961874c5f319df48",
+      "statement": "pyproject.toml declares uv_build as the PEP 517 build backend with version constraint >=0.12.23,<0.13.0.",
+      "evidence": [
+        {
+          "resource": "repo://pyproject.toml",
+          "version": "repo-file-v1:sha256:c8f9644b246fece55fe685e5f6651e6f5f5bb3f9d31eea4b2ca0013325ca8571"
+        }
+      ]
+    },
+    {
+      "id": "claim_bfebae9387134317aa2c1b4344e44013",
+      "statement": "package.json declares exactly one devDependency, supabase version 2.122.0, used only for the project-local Supabase CLI.",
+      "evidence": [
+        {
+          "resource": "repo://package.json",
+          "version": "repo-file-v1:sha256:d7df403b88da66f24da5455119ea9355094eb648ab7d9f6be66da47e11ecc84c"
+        }
+      ]
+    },
+    {
+      "id": "claim_4aed753ef1df4e4585f0d3649ad6d41a",
+      "statement": "fastapi[standard] is a runtime dependency that automatically pulls uvicorn as a transitive dependency via its standard extra.",
+      "evidence": [
+        {
+          "resource": "repo://pyproject.toml",
+          "version": "repo-file-v1:sha256:c8f9644b246fece55fe685e5f6651e6f5f5bb3f9d31eea4b2ca0013325ca8571"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/main.py#L7-L8",
+          "version": "repo-lines-v1:sha256:ce9265e13dc0ab247514e6419e9ee8058df3c6c3fdc1ce59047672ba3c0c1025:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYWQxOGMwNmEyY2Y2ZDgxYTIwNWExYjkyOTM1MWNmM2UyNjljYjZiZTViYzI1ZDZiZWQ1MWMyZGU2OWRhMDU4OCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMjk4ZmQzYmU3ZGViZjk4MjNiYjFmOTZmYjc0MmIxMTYxZDQ2ZDM1MGFhNmNiMzU3Yjg0OTY0MTg5N2ExYWZkNCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMjc3NTE5MGYzNGViMDRhMDg0NzY1YzMzOWM2ODQ3ODkyNTYzODk4MDIwYjlmNzVlYmQzMjVjOWUyOTViZGQ2OSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjBkMTZlODRmNzZmNDBjZWI5YjljZDM3MDQxN2I1NTc5MzNjZGRmNDQ1NzhkNGQ3ZWUwNDA1NjVhOThjYjg0ZiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_f265a57e40dd4fce9a8b5fce14d22cd9",
+      "statement": "On Render, the deployed runtime never needs uv because the build exports requirements with uv and installs them with pip.",
+      "evidence": [
+        {
+          "resource": "repo://pyproject.toml",
+          "version": "repo-file-v1:sha256:c8f9644b246fece55fe685e5f6651e6f5f5bb3f9d31eea4b2ca0013325ca8571"
+        }
+      ]
+    },
+    {
+      "id": "claim_663eb4b2ef9643018adce404e9430e00",
+      "statement": "deepagents is imported in planning.py for multi-agent orchestration, including create_deep_agent, HarnessProfile, register_harness_profile, and StateBackend.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/planning.py#L9-L15",
+          "version": "repo-lines-v1:sha256:ad1e65d8eaf05f7fa94f75db96ddae2ba14038225263ec2fe01cf1147d0b5123:eyJzZWxlY3RlZExpbmVDb3VudCI6NywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZDYwZjY3OGI4Mjk1YzQ3ODVjNjFhMzEyMWY2OGEyMjVjN2ZkMGY3ZWQ5NTI3MTE0ZjkyMDE3ZDRjMDEyOGJjZSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjRlZmZkMGEzOGY2MmU4YzRmODQ1MjFhMjc2ODhmMjA4ODZlMTE2YmI2NTg1ODE4ZjM0MTEwZTQ1ZTQzOTkxNyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMTFlYWVhNDgyNTc1YzM0ZjM5YjFiNDc4MWJjMjU3ZWM1MjNkNGYzYTYzNmQ3MDkyMDhjNzlmYmE5YzA2YTJjYSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDQ4NDU1MGMwMDFmM2IzZGQ5MmM4MzRiNDY2YjYwYjM3ZDIzNDA1MmZhNGYyZjQ4NTc5ZjZiZmFiYzRlYTU3NCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_43e6d3e5f73d4ece92c2fe1b378b6f43",
+      "statement": "httpx is imported in scripts/demo.py as the HTTP client that exercises a running API locally or remotely.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/demo.py#L23-L23",
+          "version": "repo-lines-v1:sha256:50223e874085358b477419a0e1f3616cd8cd32e2dc08ff87d29327147b21e779:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNTAyMjNlODc0MDg1MzU4YjQ3NzQxOWEwZTFmMzYxNmNkOGNkMzJlMmRjMDhmZjg3ZDI5MzI3MTQ3YjIxZTc3OSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNTAyMjNlODc0MDg1MzU4YjQ3NzQxOWEwZTFmMzYxNmNkOGNkMzJlMmRjMDhmZjg3ZDI5MzI3MTQ3YjIxZTc3OSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYzdmNzU0NDM4NzgzZTEwZjQyM2RkZjMxNDUwNDk5ZmE3NTU1ZTQ0NGRmZWIyOGIwZTg2ZGIwNjVmMTNmZWZhZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjdjYWNmYTkxOWU3NzNlMmUxZGYxMGU5YmQ0MzY1NGUxMTZjNjU1M2IxYTUwZDkyZGFlZjMyMzZlMTRlODQ2MyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_f9e5dd9b0a694f5f8b4b6ee741f6fce0",
+      "statement": "langgraph-checkpoint-postgres is used at build and setup time in scripts/setup_db.py via PostgresSaver.from_conn_string(...).setup() to create the hq_checkpoint schema and tables.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/setup_db.py#L41-L42",
+          "version": "repo-lines-v1:sha256:9ece5ad8fae3bfb645ba97a95da1791a26ec6bf472d7760e5838718eedcb7aaa:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiY2I3MzZjMzdlZTBmZjk2OWZkOTMxZjcwYTQ1NzY1ZmMwYjdhYzE1OTZmYTk2OTRiZjhhNDNiYTUyMjEzZmZkOCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiODc2OTcxZmNlZjk4ZjNkYTllZDI4MTVkZDcwMDZhZTY2YjI3MDE1YzQ4Yjk3ZmEzZDZlNmY2MDJhOGQ0YmNlMyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZWFiNGQwMDkxMjdiMDFlYzdlNTMxZTM2ZGE4YzY0NGNlMmFkYzEyMmUxNDE1MzY2MTE3NDE1OGNkZmE2MjFjMiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZGE3MDM2NDI4M2EyZDBlM2ViM2VlNmMwYTdiZDQ1NzZlOTYyMzQ0N2I2MzMwNjVhOGQ5NzY4NDYyOThmNGNkNSJ9"
+        },
+        {
+          "resource": "repo://scripts/setup_db.py#L8-L8",
+          "version": "repo-lines-v1:sha256:b6363810b7562b6a1bb2ae343e1494c786837041b339c2eea998b6eee247a164:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjYzNjM4MTBiNzU2MmI2YTFiYjJhZTM0M2UxNDk0Yzc4NjgzNzA0MWIzMzljMmVlYTk5OGI2ZWVlMjQ3YTE2NCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjYzNjM4MTBiNzU2MmI2YTFiYjJhZTM0M2UxNDk0Yzc4NjgzNzA0MWIzMzljMmVlYTk5OGI2ZWVlMjQ3YTE2NCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDg0MDk4YTVlMzdiNDQ0YTIxM2RiNDE4YjFjMGQ1OTgzOGUwNWY3MDg3NzJlYTExYTZiMzhiZDlhMjcyZjRlZSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMTE1MGNlYWRlMTA5YTFkMGE2MjViMWQ0NTgzMjA0MDU4YTZkMWY4ODQwODY2YWE0MDIyMmYwNWY0ODhjMjM5OSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_a3a5e6d2ec1e4983804b07a81c4361c9",
+      "statement": "langgraph-checkpoint-postgres is also imported at runtime in worker.py where PostgresSaver enables LangGraph run checkpointing and resumption against PostgreSQL.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/worker.py#L12-L12",
+          "version": "repo-lines-v1:sha256:b6363810b7562b6a1bb2ae343e1494c786837041b339c2eea998b6eee247a164:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiYjYzNjM4MTBiNzU2MmI2YTFiYjJhZTM0M2UxNDk0Yzc4NjgzNzA0MWIzMzljMmVlYTk5OGI2ZWVlMjQ3YTE2NCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjYzNjM4MTBiNzU2MmI2YTFiYjJhZTM0M2UxNDk0Yzc4NjgzNzA0MWIzMzljMmVlYTk5OGI2ZWVlMjQ3YTE2NCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMWU4MDZkZjQ3OTQ4MjU0M2RlNDBkNDIzNjczNDE0MTRiNDg2Nzk2ZjQ5ZTVmZjM0MDUzM2NmMTlhOTI2ZTc0ZCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMjNjNzdlNzc1MzRjNGVlMTlkYjdhMzE3NTM4YWVlYmE3OTdkYmQ1MDUzOTMwNzE2MGJiM2NkZTZmM2RmNjIwYyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_59a4a64441454703ab19103e42defa81",
+      "statement": "python-dotenv is loaded in demo.py, scripts/local_token.py, and tests/conftest.py to read environment variables from .env files during local development and test setup.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/demo.py#L24-L24",
+          "version": "repo-lines-v1:sha256:4afbade7df3ec4117603d54ce2c5fa18bc9abdff3d7359d68aa617de076d0efa:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNGFmYmFkZTdkZjNlYzQxMTc2MDNkNTRjZTJjNWZhMThiYzlhYmRmZjNkNzM1OWQ2OGFhNjE3ZGUwNzZkMGVmYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNGFmYmFkZTdkZjNlYzQxMTc2MDNkNTRjZTJjNWZhMThiYzlhYmRmZjNkNzM1OWQ2OGFhNjE3ZGUwNzZkMGVmYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiN2JhZWUyYmNmZTk4ZTkzZmM0NzI0NjI0N2VmOTUyNjAwN2VhYWQzMjZiMjIyNmFiNmRkOTA3NzZmZWYzOTg4OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOGU1OWRkYTk3ZGNhNzVlM2RlZTQyZjU3M2QzZmJmMjkxN2Q1NDg2YmE0NWEyMzk3MTYyM2I5MDhlZGNjZjQxMSJ9"
+        },
+        {
+          "resource": "repo://scripts/local_token.py",
+          "version": "repo-file-v1:sha256:cfd7a356f570de59d8dd619b4742dca44464699710daeaabee39b75d27ae1b77"
+        },
+        {
+          "resource": "repo://tests/conftest.py#L9-L9",
+          "version": "repo-lines-v1:sha256:4afbade7df3ec4117603d54ce2c5fa18bc9abdff3d7359d68aa617de076d0efa:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNGFmYmFkZTdkZjNlYzQxMTc2MDNkNTRjZTJjNWZhMThiYzlhYmRmZjNkNzM1OWQ2OGFhNjE3ZGUwNzZkMGVmYSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNGFmYmFkZTdkZjNlYzQxMTc2MDNkNTRjZTJjNWZhMThiYzlhYmRmZjNkNzM1OWQ2OGFhNjE3ZGUwNzZkMGVmYSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZjk1MmVjMjUxNDQ4ZDJmZWZhM2RjYThjMzIxYzA3ZDgwMTk1MWEwZDU3OWYzOGFiYzMxYTI0NDdkMDNlZGIzMiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNDZlOGYzYTYxOTI0ZTE3MzUxZWRhZWE5MzFhMmM3YWZhMTdhNmI1NGUxY2ZiZGQxZDllOGJhMDA2YzBhZTBjNyJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_0be9eb84e98a44fc9f749f20f5ac7e18",
+      "statement": "pyjwt[crypto] is imported in auth.py for JWT decoding and verification, including PyJWKClient for JWKS-based key retrieval, and in tests/conftest.py for test token generation.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/auth.py#L12-L30",
+          "version": "repo-lines-v1:sha256:3a93732735ccde21600caa259b4b9b9500f89d0b362b718a8f4be697e05954d1:eyJzZWxlY3RlZExpbmVDb3VudCI6MTksImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjNmZTIzMjllZTJhNjFjNDYzYWY1MmI2ZWEzMzQ4YTA3NGVhYzk3ZTE0ZGVjZWNjMmRlMjMzZDE5YjdmM2Q4OWYiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImE0MjE1ZTZlNDZmYWI4Y2I3YjU5NWQwOGU5ZmJmY2Q5NzQ3NmJlMjZmZWZiZjZiZWI3NDhkYzI5MDVlMTkzN2EiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6ImQ3YWRmYjJlYjYxNmQwNjk0MGYxY2YxZDA1YTMxYzBkOGQ4ZjAxMTE2MWZhYWU5NTMxMDRjMGRjODk4YTlmMjIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjdjYTczYjY4ZWNmZDcwNjM2OWZkNDI4MTZkMjdhMDdkYTM1OGM4NTcwNzk2YjZjMTc1MjliYWQyZWRjYmI1ZGIifQ"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/auth.py#L3-L3",
+          "version": "repo-lines-v1:sha256:0f9a3958d395663502f9085b6e8b880e50958a8258304ae17d982db08c9be0b9:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMGY5YTM5NThkMzk1NjYzNTAyZjkwODViNmU4Yjg4MGU1MDk1OGE4MjU4MzA0YWUxN2Q5ODJkYjA4YzliZTBiOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMGY5YTM5NThkMzk1NjYzNTAyZjkwODViNmU4Yjg4MGU1MDk1OGE4MjU4MzA0YWUxN2Q5ODJkYjA4YzliZTBiOSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjIsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMzc4ZjAxNmRhODMxYTU3OWJiMWU0ZWE5Y2RjOWMxZGZmMmU5Y2M2MTFhYjc5MzZmODRlZjc1NDMyOWIzZGY2OCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYjZmYTdlNTFhODUxYTY1NzZkNDUyMDUzM2Q0NjdiMDEwZTcyZWY2NmRjZjUxZjcxMjQ3OTNlZGI1ZjkxYzM4NiJ9"
+        },
+        {
+          "resource": "repo://tests/conftest.py#L38-L52",
+          "version": "repo-lines-v1:sha256:1edb243288833aa26536bfc5405e08ab9dad9c4b6febcf510f0885f7d1e98f27:eyJzZWxlY3RlZExpbmVDb3VudCI6MTUsImZpcnN0U2VsZWN0ZWRMaW5lSGFzaCI6IjE4YzczMzc3ODU3NzgyNWI2MTFiZTQ4MjNkM2U5MjAzZjk4NzFkZGVmMDk0MGU5Zjc3NzQyODExZmE1NGRkOTkiLCJsYXN0U2VsZWN0ZWRMaW5lSGFzaCI6ImM5MjIwNGM2NWY1MDJkYzE2NDU0YjYyNDA4NTZhOWFiN2FkZTAwM2E4ZTlmODYzMzNlYzBiN2M5ZTQwOTQ5MWQiLCJwcmVjZWRpbmdDb250ZXh0TGluZUNvdW50IjozLCJwcmVjZWRpbmdDb250ZXh0SGFzaCI6IjhiOTc0ZGE0MDg2MzJhNGFhN2UyYWU4MGI4NjAzOTFhM2RjZDgyMTFjNzllY2FkN2NhOGU5NTEyOGIwMDE4MzIiLCJmb2xsb3dpbmdDb250ZXh0TGluZUNvdW50IjozLCJmb2xsb3dpbmdDb250ZXh0SGFzaCI6IjA1NjA1NzQwZmU4ZWI4NDYyYWZkZDBhNzEzYmQ2NGVjZWJiNzNlYWEzMzVkYmJlYmEzNDgwMjg0YzUxNzBlZDIifQ"
+        },
+        {
+          "resource": "repo://tests/conftest.py#L6-L6",
+          "version": "repo-lines-v1:sha256:0f9a3958d395663502f9085b6e8b880e50958a8258304ae17d982db08c9be0b9:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMGY5YTM5NThkMzk1NjYzNTAyZjkwODViNmU4Yjg4MGU1MDk1OGE4MjU4MzA0YWUxN2Q5ODJkYjA4YzliZTBiOSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiMGY5YTM5NThkMzk1NjYzNTAyZjkwODViNmU4Yjg4MGU1MDk1OGE4MjU4MzA0YWUxN2Q5ODJkYjA4YzliZTBiOSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYjUxMmQ5YjM0OWE4ZjAwZGM3ZWVlNjliN2IxNGY2YjAzOTY5OGRiODI0MGUyZWZiMGQ0Mzg0OTkwN2ZhMzVmMSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNWQ1OTE1ODRkZjQ2ODk2MmRiM2ZmMGFlOTRiZGMyYzE5ZmY1YTBmMWMxNjkyYzYwNjljOTNlMThlMDhiZTAwYSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_4bdafb99dec44d9d9fec95ff439c574f",
+      "statement": "psycopg[binary,pool] is imported in db.py, main.py, and worker.py as the primary PostgreSQL adapter for transactions, queries, and JSONB serialization.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/db.py#L5-L5",
+          "version": "repo-lines-v1:sha256:3ed9b8a7d47864db4a45026c23e5c3fe1ef7ba6ea3522a145cd382db7fc35101:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiM2VkOWI4YTdkNDc4NjRkYjRhNDUwMjZjMjNlNWMzZmUxZWY3YmE2ZWEzNTIyYTE0NWNkMzgyZGI3ZmMzNTEwMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiM2VkOWI4YTdkNDc4NjRkYjRhNDUwMjZjMjNlNWMzZmUxZWY3YmE2ZWEzNTIyYTE0NWNkMzgyZGI3ZmMzNTEwMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDVjNGU4YjdkYzFlYjEyMjdkNTYyMDVhY2YzMjEwNjIwMTE0ZTAzNDQ0NzJlODA3NWJlNGY0MzQ5MTY3ZDAxNSIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNjFiMzJhODZjY2NkMGMyOWFiNDRhZTlhMDA4NDRmMDE1OGRjZjM3NGNhMDQ2ZDA0YjhjNGEzYzdmNDQ4MjMzMiJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/main.py#L6-L6",
+          "version": "repo-lines-v1:sha256:3ed9b8a7d47864db4a45026c23e5c3fe1ef7ba6ea3522a145cd382db7fc35101:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiM2VkOWI4YTdkNDc4NjRkYjRhNDUwMjZjMjNlNWMzZmUxZWY3YmE2ZWEzNTIyYTE0NWNkMzgyZGI3ZmMzNTEwMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiM2VkOWI4YTdkNDc4NjRkYjRhNDUwMjZjMjNlNWMzZmUxZWY3YmE2ZWEzNTIyYTE0NWNkMzgyZGI3ZmMzNTEwMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiZWU2ZDE2ODQyODY1MzY4MGI2NTQxZDdkYjhhMzY2ZjdmY2RkMzcwZTE1ZTRhNmJlMzlkYWZiNWViNDg2NDA2MiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOTU1M2FlMzYzYzE1MGY0OTEyMTBiNzA0ODNiOWU2ZmFhZmY4NjM3YmU2ODQyZWM4Y2U2ZTcyNTI0MTc1OTk5NSJ9"
+        },
+        {
+          "resource": "repo://src/habitquest_backend/worker.py#L10-L11",
+          "version": "repo-lines-v1:sha256:9015e52d868f80f1f00109d98c34de07dd231d7583c5687f5c55b2605a31f8e9:eyJzZWxlY3RlZExpbmVDb3VudCI6MiwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiM2VkOWI4YTdkNDc4NjRkYjRhNDUwMjZjMjNlNWMzZmUxZWY3YmE2ZWEzNTIyYTE0NWNkMzgyZGI3ZmMzNTEwMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiNWVkOTY2OTM3ODk4MTk5ZjBhY2Q4MmQzOWI4ODFmNTJmOTA4MWM4NWI4NDI4NGRkZDAyMjQwMGZmMTNhOTA0OSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMTI5YzJmYTZiNGY4ZDA4MDhmNjc1MWQ0NzhmZDFiZTgyNzM0NzRlZTg3MmJlNDA2NGUxODA3M2MwZDMyYmMzZiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMzJmMTc4Yzg5YThmYzA5MGM5MDUwMDY0NTQyNzdkYTdlNzY3NGJhYTg3OWJhNmNhYzU0Y2JmYjU5MmQ4M2QzZSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_fa2e565b43ff476c9270008dd72974e7",
+      "statement": "langsmith is imported in worker.py to provide tracing_context for observability during LangGraph agent execution.",
+      "evidence": [
+        {
+          "resource": "repo://src/habitquest_backend/worker.py#L13-L13",
+          "version": "repo-lines-v1:sha256:97c5e34a53357bdfcc9a18ef98dc81e8874cc69e185f2899545b091b80668068:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiOTdjNWUzNGE1MzM1N2JkZmNjOWExOGVmOThkYzgxZTg4NzRjYzY5ZTE4NWYyODk5NTQ1YjA5MWI4MDY2ODA2OCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiOTdjNWUzNGE1MzM1N2JkZmNjOWExOGVmOThkYzgxZTg4NzRjYzY5ZTE4NWYyODk5NTQ1YjA5MWI4MDY2ODA2OCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMTg1YTk0YTk5NmQzM2E4ZmQzNDNlYTkzNTQ0MWQzYWJlYjhjMmIzYmQwN2M5YWRlNDU4NjE3NTQ1ZGUzODNjNCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiOTRjNTFmY2MyOGExYjlmZDA0YTVjZjBlMDg3MThjNzBkYjk4MTg2ZWI4YjhkZmEwNDI2ZDE2NmM5ZjcwYjJmMSJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_4d307fbd50c0417b95f64712d210a609",
+      "statement": "hypothesis is used in tests/test_catalog_scoring.py for property-based testing of catalog scoring logic with randomized inputs.",
+      "evidence": [
+        {
+          "resource": "repo://tests/test_catalog_scoring.py#L202-L202",
+          "version": "repo-lines-v1:sha256:e4bf5ec2ccb167d2ec419f1d507585036be9e1303a35dc94255b9e2a014ed131:eyJzZWxlY3RlZExpbmVDb3VudCI6MSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiZTRiZjVlYzJjY2IxNjdkMmVjNDE5ZjFkNTA3NTg1MDM2YmU5ZTEzMDNhMzVkYzk0MjU1YjllMmEwMTRlZDEzMSIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZTRiZjVlYzJjY2IxNjdkMmVjNDE5ZjFkNTA3NTg1MDM2YmU5ZTEzMDNhMzVkYzk0MjU1YjllMmEwMTRlZDEzMSIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiOGU2Y2QyNGYyZWMxZWY0YmQzOGJjMGRmMDFiOGQ1OGMyMTZkYjYwNjM5OWFlM2QwYmE0NDg0OTM0ZDQxMTZjMiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiZWFhZmNlYmY5N2QzZTdjNzI4OTM0YjAxNGU2ZjU4OTU2NTA3ODk4MzhhMTExN2ViMTE3YTEyOGJiMzVlZTAxOCJ9"
+        },
+        {
+          "resource": "repo://tests/test_catalog_scoring.py#L3-L5",
+          "version": "repo-lines-v1:sha256:29dddbe10032271ca1f5e4f0439a9fa2f59149b2c31b69a636d0af63420f8cfb:eyJzZWxlY3RlZExpbmVDb3VudCI6MywiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiODRjNDIwMzk5ODY1YzUxMDU4ZThkMzdlYjljZDcyMzRlNGQ4MTIyM2Q4YzBjZWQ1YTRlNmYzYjFhMjlmNzE5MCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZmFhMThhMThlNzM0Zjc3Y2IwZWU0NmQxYTE5OWJhYjAyNzI1ZTkxZTZhNWVhZThmMDM3YWU1MDEwZDEyZmFlYyIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjIsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiMDM0YTk2ZDE5OWIyMjE4YmIzNjEwM2RlN2NhZTQ3MTc0Y2RhY2RlNTkyNmQ1NDA1NjJmZmI5OWVlMDBmMjczMCIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiYzA1MGUxYzY2MDAzZjczOWQ4YmM1ZjM5NmZiNGU0YmE4NGFjNzJiNDc4ZmFiZDQwNWZiOTQ5NDdiNGUxYmNjMCJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_4decf445fc2e4c04aaab2e1774115e35",
+      "statement": "pytest-socket is listed as a dev dependency to prevent unit tests from opening real network sockets.",
+      "evidence": [
+        {
+          "resource": "repo://pyproject.toml",
+          "version": "repo-file-v1:sha256:c8f9644b246fece55fe685e5f6651e6f5f5bb3f9d31eea4b2ca0013325ca8571"
+        }
+      ]
+    },
+    {
+      "id": "claim_0ac91c5a44ad498da79d70392de99f98",
+      "statement": "The CI workflow (test.yml) runs lint, format, type check, and test in sequence: ruff check, ruff format --check, mypy src, and pytest with coverage.",
+      "evidence": [
+        {
+          "resource": "repo://.github/workflows/test.yml#L29-L32",
+          "version": "repo-lines-v1:sha256:05e3e8cb5a2254e11031664a6a4bdf1d743a85eab46ee841f21bf6b6e1e28061:eyJzZWxlY3RlZExpbmVDb3VudCI6NCwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiMWQ1NjljZTE5MDdmNTkzODYyZWJjMDA5Yjc0NWY0MDBjYjY4OWY5YjE0NDI5MjcxODE3ZTViOGQzZjY3ZGVkYiIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiZWIzMDFmNDRlMGRlNDI4MDg2MmRiNjljZjU4NTNiZDI4YzZlYzVhOTYwZTA2N2NlODE5Zjg0ODI3NDM0ZWRjMCIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiYTRjMTVlYjFkMDI2OTRkMmE4OGZjZWNiMDNkMjI1MWFlOTMwMGRkNjA4MmQ5ZTA3M2ZhZjc2N2MyMGJhNjIyYiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiMWYwZjE1MjhiM2ZiOGE3MTJhNDhhYjU3ZjE0MjFiNTZhZmVlNDBjOTJlOTA3NjEwNDhhYjI5MDkwMzgwZjhjYiJ9"
+        }
+      ]
+    },
+    {
+      "id": "claim_4e4cd5984e824b26aa8cd2a8379cec53",
+      "statement": "The supabase Node CLI is only invoked by scripts/bootstrap_local.py when the --native flag is omitted; it calls npx supabase start and npx supabase status to launch local PostgreSQL via Docker.",
+      "evidence": [
+        {
+          "resource": "repo://scripts/bootstrap_local.py#L97-L105",
+          "version": "repo-lines-v1:sha256:04c0ca21507fb97ba20ab93de2ca32ed470e70f6815d98f27da71532d1b26013:eyJzZWxlY3RlZExpbmVDb3VudCI6OSwiZmlyc3RTZWxlY3RlZExpbmVIYXNoIjoiNzQ1MzQ1OTQ5NTdlNzE3YmZhMjE2NTI0ODBhZjhlZTkwNDRjMGZmNmQyNjg1MjBiN2Y4NjAzYjBhNDc3OWE0ZCIsImxhc3RTZWxlY3RlZExpbmVIYXNoIjoiYjcyYThiZjYwM2IzZTZjMzkzMWU0YzY5MDYwZWMyODgxZGU2YzAxNDhlZjA0OWNiMjhkZTc1YzhmZGM0NTA3ZiIsInByZWNlZGluZ0NvbnRleHRMaW5lQ291bnQiOjMsInByZWNlZGluZ0NvbnRleHRIYXNoIjoiODZlZTRmNWYyNDEwOGE1ZjkwN2E0NTdkY2M2YTQ0MTkyOTRjNDAxZjQ5MDlmOTRkYmQ4YjZhYmVhOTVlNTU1YiIsImZvbGxvd2luZ0NvbnRleHRMaW5lQ291bnQiOjMsImZvbGxvd2luZ0NvbnRleHRIYXNoIjoiNTZhZjNkODJiOGZjM2FiNTIzZTVkMDhjMmNkZjQwZGIxOTMzYTNjZDEyMGFjNjcwMzg3OGI4YzhmOGRiNzFjNCJ9"
+        }
+      ]
+    }
+  ],
+  "verification": {
+    "by": "openwiki/0.7.2",
+    "at": "2026-10-30T00:13:47.181Z"
+  }
+}
