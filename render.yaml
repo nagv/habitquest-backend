@@ -28,7 +28,9 @@ envVarGroups:
         generateValue: true    # signs our own access tokens
       - key: JWT_ISSUER
         value: https://habitquest-api.onrender.com
-      - key: GOOGLE_CLIENT_ID  # Google sign-in (used from the accounts release on)
+      - key: GOOGLE_CLIENT_ID  # the frontend's Google sign-in client id (not a secret)
+        sync: false
+      - key: CORS_ORIGINS      # comma-separated frontend origins, e.g. https://app.example,http://localhost:5180
         sync: false
       - key: DEV_LOGIN         # /docs username/password login for testers
         value: "true"

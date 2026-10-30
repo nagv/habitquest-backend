@@ -3,9 +3,11 @@ from uuid import UUID
 
 import psycopg
 from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 
-from habitquest_backend.auth import TOKEN_URL, bearer_token, dev_login, issue_token, verify_token
+from habitquest_backend import accounts
+from habitquest_backend.auth import TOKEN_URL, dev_login, issue_token, signed_in
 from habitquest_backend.config import Settings
 from habitquest_backend.db import one, transaction
 
@@ -14,12 +16,22 @@ Families register their caregivers and children, describe a child's pain points,
 pre-approved catalog of goals and habits. Kids submit completions, caregivers approve them, and children earn
 Sparks (progress, never spent) and points (spent on rewards the caregiver records).
 
-**Authentication.** Every `/v1` endpoint needs a bearer token. Click **Authorize**: when the development login
-is enabled, enter username `parent` (or `parent:<label>` for another test parent) and the shared password.
+**Authentication.** Every `/v1` endpoint needs a bearer token. The frontend exchanges Google's sign-in token
+at `POST /v1/auth/google`. In /docs, click **Authorize**: when the development login is enabled, enter username
+`parent` (or `parent:<label>` for another test parent) and the shared password.
+
+**First steps.** `GET /v1/me` → create a family (`POST /v1/families`) or join one with its invite code
+(`POST /v1/families/join`). Kid mode: a caregiver gets a kid token for one child
+(`POST /v1/children/{id}/kid-session`); kid endpoints accept only that token.
 """
 TAGS = [
     {"name": "Health", "description": "Liveness and readiness probes for hosting."},
-    {"name": "Auth", "description": "Development login (only when `DEV_LOGIN=true`)."},
+    {"name": "Auth", "description": "Google sign-in, and the development login when `DEV_LOGIN=true`."},
+    {
+        "name": "Families",
+        "description": "The signed-in user, their families, caregivers, invite codes and PIN.",
+    },
+    {"name": "Kid mode", "description": "Kid tokens for a shared device, and what a kid token can read."},
     {"name": "Catalog", "description": "Pre-approved goals and the habits parents can pick for each goal."},
 ]
 GOAL_COLUMNS = "id,title,description"
@@ -35,12 +47,13 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         openapi_tags=TAGS,
     )
 
-    def caller(token: Annotated[str | None, Depends(bearer_token(settings))]) -> UUID:
-        if token is None:
-            raise HTTPException(401, "Authentication required")
-        return verify_token(token, settings)
-
-    User = Annotated[UUID, Depends(caller)]
+    application.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.allowed_origins,
+        allow_methods=["*"],
+        allow_headers=["Authorization", "Content-Type"],
+    )
+    User = Annotated[UUID, Depends(signed_in(settings))]
 
     @application.get("/health/live", tags=["Health"], summary="Liveness probe")
     def live() -> dict[str, str]:
@@ -112,6 +125,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 (goal_id, age, age, max_tier, max_tier),
             ).fetchall()
 
+    application.include_router(accounts.router(settings))
     return application
 
 
