@@ -8,7 +8,7 @@ caregiver records).
 The MVP is being built in steps (see [docs/mvp-plan.md](docs/mvp-plan.md)). Done so far: the lean schema,
 the seeded catalog and catalog endpoints (step 1); accounts (step 2): Google sign-in, families with one or
 more caregivers, invite codes, the family PIN and kid mode; children and AI onboarding (step 3); and the daily
-loop (step 4): kids submit, caregivers approve, children earn Sparks and points.
+loop (step 4): kids submit, caregivers approve, children earn Sparks and points; and spending points (step 5).
 
 ## Stack
 
@@ -67,6 +67,17 @@ Legend 50) and the highest habit tier unlocked (tier 2 at Explorer, tier 3 at Ad
 
 The database enforces the kid's side too: a kid token can only add or resubmit its own child's completions,
 only for today, only as `submitted`, and cannot touch points.
+
+## Spending points
+
+A caregiver records what points were used for: `POST /v1/children/{id}/redemptions` with `points` and a `note`
+("30 minutes of tablet"). The points are deducted from the balance; asking for more than the child has is
+refused (422), and a database trigger also refuses any entry that would take the balance below zero, with
+concurrent redemptions checked one after the other. Sparks are never spent.
+
+`GET /v1/children/{id}/points` (caregiver) and `GET /v1/kid/points` (kid) show the balance, lifetime `earned`
+and `spent`, and the newest entries: each approved habit with its day, and each redemption with its note.
+Caregivers also see who made each entry.
 
 Browsers may call the API from the origins in `CORS_ORIGINS` (comma-separated; the frontend's dev server
 `http://localhost:5180` by default).
