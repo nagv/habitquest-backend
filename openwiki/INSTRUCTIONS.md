@@ -13,16 +13,17 @@ A Python 3.12 FastAPI backend for the HabitQuest app, built in steps described i
 ## Required pages
 
 1. **Overview and roadmap.** What is implemented now versus the planned steps in `docs/mvp-plan.md`. Include a sequence diagram for each flow that is implemented.
-2. **Architecture.** The API (`src/habitquest_backend/main.py`) and its modules (`accounts.py`, `auth.py`, `config.py`, `db.py`); how caregiver requests run as the `hq_api` database role with `app.user_id`, and kid requests as `hq_kid` with `app.child_id`, both set from the verified token; CORS (`CORS_ORIGINS`).
+2. **Architecture.** The API (`src/habitquest_backend/main.py`) and its modules (`accounts.py`, `onboarding.py`, `ai.py`, `auth.py`, `config.py`, `db.py`); how caregiver requests run as the `hq_api` database role with `app.user_id`, and kid requests as `hq_kid` with `app.child_id`, both set from the verified token; CORS (`CORS_ORIGINS`).
 3. **Data model.** Every table, index, function and policy in `db/migrations/*.sql`, in migration order, with an ER diagram. Explain row-level security (`hq.my_user`, `hq.my_families`), the grants (catalog read-only, points ledger append-only), the check constraints, and how Sparks, levels and points are derived. Describe the seed catalog in `db/seed.sql` (goals, habits per goal, tiers and points) and how it is upserted on every start.
 4. **Authentication and authorization.** Google sign-in (`POST /v1/auth/google`, `GOOGLE_CLIENT_ID`, the checks in `auth.py` `verify_google`); our HS256 tokens (`JWT_SECRET`, `JWT_ISSUER`, `JWT_AUDIENCE`) with the caregiver (`authenticated`) and `kid` roles; families, caregiver roles, invite codes and the family PIN (`accounts.py`); kid sessions; the `SECURITY DEFINER` functions `hq.google_user`, `hq.create_family` and `hq.join_family`; the development login (`DEV_LOGIN`, `DEV_LOGIN_PASSWORD`, `POST /v1/auth/token`, identities `parent` and `parent:<label>`). Include a sequence diagram of Google sign-in followed by creating or joining a family.
-5. **API reference.** Every endpoint from the route summaries and docstrings in `main.py`, grouped by OpenAPI tag, with parameters, success status and error statuses.
-6. **Configuration.** A table of every field in `Settings` (`config.py`): environment variable name, default and purpose. Note the validator (`DEV_LOGIN` requires `JWT_SECRET` and a 12+ character password). Note that secrets are never committed.
-7. **Dependencies.** See the section below.
-8. **Network calls and egress.** See the section below. This page is mandatory and must be exhaustive.
-9. **Deployment.** `render.yaml` (Blueprint), `scripts/render_start.sh` (migrations and seed, then uvicorn), the build command, health check `/health/ready`, CI in `.github/workflows/`, and that the first migration drops the earlier schema.
-10. **Testing.** The 100% statement and branch coverage gate (`pyproject.toml`), the rule that `TEST_DATABASE_URL` must name a database ending in `_test`, and how the schema tests check family isolation and data rules.
-11. **Local development.** `scripts/bootstrap_local.py` (native PostgreSQL), `scripts/setup_db.py`, and logging in from `/docs`.
+5. **Onboarding and AI.** Children, pain points and the plan (`onboarding.py`); how `ai.py` maps a pain point to goals: the local safety screen (`RISK`), the model call (`ask_model`, `AI_MODE`, the prompt), the checks on its answer (`checked`), the keyword fallback (`keyword_goals`) and `manual`; what data is sent to the provider; the plan rules (age, unlocked tier, six habits, default times); Sparks, levels and tiers (`progress`). Include a sequence diagram from pain point to activated plan.
+6. **API reference.** Every endpoint from the route summaries and docstrings in `main.py`, grouped by OpenAPI tag, with parameters, success status and error statuses.
+7. **Configuration.** A table of every field in `Settings` (`config.py`): environment variable name, default and purpose. Note the validator (`DEV_LOGIN` requires `JWT_SECRET` and a 12+ character password). Note that secrets are never committed.
+8. **Dependencies.** See the section below.
+9. **Network calls and egress.** See the section below. This page is mandatory and must be exhaustive.
+10. **Deployment.** `render.yaml` (Blueprint), `scripts/render_start.sh` (migrations and seed, then uvicorn), the build command, health check `/health/ready`, CI in `.github/workflows/`, and that the first migration drops the earlier schema.
+11. **Testing.** The 100% statement and branch coverage gate (`pyproject.toml`), the rule that `TEST_DATABASE_URL` must name a database ending in `_test`, and how the schema tests check family isolation and data rules.
+12. **Local development.** `scripts/bootstrap_local.py` (native PostgreSQL), `scripts/setup_db.py`, and logging in from `/docs`.
 
 ## Dependencies page
 
@@ -34,6 +35,7 @@ List every outbound connection the code can make, as a table: destination, proto
 
 - Postgres via `DATABASE_URL` (`db.py` `transaction`, `scripts/setup_db.py`, `scripts/bootstrap_local.py`).
 - Google's signing keys at `https://www.googleapis.com/oauth2/v3/certs` (`auth.py` `google_key`, via PyJWT's `PyJWKClient`, cached for an hour), on `POST /v1/auth/google`.
+- The OpenAI-compatible chat endpoint at `OPENAI_BASE_URL` + `/chat/completions` (`ai.py` `ask_model`, `httpx`), on `POST /v1/children/{id}/pain-points`, only with `AI_MODE=openai`. Sends the child's age, the parent's text and the catalog.
 - Package indexes (PyPI, the uv installer) during the Render build and CI.
 
 ## Rules

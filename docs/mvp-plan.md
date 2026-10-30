@@ -43,7 +43,7 @@ Each step is one pull request with tests at 100% coverage.
    endpoints, removal of the versioned planning and editorial code.
 2. **Accounts (done):** Google sign-in (`POST /v1/auth/google` checks Google's ID token and returns our token), family
    creation and joining by invite code, caregiver roles, family PIN, kid tokens, CORS for the frontend.
-3. **Children and AI onboarding:** child profiles; pain points mapped to goals with recommendations; habit
+3. **Children and AI onboarding (done):** child profiles; pain points mapped to goals with recommendations; habit
    picking by age and tier; plan activation; editing the plan.
 4. **Daily loop:** today's habits in the family's time zone, submit, approve or reject, Sparks, level, points.
 5. **Redemption:** record a redemption against the balance; points history.
