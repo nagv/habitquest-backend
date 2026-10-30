@@ -55,13 +55,13 @@ Known limits:
 ## Frontend: done
 
 - Analysis of the app and the integration plan.
-- `HANDOFF.md`: the full API contract (every endpoint and response shape), the screen-by-screen changes, local
+- [frontend-integration.md](frontend-integration.md) (given to the local session as `HANDOFF.md`): the full API contract (every endpoint and response shape), the screen-by-screen changes, local
   settings and test steps. It has been given to a Claude session on your computer.
 
 No frontend code has been pushed anywhere yet. Your account has no push access to
 `rahulwarekar20/habbit-quest`, so changes stay local until Rahul adds you as a collaborator or you use a fork.
 
-## Frontend: left to do (from `HANDOFF.md`)
+## Frontend: left to do (details in [frontend-integration.md](frontend-integration.md))
 
 **Set-up**
 - [ ] `.env.local` with `VITE_API_URL`, `VITE_GOOGLE_CLIENT_ID`, `VITE_DEV_LOGIN`; dev server on port 5180
@@ -93,6 +93,30 @@ point bonuses, kid-mode time limit, and buddy lines (only with a Groq key).
 - [ ] Get the code into a repository: collaborator access on `rahulwarekar20/habbit-quest`, or a fork
 - [ ] Host the frontend (for example a Render static site), then add its address to `CORS_ORIGINS` on the API
       and to the Google client's Authorized JavaScript origins
+
+## Integration needs: what each side must provide
+
+**Backend provides (in place)**
+- The API at `https://habitquest-api-qmt1.onrender.com`, with every endpoint in
+  [frontend-integration.md](frontend-integration.md) live and documented at `/docs`.
+- Browser access (CORS) from `http://localhost:5180`; Google sign-in for client
+  `589389699921-ol224oo6m4svf9tts3enahorubm4lb1s.apps.googleusercontent.com`; the dev login for testing.
+- Habit ids, buddies, ages and level thresholds that match the frontend's, so existing artwork and texts map
+  directly (two new habits: `tidy-space`, `day-chat`).
+
+**Frontend must provide**
+- `VITE_API_URL`, `VITE_GOOGLE_CLIENT_ID` and (for testing) `VITE_DEV_LOGIN` settings, on port 5180 locally.
+- Two token stores: the caregiver token (`localStorage`, 8 hours, 1 hour for dev login) and the kid token
+  (`sessionStorage`, 8 hours, only for `/v1/kid/*`). A 401 means sign in again.
+- The Google Identity Services button, posting its `credential` to `POST /v1/auth/google`.
+- Patience with the free server: up to a minute for the first request after an idle period.
+
+**Both sides, when the frontend is hosted**
+- Add the hosted address to `CORS_ORIGINS` on Render and to the Google client's Authorized JavaScript origins.
+- Turn off `DEV_LOGIN` and publish the Google consent screen before real families sign up.
+- Any change to an endpoint's shape: update the backend tests, [frontend-integration.md](frontend-integration.md)
+  and the frontend's `src/lib/api.ts` together. The API's machine-readable contract is `/openapi.json`; the
+  frontend can generate its types from it with `openapi-typescript`.
 
 ## Decisions still open
 
