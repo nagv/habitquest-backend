@@ -12,7 +12,7 @@ from habitquest_backend import coach
 from habitquest_backend.ai import SAFETY_GUIDANCE, Candidate
 from habitquest_backend.coach import FALLBACK_MATCH, FALLBACK_NONE, fallback, run_turn, swap_names
 from habitquest_backend.coach_tools import Snapshot, Turn, build_tools
-from habitquest_backend.guidance import search_guidance
+from habitquest_backend.guidance import CHUNKS, search_guidance
 from habitquest_backend.main import create_app
 
 HABITS = [
@@ -107,6 +107,10 @@ def test_names_are_swapped_as_whole_words():
     assert swap_names("alex and Alexa", {"Alex": "Child A"}) == "Child A and Alexa"
 
 
+def test_labels_are_restored_with_any_kind_of_space():
+    assert swap_names("Child\u202fA and Child\u00a0A", {"Child A": "Alex"}) == "Alex and Alex"
+
+
 def test_risky_text_gets_guidance_without_any_model_call(remote, llm_reply):
     llm_reply("never")
     reply = run_turn(remote, snapshot(), [], "He said he wants to die", ["Alex"])
@@ -166,6 +170,30 @@ def test_a_failed_fit_check_keeps_the_picks(remote, llm_reply):
     assert run_turn(remote, snapshot(), [], BEDTIME, ["Alex"]).turn.recommendations == {
         "bedtime": "It helps."
     }
+
+
+def test_replies_are_tidied():
+    assert coach.tidy_reply("Try this【G9†source】.", True) == "Try this[G9]."
+    text = "A routine helps. I have shown three habit cards below! Tell me more."
+    assert coach.tidy_reply(text, False) == "A routine helps. Tell me more."
+    assert coach.tidy_reply(text, True) == text
+
+
+def test_several_citations_in_one_bracket_are_kept(remote, llm_reply):
+    first, second = [c.ref for c in CHUNKS[:2]]
+    llm_reply(call("research", problem="stalling at bedtime"), f"Try this [{first}, {second}].")
+    reply = run_turn(remote, snapshot(), [], "How much sleep do children need at bedtime", ["Alex"])
+    assert reply.turn.sources is not None and reply.text.endswith("].")
+
+
+def test_an_answer_that_only_mentions_missing_cards_asks_for_more(remote, llm_reply):
+    llm_reply("I have shown the cards.")
+    assert run_turn(remote, snapshot(), [], BEDTIME, ["Alex"]).text.startswith("Could you tell me")
+
+
+def test_a_label_after_the_is_restored_cleanly(remote, llm_reply):
+    llm_reply("This gives the Child A a tool.")
+    assert run_turn(remote, snapshot(), [], BEDTIME, ["Alex"]).text == "This gives Alex a tool."
 
 
 def test_a_clarifying_question_skips_the_fit_check(remote, llm_reply):

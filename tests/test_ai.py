@@ -208,7 +208,7 @@ def test_openai_mode_needs_its_settings(settings):
     from habitquest_backend.config import Settings
 
     with pytest.raises(ValidationError, match="AI_MODE=openai requires"):
-        Settings(ai_mode="openai", openai_model="m")
+        Settings(_env_file=None, ai_mode="openai", openai_model="m")
 
 
 def test_a_rejected_request_is_logged_with_its_status_but_no_content(remote, monkeypatch, caplog):

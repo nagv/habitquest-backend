@@ -21,6 +21,9 @@ SECRET = "test-only-signing-key-at-least-32-bytes-long"
 PARENT = UUID("11111111-1111-1111-1111-111111111111")
 OTHER = UUID("22222222-2222-2222-2222-222222222222")
 load_dotenv()
+# Tests never reach a real model, whatever a developer's .env says.
+for name in ("AI_MODE", "OPENAI_BASE_URL", "OPENAI_MODEL", "OPENAI_SMALL_MODEL", "OPENAI_API_KEY"):
+    os.environ.pop(name, None)
 URL = os.getenv("TEST_DATABASE_URL", "postgresql://hq_dev@127.0.0.1:55432/hq_test")
 if not conninfo_to_dict(URL).get("dbname", "").endswith("_test"):
     raise pytest.UsageError(
@@ -39,7 +42,7 @@ def no_golden_habit(monkeypatch):
 
 @pytest.fixture
 def settings():
-    return Settings(database_url=URL, jwt_secret=SECRET, jwt_issuer="http://local-test")
+    return Settings(_env_file=None, database_url=URL, jwt_secret=SECRET, jwt_issuer="http://local-test")
 
 
 def token(settings, user=PARENT, **overrides):
