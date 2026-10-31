@@ -6,7 +6,7 @@ from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 
-from habitquest_backend import accounts, coach, daily, onboarding, rewards
+from habitquest_backend import accounts, coach, daily, insights, onboarding, rewards
 from habitquest_backend.auth import TOKEN_URL, dev_login, issue_token, signed_in
 from habitquest_backend.config import Settings
 from habitquest_backend.db import one, transaction
@@ -146,6 +146,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.include_router(daily.router(settings))
     application.include_router(rewards.router(settings))
     application.include_router(coach.router(settings))
+    application.include_router(insights.router(settings))
     return application
 
 

@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     openai_model: str = ""
     openai_small_model: str = ""
     openai_api_key: SecretStr | None = None
-    ai_timeout_seconds: float = Field(default=15, gt=0, le=60)
+    ai_timeout_seconds: float = Field(default=30, gt=0, le=60)
     # The coach's whole turn (several model calls), and model-backed requests per family per day.
     coach_timeout_seconds: float = Field(default=50, gt=0, le=120)
     ai_daily_limit: int = Field(default=100, gt=0)
