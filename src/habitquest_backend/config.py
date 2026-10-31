@@ -16,13 +16,18 @@ class Settings(BaseSettings):
     google_client_id: str = ""
     # Browser origins allowed to call the API, comma-separated (the frontend's dev server by default).
     cors_origins: str = "http://localhost:5180"
-    # Mapping pain points to goals: `fake` is a deterministic keyword-based stand-in (tests, local use);
-    # `openai` calls any OpenAI-compatible chat endpoint, e.g. Nebius.
+    # Every AI feature: `fake` is a deterministic stand-in (tests, local use); `openai` calls any
+    # OpenAI-compatible chat endpoint, e.g. Nebius. The small model (optional) serves buddy lines and safety
+    # checks; without one, they use `openai_model`.
     ai_mode: Literal["fake", "openai"] = "fake"
     openai_base_url: str = ""
     openai_model: str = ""
+    openai_small_model: str = ""
     openai_api_key: SecretStr | None = None
     ai_timeout_seconds: float = Field(default=15, gt=0, le=60)
+    # The coach's whole turn (several model calls), and model-backed requests per family per day.
+    coach_timeout_seconds: float = Field(default=50, gt=0, le=120)
+    ai_daily_limit: int = Field(default=100, gt=0)
     # Development login: POST /v1/auth/token (and /docs Authorize) issues tokens for test parents.
     dev_login: bool = False
     dev_login_password: SecretStr | None = None

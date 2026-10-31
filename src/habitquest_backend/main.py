@@ -6,7 +6,7 @@ from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 
-from habitquest_backend import accounts, daily, onboarding, rewards
+from habitquest_backend import accounts, coach, daily, onboarding, rewards
 from habitquest_backend.auth import TOKEN_URL, dev_login, issue_token, signed_in
 from habitquest_backend.config import Settings
 from habitquest_backend.db import one, transaction
@@ -47,6 +47,7 @@ TAGS = [
         "description": "Today's habits, completions waiting for approval, approving and rejecting.",
     },
     {"name": "Points", "description": "Spending points on rewards, and the points history."},
+    {"name": "Coach", "description": "The habit coach, and AI suggestions a caregiver accepts with the PIN."},
     {"name": "Catalog", "description": "Pre-approved goals and the habits parents can pick for each goal."},
 ]
 GOAL_COLUMNS = "id,title,description"
@@ -144,6 +145,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     application.include_router(onboarding.router(settings))
     application.include_router(daily.router(settings))
     application.include_router(rewards.router(settings))
+    application.include_router(coach.router(settings))
     return application
 
 

@@ -1,15 +1,19 @@
+import json
 import os
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import UUID
 
+import httpx
 import jwt
 import psycopg
 import pytest
 from dotenv import load_dotenv
 from fastapi.testclient import TestClient
 from psycopg.conninfo import conninfo_to_dict
+from pydantic import SecretStr
 
+from habitquest_backend import llm
 from habitquest_backend.config import Settings
 from habitquest_backend.main import create_app
 
@@ -60,3 +64,49 @@ def client(settings, db):
     with TestClient(create_app(settings)) as c:
         c.headers["Authorization"] = "Bearer " + token(settings)
         yield c
+
+
+@pytest.fixture
+def remote(settings):
+    """Settings for the real model path; pair with `llm_reply` so nothing reaches the network."""
+    return settings.model_copy(
+        update={
+            "ai_mode": "openai",
+            "openai_base_url": "https://llm.example/v1/",
+            "openai_model": "vendor/model",
+            "openai_small_model": "vendor/small",
+            "openai_api_key": SecretStr("k"),
+        }
+    )
+
+
+@pytest.fixture
+def llm_reply(monkeypatch):
+    """Routes model calls to the returned function's handler; `.seen` holds each request's JSON body."""
+
+    def route(*handlers):
+        queue = list(handlers)
+
+        def respond(request):
+            route.seen.append(json.loads(request.content))
+            reply = queue.pop(0) if len(queue) > 1 else queue[0]
+            if isinstance(reply, httpx.Response):
+                return reply
+            message = {"role": "assistant", **(reply if isinstance(reply, dict) else {"content": reply})}
+            return httpx.Response(
+                200,
+                json={
+                    "id": "x",
+                    "object": "chat.completion",
+                    "created": 0,
+                    "model": "m",
+                    "choices": [{"index": 0, "finish_reason": "stop", "message": message}],
+                },
+            )
+
+        monkeypatch.setattr(
+            llm, "http_client", lambda settings: httpx.Client(transport=httpx.MockTransport(respond))
+        )
+
+    route.seen = []
+    return route

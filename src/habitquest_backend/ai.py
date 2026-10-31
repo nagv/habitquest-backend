@@ -11,10 +11,11 @@ import logging
 import re
 from dataclasses import dataclass, field
 
-import httpx
+import openai
 from pydantic import BaseModel, Field
 
 from habitquest_backend.config import Settings
+from habitquest_backend.llm import chat_model
 
 log = logging.getLogger(__name__)
 MAX_GOALS = 3
@@ -76,40 +77,21 @@ class Answer(BaseModel):
     goals: list[GoalPick] = Field(default_factory=list, max_length=10)
 
 
-def http_client(settings: Settings) -> httpx.Client:
-    return httpx.Client(timeout=settings.ai_timeout_seconds)
-
-
 def ask_model(settings: Settings, age: int, text: str, candidates: list[Candidate]) -> dict:
     """One chat completion from the OpenAI-compatible endpoint, parsed as JSON."""
     catalog = [
         {"id": c.goal_id, "title": c.title, "description": c.description, "habits": c.habits}
         for c in candidates
     ]
-    payload = {
-        "model": settings.openai_model,
-        "temperature": 0,
-        "max_tokens": 800,
-        "response_format": {"type": "json_object"},
-        "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {
-                "role": "user",
-                "content": json.dumps({"child_age": age, "parent_wrote": text, "goals": catalog}),
-            },
-        ],
-    }
-    key = settings.openai_api_key.get_secret_value() if settings.openai_api_key else ""
-    with http_client(settings) as client:
-        response = client.post(
-            settings.openai_base_url.rstrip("/") + "/chat/completions",
-            headers={"Authorization": f"Bearer {key}"},
-            json=payload,
-        )
-        response.raise_for_status()
-        content = response.json()["choices"][0]["message"]["content"]
+    model = chat_model(settings).bind(response_format={"type": "json_object"})
+    reply = model.invoke(
+        [
+            ("system", SYSTEM_PROMPT),
+            ("user", json.dumps({"child_age": age, "parent_wrote": text, "goals": catalog})),
+        ]
+    )
     # Some models wrap JSON in a Markdown fence despite response_format.
-    return json.loads(re.sub(r"^```(?:json)?\s*|\s*```$", "", content.strip()))
+    return json.loads(re.sub(r"^```(?:json)?\s*|\s*```$", "", reply.text.strip()))
 
 
 def keyword_goals(text: str, candidates: list[Candidate]) -> list[tuple[str, str]]:
@@ -166,9 +148,9 @@ def map_pain_point(settings: Settings, age: int, text: str, candidates: list[Can
         mapping = checked(answer, candidates)
         if mapping.goals:
             return mapping
-    except (httpx.HTTPError, ValueError, KeyError, IndexError, TypeError) as exc:
+    except (openai.OpenAIError, ValueError, KeyError, IndexError, TypeError) as exc:
         # The status code shows a provider rejecting the request (e.g. 400, 401); never log the content.
-        status = exc.response.status_code if isinstance(exc, httpx.HTTPStatusError) else ""
+        status = exc.status_code if isinstance(exc, openai.APIStatusError) else ""
         log.warning("AI goal mapping failed (%s %s); using keyword matching", type(exc).__name__, status)
     goals = keyword_goals(text, candidates)
     return Mapping("keywords", goals) if goals else Mapping("manual")

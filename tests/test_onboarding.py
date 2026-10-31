@@ -7,7 +7,7 @@ import pytest
 from conftest import OTHER, PARENT, token
 from pydantic import SecretStr
 
-from habitquest_backend import ai
+from habitquest_backend import ai, llm
 from habitquest_backend.db import transaction
 from habitquest_backend.main import create_app
 from habitquest_backend.onboarding import progress
@@ -144,7 +144,7 @@ def test_an_unavailable_model_falls_back_to_keywords(settings, db, alex, monkeyp
         }
     )
     monkeypatch.setattr(
-        ai,
+        llm,
         "http_client",
         lambda s: httpx.Client(transport=httpx.MockTransport(lambda r: httpx.Response(503))),
     )

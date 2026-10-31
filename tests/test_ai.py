@@ -6,7 +6,7 @@ import httpx
 import pytest
 from pydantic import SecretStr
 
-from habitquest_backend import ai
+from habitquest_backend import ai, llm
 from habitquest_backend.ai import Candidate, keyword_goals, map_pain_point
 
 CANDIDATES = [
@@ -73,13 +73,16 @@ def serve(monkeypatch, handler):
         return handler(request)
 
     monkeypatch.setattr(
-        ai, "http_client", lambda settings: httpx.Client(transport=httpx.MockTransport(respond))
+        llm, "http_client", lambda settings: httpx.Client(transport=httpx.MockTransport(respond))
     )
     return seen
 
 
 def chat(content):
-    return lambda request: httpx.Response(200, json={"choices": [{"message": {"content": content}}]})
+    message = {"role": "assistant", "content": content}
+    choice = {"index": 0, "finish_reason": "stop", "message": message}
+    body = {"id": "x", "object": "chat.completion", "created": 0, "model": "m", "choices": [choice]}
+    return lambda request: httpx.Response(200, json=body)
 
 
 def test_fake_mode_maps_keywords_and_recommends_the_first_habits(settings):
@@ -195,7 +198,7 @@ def test_keywords_rank_by_hits_and_cap_at_three():
 
 
 def test_the_http_client_uses_the_configured_timeout(settings):
-    with ai.http_client(settings.model_copy(update={"ai_timeout_seconds": 7})) as client:
+    with llm.http_client(settings.model_copy(update={"ai_timeout_seconds": 7})) as client:
         assert client.timeout.read == 7
 
 
@@ -211,4 +214,4 @@ def test_openai_mode_needs_its_settings(settings):
 def test_a_rejected_request_is_logged_with_its_status_but_no_content(remote, monkeypatch, caplog):
     serve(monkeypatch, lambda request: httpx.Response(400, json={"error": "response_format not supported"}))
     map_pain_point(remote, 7, BEDTIME, CANDIDATES)
-    assert "HTTPStatusError 400" in caplog.text and BEDTIME not in caplog.text
+    assert "OpenAIInvalidRequestError 400" in caplog.text and BEDTIME not in caplog.text
