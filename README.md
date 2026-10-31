@@ -145,6 +145,103 @@ Open http://127.0.0.1:8000/docs, click **Authorize**, and in the **OAuth2Passwor
 `parent` and the `DEV_LOGIN_PASSWORD` from `.env` (leave `client_id` and `client_secret` empty). `parent:<any
 label>` logs in as a separate parent, e.g. to check that families are isolated.
 
+## Connect a frontend
+
+The frontend needs three public settings, in its `.env.local` or on its host. No API key, Nebius key or database
+setting belongs there: the frontend only signs in and calls this API.
+
+| Setting | Value |
+|---|---|
+| `VITE_API_URL` | The API's address (see below) |
+| `VITE_GOOGLE_CLIENT_ID` | The same Google client id as `GOOGLE_CLIENT_ID` here. Public |
+| `VITE_DEV_LOGIN` | `true` shows the test login, which works only while this API has `DEV_LOGIN=true` |
+
+### Local backend with a local frontend
+
+Use this to change the backend, or to test without touching hosted data.
+
+1. Start the API as in [Run it locally](#run-it-locally). Check `.env` has `DATABASE_URL` for the local cluster,
+   `JWT_SECRET` and `GOOGLE_CLIENT_ID`, plus `DEV_LOGIN` and `DEV_LOGIN_PASSWORD` for the test login. The bootstrap keeps
+   an older `.env` as it is, so these may need updating.
+2. For real AI, add these to `.env`; without them, AI features use the `fake` stand-in:
+
+   ```text
+   AI_MODE=openai
+   OPENAI_BASE_URL=https://api.tokenfactory.nebius.com/v1/
+   OPENAI_MODEL=openai/gpt-oss-120b
+   OPENAI_API_KEY=<your key>
+   ```
+
+3. In the frontend repository, use a branch that has the AI screens (`feat/ai-coach-ui` until it is merged), and set
+   `.env.local`:
+
+   ```text
+   VITE_API_URL=http://127.0.0.1:8000
+   VITE_GOOGLE_CLIENT_ID=<the client id>
+   VITE_DEV_LOGIN=true
+   ```
+
+4. Run `npm install` and `npm run dev`, then open http://localhost:5180. Restart the frontend after changing
+   `.env.local`, because Vite reads it only at startup.
+
+The frontend must run on port 5180: that is the origin `CORS_ORIGINS` allows by default and the one the Google client
+lists. Open it as `localhost`, not `127.0.0.1`, or Google sign-in and CORS refuse it.
+
+### Local frontend with the hosted backend
+
+Change one line in the frontend's `.env.local`, and restart it:
+
+```text
+VITE_API_URL=https://habitquest-api-qmt1.onrender.com
+```
+
+Nothing changes on the backend. The free instance sleeps, so the first request can take about a minute. Data goes to
+the hosted database, so use made-up details while testing. Real AI needs the `OPENAI_*` settings on Render.
+
+### Hosted frontend with the hosted backend
+
+1. Set the three settings above on the frontend host, with `VITE_DEV_LOGIN=false`.
+2. Add the frontend's exact address, such as `https://app.example.com`, to `CORS_ORIGINS` on Render, comma-separated
+   and keeping `http://localhost:5180` for local work.
+3. Add the same address to the Google client's **Authorized JavaScript origins**.
+4. Publish the Google consent screen before real families use it; in Testing, only listed test users can sign in.
+
+## API documentation
+
+| Page | Local | Hosted |
+|---|---|---|
+| Swagger UI, to try requests | http://127.0.0.1:8000/docs | https://habitquest-api-qmt1.onrender.com/docs |
+| ReDoc, to read | http://127.0.0.1:8000/redoc | https://habitquest-api-qmt1.onrender.com/redoc |
+| OpenAPI contract, for tools | http://127.0.0.1:8000/openapi.json | https://habitquest-api-qmt1.onrender.com/openapi.json |
+
+**Try an endpoint in Swagger:** this needs `DEV_LOGIN=true` on the server you are using.
+
+1. Click **Authorize**. In the **OAuth2PasswordBearer** form, enter username `parent` and the `DEV_LOGIN_PASSWORD`, and
+   leave `client_id` and `client_secret` empty. The token lasts one hour.
+2. Open `POST /v1/families`, click **Try it out**, and create a family. Copy its `id`.
+3. Add a child with `POST /v1/families/{family_id}/children`, and copy its `id`.
+4. Message the coach with `POST /v1/children/{child_id}/coach/messages`, then read the cards with
+   `GET /v1/families/{family_id}/suggestions`.
+5. Accept a card with `POST /v1/suggestions/{suggestion_id}/accept` and the family `pin`.
+
+Use `parent:<any label>`, such as `parent:test2`, to log in as a separate parent and check that families stay isolated.
+
+**Try kid endpoints:** `/v1/kid/*` refuses a caregiver token. Get a kid token from
+`POST /v1/children/{child_id}/kid-session`, then click **Authorize**, log out, and paste it into the **HTTPBearer** box.
+
+**From the command line:**
+
+```bash
+API=https://habitquest-api-qmt1.onrender.com
+TOKEN=$(curl -s "$API/v1/auth/token" -d "username=parent" --data-urlencode "password=$DEV_LOGIN_PASSWORD" | jq -r .access_token)
+curl -H "Authorization: Bearer $TOKEN" "$API/v1/me"
+```
+
+**Status codes:** 401 means sign in again, 403 a wrong PIN, 404 a missing record or one from another family, 409 a
+conflict such as a decision already made, 422 invalid input, and 429 a rate limit. Errors carry a readable `detail`.
+
+Hosted data is real to the app: endpoints that delete or spend change it for good, so use test families.
+
 ## Tests
 
 Tests need a dedicated database whose name ends in `_test`; fixtures delete its data.
@@ -177,5 +274,4 @@ PostgreSQL 17.
 | `DEV_LOGIN`, `DEV_LOGIN_PASSWORD` | `true` and a shared tester password of 12+ characters (set it in the dashboard). Setting `DEV_LOGIN=true` without a valid password stops the service from starting |
 
 The first migration replaces the earlier versioned schema: it drops the old `hq` and `hq_checkpoint` schemas and
-their data. The migrations create the `hq_api` and `hq_kid` roles, so the database user needs `CREATEROLE`. Treat a hosted
-deployment as test data only until family deletion and retention exist.
+their data. The migrations create the `hq_api` and `hq_kid` roles, so the database user needs `CREATEROLE`.
