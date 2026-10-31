@@ -252,12 +252,18 @@ def take_snapshot(conn, child: dict) -> Snapshot:
         " unnest(m.shown_habits) AS h WHERE m.child_id=%s",
         (child["id"],),
     ).fetchone()["ids"]
+    checkins = conn.execute(
+        "SELECT day::text,mood,hardest,favorite,stickers FROM hq.checkins WHERE child_id=%s"
+        " AND day>hq.child_today(%s)-14 ORDER BY day",
+        (child["id"], child["id"]),
+    ).fetchall()
     return Snapshot(
         child["age"],
         candidates(conn, child["age"], tier),
         plan,
         {row["habit_id"]: row["n"] for row in approved},
         set(shown),
+        checkins,
     )
 
 

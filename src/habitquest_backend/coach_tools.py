@@ -28,6 +28,7 @@ class Snapshot:
     plan: dict[str, dict]  # habit_id -> title, cue_time, status
     approved_days: dict[str, int]  # habit_id -> approved days in the last 14
     shown: set[str] = field(default_factory=set)  # habits already shown or rejected in this conversation
+    checkins: list[dict] = field(default_factory=list)  # recent mood, trickiest and favourite habits
 
 
 @dataclass
@@ -57,12 +58,12 @@ def build_tools(snapshot: Snapshot, turn: Turn) -> list[BaseTool]:
 
     @tool
     def get_progress() -> str:
-        """Current habits with their time and status, plus how many of the last 14 days each was approved."""
+        """Current habits with their time and status, approvals in the last 14 days, and recent check-ins."""
         plan = [
             {**habit, "habit_id": habit_id, "approved_days": snapshot.approved_days.get(habit_id, 0)}
             for habit_id, habit in snapshot.plan.items()
         ]
-        return json.dumps({"days": 14, "plan": plan})
+        return json.dumps({"days": 14, "plan": plan, "checkins": snapshot.checkins})
 
     @tool
     def research(problem: str) -> str:

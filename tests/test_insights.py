@@ -72,12 +72,14 @@ def test_the_planner_saves_only_changes_that_can_apply(live, family, llm_reply):
     assert response.status_code == 200, response.text
     assert response.json()["result"]["summary"] == "Alex is doing well."
     assert response.json()["result"]["tips"] == ["Alex could set an alarm."]
-    cards = live.get(f"/v1/families/{family}/suggestions").json()
+    cards = sorted(
+        live.get(f"/v1/families/{family}/suggestions").json(), key=lambda c: c["kind"], reverse=True
+    )
     assert [(c["kind"], c["habit_id"], c["cue_time"], c["reason"]) for c in cards] == [
         ("retime", "bedtime", "19:45", "Alex is tired."),
         ("add", "homework", None, "This could help."),
     ]
-    assert cards[0]["source"] == "planner"
+    assert {c["source"] for c in cards} == {"planner"}
     sent = json.dumps(llm_reply.seen)
     assert "Alex" not in sent and "Child A" in sent
 

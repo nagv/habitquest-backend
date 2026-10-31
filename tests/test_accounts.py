@@ -265,7 +265,7 @@ def test_kid_session_gives_a_token_only_for_kid_endpoints(client, settings, db, 
     assert body["child"] == {"id": str(alex), "name": "Alex"} and body["expires_in"] == 8 * 3600
     kid = {"Authorization": "Bearer " + body["access_token"]}
     me = client.get("/v1/kid/me", headers=kid).json()
-    assert (me["name"], me["age"], me["buddy"], me["world"]) == ("Alex", 7, "fox", "space")
+    assert (me["name"], me["age"], me["buddy"], me["world"]) == ("Alex", 7, "fox", "camp")
     assert client.get("/v1/me", headers=kid).status_code == 401
     assert client.get(f"/v1/families/{family['id']}", headers=kid).status_code == 401
     assert client.get("/v1/kid/me").status_code == 401  # a caregiver token is not a kid token

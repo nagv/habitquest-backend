@@ -37,7 +37,7 @@ Anchor = Literal["morning", "midday", "after_school", "evening", "bedtime"]
 Day = Literal["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 Time = Annotated[str, Field(pattern=r"^([01]\d|2[0-3]):[0-5]\d$", description="24-hour HH:MM")]
 Buddy = Literal["fox", "owl", "bear", "bunny"]
-World = Literal["space", "forest", "city"]
+World = Literal["camp", "mosswood", "sky"]
 Days = Annotated[list[Day], Field(min_length=1, max_length=7)]
 
 
@@ -51,7 +51,7 @@ class ChildInput(StrictModel):
     name: str = Field(min_length=1, max_length=40)
     age: int = Field(ge=3, le=13)
     buddy: Buddy = "fox"
-    world: World = "space"
+    world: World = "camp"
     routine_times: dict[Anchor, Time] = Field(
         default_factory=dict, description='When each part of the day starts, e.g. {"bedtime": "20:00"}'
     )
@@ -179,7 +179,7 @@ def router(settings: Settings) -> APIRouter:
     @api.post("/v1/families/{family_id}/children", status_code=201, tags=["Children"], summary="Add a child")
     def add_child(family_id: UUID, body: ChildInput, user: User) -> dict:
         """Adds a child to the family: `name`, `age` (3-13, decides which habits suit them), `buddy` (fox, owl,
-        bear, bunny), `world` (space, forest, city) and optional `routine_times` per part of the day
+        bear, bunny), `world` (camp, mosswood, sky) and optional `routine_times` per part of the day
         (`morning`, `midday`, `after_school`, `evening`, `bedtime`), used as default habit times.
         """
         with transaction(settings, user) as conn:

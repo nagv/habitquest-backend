@@ -44,7 +44,7 @@ PLANNER_PROMPT = f"""You are the quest planner for HabitQuest.
 
 Given a family snapshot, propose a realistic daily plan for the parent. Each child has their own habits, under a
 label such as Child A; keep those labels. Consider each child's age (typical sleep needs are about 10-13 hours at
-ages 3-5 and 9-12 hours at ages 6-12), how often each habit was approved recently, and gaps between morning, meals
+ages 3-5 and 9-12 hours at ages 6-12), how often each habit was approved recently, their check-ins, and gaps between morning, meals
 and bedtime. Prefer small steps: shift a time by 15-30 minutes rather than a big jump, and do not add more than a
 family is managing. A child has at most 6 habits. Tie each reason to that child's numbers. If a plan is already
 sensible, return no changes. Write for a busy parent: warm, plain and brief. Never give medical advice."""
@@ -119,6 +119,7 @@ class FamilyView:
                 "plan": snapshot.plan,
                 "approved_days_last_14": snapshot.approved_days,
                 "weeks": self.weeks[label],
+                "checkins": snapshot.checkins,
                 "can_add": [
                     {"habit_id": h["id"], "title": h["title"]}
                     for goal in snapshot.goals

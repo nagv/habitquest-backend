@@ -13,7 +13,7 @@ from fastapi.testclient import TestClient
 from psycopg.conninfo import conninfo_to_dict
 from pydantic import SecretStr
 
-from habitquest_backend import llm
+from habitquest_backend import daily, llm
 from habitquest_backend.config import Settings
 from habitquest_backend.main import create_app
 
@@ -26,6 +26,15 @@ if not conninfo_to_dict(URL).get("dbname", "").endswith("_test"):
     raise pytest.UsageError(
         "TEST_DATABASE_URL must name a dedicated database ending in _test; fixtures delete test data."
     )
+
+
+REAL_GOLDEN = daily.golden_habit
+
+
+@pytest.fixture(autouse=True)
+def no_golden_habit(monkeypatch):
+    """Keeps point totals predictable; tests of the golden quest put REAL_GOLDEN back."""
+    monkeypatch.setattr(daily, "golden_habit", lambda habits, day, child_id: None)
 
 
 @pytest.fixture

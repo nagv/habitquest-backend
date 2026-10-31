@@ -12,7 +12,7 @@ from habitquest_backend.db import transaction
 from habitquest_backend.main import create_app
 from habitquest_backend.onboarding import progress
 
-ALEX = {"name": "Alex", "age": 8, "buddy": "owl", "world": "forest", "routine_times": {"bedtime": "19:45"}}
+ALEX = {"name": "Alex", "age": 8, "buddy": "owl", "world": "mosswood", "routine_times": {"bedtime": "19:45"}}
 BEDTIME = "Bedtime is a battle every night and he will not go to sleep"
 
 
@@ -54,7 +54,7 @@ def approve(db, child_id, count):
 
 def test_adding_listing_reading_and_editing_children(client, family, alex):
     child = client.get(f"/v1/children/{alex}").json()
-    assert (child["name"], child["age"], child["buddy"], child["world"]) == ("Alex", 8, "owl", "forest")
+    assert (child["name"], child["age"], child["buddy"], child["world"]) == ("Alex", 8, "owl", "mosswood")
     assert child["routine_times"] == {"bedtime": "19:45"} and child["family_id"] == family
     client.post(f"/v1/families/{family}/children", json={"name": "Maya", "age": 4})
     assert [c["name"] for c in client.get(f"/v1/families/{family}/children").json()] == ["Alex", "Maya"]

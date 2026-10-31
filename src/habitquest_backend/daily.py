@@ -1,5 +1,6 @@
 """The daily loop: today's habits, kids submitting completions, caregivers approving them, Sparks and points."""
 
+from datetime import date, timedelta
 from typing import Annotated
 from uuid import UUID
 
@@ -11,6 +12,9 @@ from habitquest_backend.config import Settings
 from habitquest_backend.db import one, transaction
 from habitquest_backend.onboarding import progress
 
+MAX_MULTIPLIER = 3
+STREAK_DAYS = 3
+
 
 class Submission(StrictModel):
     child_habit_id: UUID
@@ -21,6 +25,44 @@ def balance(conn, child_id: UUID) -> int:
     return conn.execute(
         "SELECT coalesce(sum(amount),0) AS n FROM hq.points_ledger WHERE child_id=%s", (child_id,)
     ).fetchone()["n"]
+
+
+def golden_habit(habits: list[str], day: date, child_id: UUID) -> str:
+    """FNV-1a, as the frontend used, so each child gets a fresh golden quest each day."""
+    value = 2166136261
+    for character in f"{day}:{child_id}":
+        value = ((value ^ ord(character)) * 16777619) & 0xFFFFFFFF
+    return habits[value % len(habits)]
+
+
+def boosts(conn, child_id: UUID, day: date) -> dict[str, list[str]]:
+    """Why each habit scheduled on `day` would earn extra: `golden`, `streak` or `double`, each worth 1x more."""
+    habits = conn.execute(
+        "SELECT habit_id FROM hq.child_habits WHERE child_id=%s AND status='active'"
+        " AND to_char(%s::date,'dy')=ANY(days) ORDER BY habit_id",
+        (child_id, day),
+    ).fetchall()
+    if not habits:
+        return {}
+    done = conn.execute(
+        "SELECT DISTINCT c.day FROM hq.completions c JOIN hq.child_habits ch ON ch.id=c.child_habit_id"
+        " WHERE ch.child_id=%s AND c.status='approved' AND c.day<%s AND c.day>=%s::date-%s",
+        (child_id, day, day, STREAK_DAYS),
+    ).fetchall()
+    days = {row["day"] for row in done}
+    shared = ["streak"] if all(day - timedelta(n) in days for n in range(1, STREAK_DAYS)) else []
+    double = conn.execute(
+        "SELECT 1 FROM hq.surprises WHERE kind='double' AND day=%s AND (child_id IS NULL OR child_id=%s)"
+        " AND family_id=(SELECT family_id FROM hq.children WHERE id=%s)",
+        (day, child_id, child_id),
+    ).fetchone()
+    shared += ["double"] if double else []
+    golden = golden_habit([h["habit_id"] for h in habits], day, child_id)
+    return {h["habit_id"]: (["golden"] if h["habit_id"] == golden else []) + shared for h in habits}
+
+
+def multiplier(reasons: list[str]) -> int:
+    return min(1 + len(reasons), MAX_MULTIPLIER)
 
 
 def today_view(conn, child_id: UUID) -> dict:
@@ -36,6 +78,10 @@ def today_view(conn, child_id: UUID) -> dict:
         " ORDER BY ch.cue_time,h.kid_title",
         (day, child_id, day),
     ).fetchall()
+    reasons = boosts(conn, child_id, day)
+    for habit in habits:
+        habit["boosts"] = reasons.get(habit["habit_id"], [])
+        habit["multiplier"] = multiplier(habit["boosts"])
     return {
         "child": child,
         "day": day,
@@ -54,7 +100,7 @@ def router(settings: Settings) -> APIRouter:
         with transaction(settings, user) as conn:
             row = one(
                 conn,
-                "SELECT c.status,ch.child_id,h.points FROM hq.completions c"
+                "SELECT c.status,c.day,ch.child_id,ch.habit_id,h.points FROM hq.completions c"
                 " JOIN hq.child_habits ch ON ch.id=c.child_habit_id JOIN hq.habits h ON h.id=ch.habit_id"
                 " WHERE c.id=%s FOR UPDATE OF c",
                 (completion_id,),
@@ -68,10 +114,11 @@ def router(settings: Settings) -> APIRouter:
                 (status, user, completion_id),
             )
             if status == "approved":
+                reasons = boosts(conn, row["child_id"], row["day"]).get(row["habit_id"], [])
                 conn.execute(
                     "INSERT INTO hq.points_ledger(child_id,amount,reason,completion_id,created_by)"
                     " VALUES(%s,%s,'earned',%s,%s)",
-                    (row["child_id"], row["points"], completion_id, user),
+                    (row["child_id"], row["points"] * multiplier(reasons), completion_id, user),
                 )
             return {
                 "completion": completion,
