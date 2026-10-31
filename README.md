@@ -41,7 +41,7 @@ Python 3.12, uv, FastAPI and Pydantic, PostgreSQL with row-level security, psyco
    - Only the child's age and the parent's text go to the AI provider.
    - A local safety screen runs first, and the AI can also flag risk: if the text suggests a child may be at
      risk, nothing is saved and the response carries guidance (emergency number, doctor, helpline).
-   - If the AI fails or times out (`AI_TIMEOUT_SECONDS`, default 15), keyword matching on `goals.keywords`
+   - If the AI fails or times out (`AI_TIMEOUT_SECONDS`, default 30), keyword matching on `goals.keywords`
      suggests the goals instead, without recommendations (`mapped_by: keywords`). If nothing matches,
      `mapped_by` is `manual` and the parent picks goals from `GET /v1/goals`.
 3. **Pick habits.** `GET /v1/children/{id}/plan` shows each suggested or active goal with its habit `options`
@@ -53,6 +53,17 @@ Python 3.12, uv, FastAPI and Pydantic, PostgreSQL with row-level security, psyco
 
 The plan also reports the child's `progress`: Sparks, level (Sprout 0, Explorer 5, Adventurer 15, Hero 30,
 Legend 50) and the highest habit tier unlocked (tier 2 at Explorer, tier 3 at Adventurer).
+
+## AI helpers
+
+- **Habit coach** (`coach.py`, `coach_tools.py`): a LangChain `create_agent` inside a small LangGraph graph with a fit
+  check that sends poor picks back once. Tools work on an in-memory snapshot and cannot change anything. Children's
+  names become labels before any model call, risky text never reaches the model and is not stored, and any failure
+  falls back to keyword matching. Conversations are kept for 90 days.
+- **Quest planner and weekly review** (`insights.py`): one structured call each, on facts computed in code.
+- **Buddy lines**: one small call, then a safety check; a built-in line replaces anything unusable.
+- **Suggestions**: nothing applies until a caregiver accepts with the family PIN, and the plan rules are checked again.
+- **Limits**: `AI_DAILY_LIMIT` model-backed requests per family per day, `COACH_TIMEOUT_SECONDS` per coach turn.
 
 ## The daily loop
 

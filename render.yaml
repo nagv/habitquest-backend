@@ -38,6 +38,8 @@ envVarGroups:
         sync: false
       - key: OPENAI_MODEL      # must support JSON output
         sync: false
+      - key: OPENAI_SMALL_MODEL # optional: faster model for buddy lines and safety checks
+        sync: false
       - key: OPENAI_API_KEY
         sync: false
       - key: DEV_LOGIN         # /docs username/password login for testers

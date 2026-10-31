@@ -38,6 +38,7 @@ class ExtrasUpdate(StrictModel):
     )
     wearing: str | None = Field(default=None, description='An accessory the child owns, or "" to take it off')
     goal: UUID | None = None
+    clear_goal: bool = False
     level_seen: int | None = Field(default=None, ge=1, le=5)
 
 
@@ -94,7 +95,7 @@ def router(settings: Settings) -> APIRouter:
     @api.patch("/v1/kid/extras", tags=["Kid mode"], summary="Save a discovery or outfit")
     def update_extras(body: ExtrasUpdate, kid: Kid) -> dict:
         """With a kid token: records a `discover` key, the accessory the child is `wearing` (it must be owned;
-        422 otherwise), their savings `goal`, and the highest level seen celebrated.
+        422 otherwise), their savings `goal` (or `clear_goal`), and the highest level seen celebrated.
         """
         with transaction(settings, kid=kid) as conn:
             owned = one(conn, "SELECT accessories FROM hq.child_extras WHERE child_id=%s", (kid,))[
@@ -115,6 +116,8 @@ def router(settings: Settings) -> APIRouter:
             if body.goal:
                 one(conn, "SELECT id FROM hq.rewards WHERE id=%s AND is_active", (body.goal,))
                 conn.execute("UPDATE hq.child_extras SET goal=%s WHERE child_id=%s", (body.goal, kid))
+            if body.clear_goal:
+                conn.execute("UPDATE hq.child_extras SET goal=NULL WHERE child_id=%s", (kid,))
             if body.level_seen:
                 conn.execute(
                     "UPDATE hq.child_extras SET level_seen=greatest(level_seen,%s) WHERE child_id=%s",
@@ -175,6 +178,7 @@ def router(settings: Settings) -> APIRouter:
                 "SELECT f.pin_hash FROM hq.children k JOIN hq.families f ON f.id=k.family_id WHERE k.id=%s",
                 (child_id,),
             )
+            settings.pin_attempts.check(str(user))
             if not check_pin(body.pin, family["pin_hash"]):
                 raise HTTPException(403, "Wrong PIN")
             add_to_day(conn, "app_extra_minutes", child_id, body.minutes)

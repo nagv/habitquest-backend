@@ -65,6 +65,23 @@ def multiplier(reasons: list[str]) -> int:
     return min(1 + len(reasons), MAX_MULTIPLIER)
 
 
+def history_view(conn, child_id: UUID, day: date) -> dict:
+    """The current streak, ending today or yesterday, and approved habits per day for the last seven days."""
+    rows = conn.execute(
+        "SELECT c.day,count(*) AS n FROM hq.completions c JOIN hq.child_habits ch ON ch.id=c.child_habit_id"
+        " WHERE ch.child_id=%s AND c.status='approved' AND c.day>%s::date-60 GROUP BY c.day",
+        (child_id, day),
+    ).fetchall()
+    counts = {row["day"]: row["n"] for row in rows}
+    cursor = day if day in counts else day - timedelta(1)
+    streak = 0
+    while cursor in counts:
+        streak += 1
+        cursor -= timedelta(1)
+    week = {(day - timedelta(n)).isoformat(): counts.get(day - timedelta(n), 0) for n in range(6, -1, -1)}
+    return {"streak": streak, "week": week}
+
+
 def today_view(conn, child_id: UUID) -> dict:
     """The child's habits scheduled for today (in the family's time zone), each with today's status."""
     child = one(conn, "SELECT id,name,buddy,world FROM hq.children WHERE id=%s", (child_id,))
@@ -88,6 +105,7 @@ def today_view(conn, child_id: UUID) -> dict:
         "progress": progress(conn, child_id),
         "points": balance(conn, child_id),
         "habits": habits,
+        **history_view(conn, child_id, day),
     }
 
 

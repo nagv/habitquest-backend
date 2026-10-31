@@ -125,6 +125,23 @@ VITE_DEV_LOGIN=true
   `{points, earned, spent, entries: [{id, amount, reason: "earned" | "redeemed" | "adjusted", note, created_at,
   habit_id, kid_title, icon, completion_day, by?}]}` (`by` = caregiver display name, caregiver view only).
 
+### AI helpers, rewards, check-ins and extras
+
+`/docs` and `/openapi.json` have every shape. In short:
+
+- Coach: `GET`, `POST`, `DELETE /v1/children/{id}/coach/messages`. Suggestions: `GET /v1/families/{id}/suggestions`,
+  `POST /v1/suggestions/{id}/accept` with `{pin}`, `POST /v1/suggestions/{id}/dismiss`.
+- `POST /v1/families/{id}/plan-suggestions`, `POST /v1/families/{id}/reviews`, `GET /v1/families/{id}/reports`,
+  `POST /v1/kid/buddy-line`.
+- Rewards: `/v1/families/{id}/rewards`, `/v1/rewards/{id}`, `/v1/kid/rewards`, `/v1/kid/reward-requests`,
+  `/v1/families/{id}/reward-requests`, `/v1/reward-requests/{id}/approve` (`{pin}`) and `/decline`.
+- Check-ins and surprises: `/v1/kid/checkins`, `/v1/kid/checkins/today`, `/v1/families/{id}/checkins` and `/read`,
+  `/v1/families/{id}/surprises`, `/v1/kid/surprises`, `/v1/kid/surprises/{id}/open`.
+- Extras: `/v1/kid/extras`, `/v1/kid/chest`, `/v1/kid/app-time`, `/v1/children/{id}/extras`,
+  `/v1/children/{id}/app-time/extend`, `/v1/families/{id}/settings`.
+- Data: `GET /v1/families/{id}/export`, `POST /v1/families/{id}/delete` and `POST /v1/children/{id}/delete` (`{pin}`),
+  `DELETE /v1/families/{id}/caregivers/me`.
+- `today` also returns `streak`, `week`, and each habit's `boosts` and `multiplier`. Worlds are `camp`, `mosswood`, `sky`.
 ## 4. How the screens map
 
 | Screen | Change |

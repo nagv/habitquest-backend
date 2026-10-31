@@ -285,6 +285,18 @@ def test_a_streak_and_the_golden_quest_stack_to_the_cap(client, db, family, alex
     assert sorted(habit["boosts"]) == ["double", "golden", "streak"] and habit["multiplier"] == 3
 
 
+def test_today_reports_the_streak_and_week(client, db, family, alex):
+    row = add_habit(db, alex)
+    day = today(db, alex)
+    for back in (1, 2, 4):
+        complete(db, row, day - timedelta(days=back))
+    body = client.get(f"/v1/children/{alex}/today").json()
+    assert body["streak"] == 2
+    assert list(body["week"].values()) == [0, 0, 1, 0, 1, 1, 0]
+    complete(db, row, day)
+    assert client.get(f"/v1/children/{alex}/today").json()["streak"] == 3
+
+
 def test_a_gap_breaks_the_streak(client, db, family, alex):
     row = add_habit(db, alex)
     day = today(db, alex)
@@ -319,6 +331,7 @@ def test_a_savings_goal_must_be_in_the_shop(client, family, kid):
         == reward["id"]
     )
     assert client.patch("/v1/kid/extras", json={"goal": str(uuid4())}, headers=kid).status_code == 404
+    assert client.patch("/v1/kid/extras", json={"clear_goal": True}, headers=kid).json()["goal"] is None
 
 
 def test_the_chest_waits_for_every_quest_and_opens_once(client, db, alex, kid, monkeypatch):
@@ -398,3 +411,59 @@ def test_a_kid_cannot_reach_another_familys_shop(client, settings, db, family, k
 
 def test_a_caregiver_token_cannot_use_kid_routes(client):
     assert client.get("/v1/kid/extras").status_code == 401
+
+
+# ── Limits, export and deletion ───────────────────────────────────────────────
+
+
+def test_a_new_approach_to_pin_guessing_is_limited(settings, db, family, alex):
+    limited = settings.model_copy(update={"pin_limit": 2})
+    with TestClient(create_app(limited)) as c:
+        c.headers["Authorization"] = "Bearer " + token(settings)
+        url = f"/v1/families/{family}/pin/verify"
+        assert [c.post(url, json={"pin": "0000"}).status_code for _ in range(3)] == [200, 200, 429]
+
+
+def test_sign_in_attempts_are_limited_per_address(settings, db):
+    limited = settings.model_copy(update={"sign_in_limit": 1, "google_client_id": ""})
+    with TestClient(create_app(limited)) as c:
+        body, headers = {"credential": "x" * 30}, {"X-Forwarded-For": "1.2.3.4, 10.0.0.1"}
+        assert c.post("/v1/auth/google", json=body, headers=headers).status_code == 503
+        assert c.post("/v1/auth/google", json=body, headers=headers).status_code == 429
+        assert c.post("/v1/auth/google", json=body).status_code == 503  # another address
+
+
+def test_the_rate_limiter_forgets_old_attempts():
+    from habitquest_backend.limits import RateLimiter
+
+    limiter = RateLimiter(1, seconds=0)
+    limiter.check("a")
+    limiter.check("a")
+
+
+def test_export_holds_the_family_without_the_pin(client, db, family, alex):
+    give_points(db, alex, 5)
+    body = client.get(f"/v1/families/{family}/export").json()
+    assert body["children"][0]["points"][0]["amount"] == 5
+    assert "pin_hash" not in json.dumps(body)
+
+
+def test_deleting_a_child_needs_the_pin(client, family, alex):
+    assert client.post(f"/v1/children/{alex}/delete", json={"pin": "9999"}).status_code == 403
+    assert client.post(f"/v1/children/{alex}/delete", json={"pin": "1234"}).status_code == 204
+    assert client.get(f"/v1/children/{alex}").status_code == 404
+
+
+def test_deleting_a_family_removes_its_data(client, db, family, alex):
+    complete(db, add_habit(db, alex), today(db, alex))
+    assert client.post(f"/v1/families/{family}/delete", json={"pin": "9999"}).status_code == 403
+    assert client.post(f"/v1/families/{family}/delete", json={"pin": "1234"}).status_code == 204
+    assert db.execute("SELECT count(*) FROM hq.children").fetchone()[0] == 0
+
+
+def test_the_last_caregiver_cannot_leave(client, settings, db, family):
+    url = f"/v1/families/{family}/caregivers/me"
+    assert client.delete(url, headers=outsider(settings)).status_code == 404
+    assert client.delete(url).status_code == 409
+    db.execute("INSERT INTO hq.caregivers VALUES(%s,%s,'Lee','father')", (family, OTHER))
+    assert client.delete(url).status_code == 204

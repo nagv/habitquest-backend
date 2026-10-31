@@ -375,3 +375,9 @@ def test_a_kid_token_cannot_reach_the_coach(client, alex):
     kid = client.post(f"/v1/children/{alex}/kid-session").json()["access_token"]
     headers = {"Authorization": "Bearer " + kid}
     assert client.get(f"/v1/children/{alex}/coach/messages", headers=headers).status_code == 401
+
+
+def test_keywords_use_the_whole_conversation(settings):
+    history = [{"role": "parent", "content": BEDTIME}]
+    reply = run_turn(settings, snapshot(), history, "Something different please", ["Alex"])
+    assert reply.turn.recommendations and reply.mapped_by == "keywords"

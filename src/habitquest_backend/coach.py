@@ -38,6 +38,7 @@ from habitquest_backend.safety import parent_at_risk
 
 log = logging.getLogger(__name__)
 HISTORY_MESSAGES = 20
+RETENTION_DAYS = 90
 REPLY_LENGTH = 4000
 MODEL_CALLS = 6
 STEP_LIMIT = 30
@@ -183,8 +184,10 @@ def run_turn(
     """Answers one parent message. `names` lists the family's children, this child first."""
     if parent_at_risk(text):
         return Reply(SAFETY_GUIDANCE, safety=SAFETY_GUIDANCE, mapped_by="manual")
+    # Keywords need the whole conversation: "something different" alone matches nothing.
+    problem = " ".join([*(m["content"] for m in history if m["role"] == "parent"), text])
     if settings.ai_mode == "fake":
-        return fallback(snapshot, text)
+        return fallback(snapshot, problem)
     labels = {name: f"Child {LABELS[i]}" for i, name in enumerate(names[: len(LABELS)])}
     restore = {label: name for name, label in labels.items()}
     messages = [
@@ -208,7 +211,7 @@ def run_turn(
     except (openai.OpenAIError, GraphRecursionError, FutureTimeout, ValueError, KeyError, TypeError) as exc:
         status = exc.status_code if isinstance(exc, openai.APIStatusError) else ""
         log.warning("Coach turn failed (%s %s); using keyword matching", type(exc).__name__, status)
-        return fallback(snapshot, text)
+        return fallback(snapshot, problem)
     finally:
         executor.shutdown(wait=False, cancel_futures=True)
     if not answer:
@@ -362,7 +365,8 @@ def router(settings: Settings) -> APIRouter:
     @api.post("/v1/children/{child_id}/coach/messages", tags=["Coach"], summary="Message the coach")
     def send(child_id: UUID, body: CoachMessage, user: User) -> dict:
         """Sends a parent's message to the habit coach. The reply cites guidance, and habit suggestions are saved
-        as cards the parent accepts with the PIN. Refining never repeats a habit shown in this conversation.
+        as cards the parent accepts with the PIN. Refining never repeats a habit shown in this conversation, and
+        messages are kept for 90 days.
         Children's names are not sent to the AI provider. `mapped_by` is `ai`, or `keywords` or `manual` when the
         AI was unavailable. If the text suggests a child may be at risk, nothing is saved or sent, and `safety`
         carries guidance. 429 when the family reaches its daily AI limit.
@@ -370,6 +374,10 @@ def router(settings: Settings) -> APIRouter:
         with transaction(settings, user) as conn:
             child = one(conn, "SELECT id,family_id,name,age FROM hq.children WHERE id=%s", (child_id,))
             spend_ai_call(conn, child["family_id"], settings)
+            conn.execute(
+                "DELETE FROM hq.coach_messages WHERE child_id=%s AND created_at<now()-make_interval(days=>%s)",
+                (child_id, RETENTION_DAYS),
+            )
             snapshot = take_snapshot(conn, child)
             siblings = conn.execute(
                 "SELECT name FROM hq.children WHERE family_id=%s AND id<>%s ORDER BY created_at,id",
@@ -450,6 +458,7 @@ def router(settings: Settings) -> APIRouter:
                 " JOIN hq.habits h ON h.id=s.habit_id WHERE s.id=%s FOR UPDATE OF s",
                 (suggestion_id,),
             )
+            settings.pin_attempts.check(str(user))
             if not check_pin(body.pin, row["pin_hash"]):
                 raise HTTPException(403, "Wrong PIN")
             if row["status"] != "pending":

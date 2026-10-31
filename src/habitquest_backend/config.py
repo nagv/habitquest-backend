@@ -1,7 +1,10 @@
+from functools import cached_property
 from typing import Literal
 
 from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+from habitquest_backend.limits import RateLimiter
 
 
 class Settings(BaseSettings):
@@ -28,6 +31,9 @@ class Settings(BaseSettings):
     # The coach's whole turn (several model calls), and model-backed requests per family per day.
     coach_timeout_seconds: float = Field(default=50, gt=0, le=120)
     ai_daily_limit: int = Field(default=100, gt=0)
+    # Attempts per minute: Google sign-in per address, and PIN checks per signed-in person.
+    sign_in_limit: int = Field(default=20, gt=0)
+    pin_limit: int = Field(default=10, gt=0)
     # Development login: POST /v1/auth/token (and /docs Authorize) issues tokens for test parents.
     dev_login: bool = False
     dev_login_password: SecretStr | None = None
@@ -43,6 +49,14 @@ class Settings(BaseSettings):
             if len(password) < 12 or not self.jwt_secret:
                 raise ValueError("DEV_LOGIN requires JWT_SECRET and a DEV_LOGIN_PASSWORD of 12+ characters")
         return self
+
+    @cached_property
+    def sign_in_attempts(self) -> RateLimiter:
+        return RateLimiter(self.sign_in_limit)
+
+    @cached_property
+    def pin_attempts(self) -> RateLimiter:
+        return RateLimiter(self.pin_limit)
 
     @property
     def allowed_origins(self) -> list[str]:

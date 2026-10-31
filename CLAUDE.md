@@ -21,9 +21,16 @@ completions, caregivers approving them, Sparks (progress, never spent) and point
 | `auth.py` | Our HS256 tokens (caregiver and kid roles), Google ID-token check, PIN hashing, dev login |
 | `accounts.py` | `/v1/me`, families, caregivers, invite codes, PIN, kid sessions |
 | `onboarding.py` | Children, pain points, the plan (goals and habits), Sparks/levels (`progress`) |
-| `ai.py` | Safety screen, one structured model call, checks on its answer, keyword fallback |
+| `ai.py` | Onboarding goal mapping: safety screen, one structured call, checks, keyword fallback |
+| `llm.py` | The chat model through LangChain (any OpenAI-compatible endpoint, e.g. Nebius) |
+| `coach.py`, `coach_tools.py` | The habit coach agent, its tools, suggestions accepted with the PIN |
+| `insights.py` | Quest planner, weekly review, buddy lines |
+| `guidance.py`, `guidance.json` | Parenting guidance and BM25 search |
+| `safety.py` | Screening text children write and read |
+| `checkins.py`, `extras.py` | Check-ins, surprises, kid extras, family settings |
+| `limits.py` | Rate limits for sign-in and PIN attempts |
 | `daily.py` | Today's habits, kid submissions, approvals |
-| `rewards.py` | Redemptions and points history |
+| `rewards.py` | Redemptions, points history, the reward shop and requests |
 | `db.py` | One transaction per request as `hq_api` (caregiver) or `hq_kid` (kid), with row-level security |
 | `config.py` | Every setting (environment variables) |
 | `db/migrations/*.sql` | The schema, in order. `db/seed.sql`: the catalog, upserted on every start |
@@ -88,11 +95,11 @@ CI (`.github/workflows/test.yml`) runs the same checks on PostgreSQL 17.
 - **Kids have no accounts:** a caregiver starts kid mode on the device and gets a kid token for one child; the
   family PIN guards leaving kid mode.
 - **AI suggests, parents decide:** AI maps pain points to 1-3 pre-approved goals and recommends habits; the parent
-  picks habits from that goal's pre-approved list. The AI only sees the child's age, the text and the catalog,
-  and its answer is filtered to that catalog. Provider: any OpenAI-compatible endpoint (Nebius), with keyword
+  picks habits from that goal's pre-approved list. The AI sees labels instead of names, and its answers are
+  checked against the catalog. Provider: any OpenAI-compatible endpoint (Nebius), with keyword
   matching as the fallback.
 - **Sparks and points are separate:** Sparks = approved completions (levels, tier unlocks); points = an
-  append-only ledger. Parents record redemptions; there is no reward catalog yet.
+  append-only ledger. Kid tokens write it only through `hq.kid_ledger`.
 - **Ages 3-13 as in the frontend;** habit ids, buddies and level thresholds match the frontend.
 
 ## Pitfalls

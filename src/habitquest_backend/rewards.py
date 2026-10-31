@@ -252,6 +252,7 @@ def router(settings: Settings) -> APIRouter:
                 " WHERE r.id=%s FOR UPDATE OF r",
                 (request_id,),
             )
+            settings.pin_attempts.check(str(user))
             if status == "approved" and not check_pin(pin or "", row["pin_hash"]):
                 raise HTTPException(403, "Wrong PIN")
             if row["status"] != "pending":
