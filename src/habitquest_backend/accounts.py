@@ -6,18 +6,32 @@ from uuid import UUID
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import psycopg
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from habitquest_backend.auth import KID, check_pin, hash_pin, issue_token, signed_in, verify_google
 from habitquest_backend.config import Settings
 from habitquest_backend.db import one, transaction
+from habitquest_backend.limits import client_address
 
 SESSION_MINUTES = 8 * 60
 # Unambiguous characters (no 0/O, 1/I/L): 8 of 31 gives about 4 * 10^11 codes.
 INVITE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
 Role = Literal["father", "mother", "guardian", "other"]
 Pin = Annotated[str, Field(pattern=r"^\d{4}$", description="Four digits")]
+
+
+CHILD_EXPORT = {
+    "habits": "SELECT habit_id,cue_time::text,days,status,started_on,ended_on FROM hq.child_habits WHERE child_id=%s",
+    "completions": "SELECT ch.habit_id,c.day,c.status,c.submitted_at FROM hq.completions c"
+    " JOIN hq.child_habits ch ON ch.id=c.child_habit_id WHERE ch.child_id=%s ORDER BY c.day",
+    "points": "SELECT amount,reason,note,created_at FROM hq.points_ledger WHERE child_id=%s ORDER BY id",
+    "pain_points": "SELECT text,mapped_by,created_at FROM hq.pain_points WHERE child_id=%s ORDER BY created_at",
+    "checkins": "SELECT day,mood,hardest,favorite,stickers,note,flagged FROM hq.checkins WHERE child_id=%s ORDER BY day",
+    "coach_messages": "SELECT role,content,created_at FROM hq.coach_messages WHERE child_id=%s ORDER BY id",
+    "ai_suggestions": "SELECT source,kind,habit_id,reason,status,created_at FROM hq.ai_suggestions WHERE child_id=%s",
+    "reward_requests": "SELECT title,cost,status,day FROM hq.reward_requests WHERE child_id=%s ORDER BY created_at",
+}
 
 
 class StrictModel(BaseModel):
@@ -98,12 +112,14 @@ def router(settings: Settings) -> APIRouter:
     Kid = Annotated[UUID, Depends(signed_in(settings, KID))]
 
     @api.post("/v1/auth/google", tags=["Auth"], summary="Sign in with Google")
-    def google(body: GoogleLogin) -> dict:
+    def google(body: GoogleLogin, request: Request) -> dict:
         """Exchanges the ID token from Google's sign-in button (`credential`) for our bearer token, valid for
         8 hours. The Google account must have a verified email; the user record is created on first sign-in
         and its email and name refreshed on later ones. 401 for an invalid or unverified token, 503 when
-        Google sign-in is not configured (`GOOGLE_CLIENT_ID`) or Google's keys cannot be fetched.
+        Google sign-in is not configured (`GOOGLE_CLIENT_ID`) or Google's keys cannot be fetched, 429 after
+        too many attempts in a minute.
         """
+        settings.sign_in_attempts.check(client_address(request))
         claims = verify_google(body.credential, settings)
         name = (claims.get("name") or claims["email"].split("@")[0])[:80]
         with transaction(settings) as conn:
@@ -223,9 +239,73 @@ def router(settings: Settings) -> APIRouter:
         """Returns `{"valid": true}` when `pin` matches the family PIN, otherwise `{"valid": false}`. The
         frontend asks for the PIN before leaving kid mode or opening a grown-up screen on a shared device.
         """
+        settings.pin_attempts.check(str(user))
         with transaction(settings, user) as conn:
             stored = one(conn, "SELECT pin_hash FROM hq.families WHERE id=%s", (family_id,))["pin_hash"]
         return {"valid": check_pin(body.pin, stored)}
+
+    @api.get("/v1/families/{family_id}/export", tags=["Families"], summary="Export family data")
+    def export_family(family_id: UUID, user: User) -> dict:
+        """Everything stored for the family as JSON: the family, caregivers, children and each child's plan,
+        completions, points, check-ins, coach conversation and AI suggestions. The PIN hash is left out.
+        """
+        with transaction(settings, user) as conn:
+            family = family_view(conn, family_id)
+            children = conn.execute(
+                "SELECT id,name,age,buddy,world,routine_times,created_at FROM hq.children WHERE family_id=%s"
+                " ORDER BY created_at,id",
+                (family_id,),
+            ).fetchall()
+            for child in children:
+                for name, sql in CHILD_EXPORT.items():
+                    child[name] = conn.execute(sql, (child["id"],)).fetchall()
+            return {"family": family, "children": children}
+
+    @api.post(
+        "/v1/families/{family_id}/delete", status_code=204, tags=["Families"], summary="Delete a family"
+    )
+    def delete_family(family_id: UUID, body: PinInput, user: User) -> Response:
+        """Permanently deletes the family and everything about its children, after checking the family PIN
+        (403 if wrong). This cannot be undone. Caregivers keep their sign-in.
+        """
+        settings.pin_attempts.check(str(user))
+        with transaction(settings, user) as conn:
+            family = one(conn, "SELECT pin_hash FROM hq.families WHERE id=%s", (family_id,))
+            if not check_pin(body.pin, family["pin_hash"]):
+                raise HTTPException(403, "Wrong PIN")
+            conn.execute("DELETE FROM hq.families WHERE id=%s", (family_id,))
+        return Response(status_code=204)
+
+    @api.post("/v1/children/{child_id}/delete", status_code=204, tags=["Children"], summary="Delete a child")
+    def delete_child(child_id: UUID, body: PinInput, user: User) -> Response:
+        """Permanently deletes a child and all their data, after checking the family PIN (403 if wrong)."""
+        settings.pin_attempts.check(str(user))
+        with transaction(settings, user) as conn:
+            family = one(
+                conn,
+                "SELECT f.pin_hash FROM hq.children k JOIN hq.families f ON f.id=k.family_id WHERE k.id=%s",
+                (child_id,),
+            )
+            if not check_pin(body.pin, family["pin_hash"]):
+                raise HTTPException(403, "Wrong PIN")
+            conn.execute("DELETE FROM hq.children WHERE id=%s", (child_id,))
+        return Response(status_code=204)
+
+    @api.delete(
+        "/v1/families/{family_id}/caregivers/me", status_code=204, tags=["Families"], summary="Leave a family"
+    )
+    def leave_family(family_id: UUID, user: User) -> Response:
+        """Removes the signed-in caregiver from the family. The last caregiver cannot leave (409): delete the
+        family instead.
+        """
+        with transaction(settings, user) as conn:
+            count = one(conn, "SELECT count(*) AS n FROM hq.caregivers WHERE family_id=%s", (family_id,))["n"]
+            if count == 0:
+                raise HTTPException(404, "Record not found")
+            if count == 1:
+                raise HTTPException(409, "You are the last caregiver; delete the family instead")
+            conn.execute("DELETE FROM hq.caregivers WHERE family_id=%s AND user_id=%s", (family_id, user))
+        return Response(status_code=204)
 
     @api.post("/v1/children/{child_id}/kid-session", tags=["Kid mode"], summary="Start kid mode")
     def kid_session(child_id: UUID, user: User) -> dict:

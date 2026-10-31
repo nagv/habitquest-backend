@@ -27,12 +27,19 @@ Also done:
   (API contract for the frontend) and this file. The old generated `openwiki/` pages were removed; regenerate
   them from `openwiki/INSTRUCTIONS.md`.
 
+## Update 2026-10-31: AI helpers and browser features moved to the backend
+
+On branches `feat/ai-coach` (backend) and `feat/ai-coach-ui` (frontend), not yet merged. Added: the habit coach
+(LangChain agent), quest planner, weekly review, buddy lines, reward shop and requests, check-ins with screening,
+surprises, kid extras, family settings, server-paid multipliers, rate limits, family export and deletion. This reverses
+the earlier plan to replace the coach with the one-shot form, and resolves open decisions 1-3 and the Groq question.
+Pain-point onboarding stays available but the frontend now uses the coach. Tested locally on real Nebius, not yet on Render.
 ## Backend: settings to finish
 
 | Item | Why | Where |
 |---|---|---|
 | Upgrade or replace the database **before 2026-11-28** | The free Render Postgres expires and its data is lost | Render → `habitquest-db` |
-| `AI_MODE=openai` plus `OPENAI_BASE_URL`, `OPENAI_MODEL` (must support JSON output), `OPENAI_API_KEY` | Real AI goal mapping; until then onboarding uses keyword matching | Render → habitquest-api → Environment |
+| `AI_MODE=openai` plus `OPENAI_BASE_URL`, `OPENAI_MODEL` (must support JSON output and tool calls), `OPENAI_API_KEY`, optional `OPENAI_SMALL_MODEL` | Every AI feature; until then they use keyword matching or built-in lines | Render → habitquest-api → Environment |
 | `CORS_ORIGINS` | Needed once the frontend is hosted (comma-separated; keep `http://localhost:5180` for local work) | Render → Environment |
 | Paid always-on instance | The free instance sleeps; the first request can take about a minute | Render → habitquest-api |
 | Turn off `DEV_LOGIN` | Before real families use it: anyone with the password can act as a test parent | Render → Environment |
