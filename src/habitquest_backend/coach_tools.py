@@ -46,6 +46,7 @@ class Turn:
     recommendations: dict[str, str] = field(default_factory=dict)  # habit_id -> reason
     changes: list[Change] = field(default_factory=list)
     sources: dict[str, str] = field(default_factory=dict)  # ref -> title
+    researched: bool = False
 
 
 class Pick(BaseModel):
@@ -73,12 +74,14 @@ def build_tools(snapshot: Snapshot, turn: Turn) -> list[BaseTool]:
         Args:
             problem: The problem in the parent's words plus key topics, e.g. "meltdowns when screen time ends"
         """
+        turn.researched = True
         chunks = search_guidance(problem, snapshot.age)
         turn.sources |= {c.ref: c.title for c in chunks}
         taken = snapshot.shown | snapshot.plan.keys()
         goals = [
             {
                 "goal": goal.title,
+                "about": goal.description,
                 "habits": [
                     {"habit_id": h["id"], "title": h["title"], "tier": h["tier"]}
                     for h in goal.habits
@@ -93,7 +96,10 @@ def build_tools(snapshot: Snapshot, turn: Turn) -> list[BaseTool]:
                 **(
                     {}
                     if chunks
-                    else {"note": "No matching guidance. Use cautious general principles and say so."}
+                    else {
+                        "note": "No matching guidance. Use cautious general principles and say so. Skip"
+                        " recommend_habits unless a goal below is plainly about this problem."
+                    }
                 ),
                 "goals": [g for g in goals if g["habits"]],
             }

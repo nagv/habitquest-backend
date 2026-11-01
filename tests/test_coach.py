@@ -54,6 +54,7 @@ def test_research_leaves_out_the_plan_and_what_was_shown():
     snap = snapshot(shown={"story-time"}, plan=plan)
     found = json.loads(tools_of(snap, turn)["research"].invoke({"problem": "stalling at bedtime"}))
     assert [h["habit_id"] for h in found["goals"][0]["habits"]] == ["wash-hands"]
+    assert found["goals"][0]["about"] == snap.goals[0].description
     assert found["sources"] and set(turn.sources) == {s["ref"] for s in found["sources"]}
 
 
@@ -152,24 +153,57 @@ def test_a_poor_fit_is_removed_and_the_agent_tries_once_more(remote, llm_reply):
         '{"poor_fit": ["wash-hands", "unknown"]}',
         call("recommend_habits", quests=[pick("story-time")]),
         "A book helps. Here is a better pick.",
+        '{"poor_fit": []}',
     )
     snap = snapshot()
     reply = run_turn(remote, snap, [], BEDTIME, ["Alex"])
     assert reply.turn.recommendations == {"story-time": "It helps."}
     assert "wash-hands" in snap.shown and reply.text.startswith("A book helps")
     assert "Wash hands" in json.dumps(llm_reply.seen[3]["messages"])
-    assert len(llm_reply.seen) == 5  # the second answer is not checked again
+    assert len(llm_reply.seen) == 6 and not reply.no_habit_match  # the second answer is checked too
 
 
-def test_a_failed_fit_check_keeps_the_picks(remote, llm_reply):
+def test_picks_that_fail_the_second_check_are_dropped_without_another_try(remote, llm_reply):
     llm_reply(
+        call("research", problem="lying"),
         call("recommend_habits", quests=[pick("bedtime")]),
+        "Try honesty. The card can help.",
+        '{"poor_fit": ["bedtime"]}',
+        call("recommend_habits", quests=[pick("story-time")]),
+        "Try honesty. The card can help.",
+        '{"poor_fit": ["story-time"]}',
+    )
+    reply = run_turn(remote, snapshot(), [], "He lies to us", ["Alex"])
+    assert reply.turn.recommendations == {} and reply.no_habit_match
+    assert reply.text == "Try honesty." and len(llm_reply.seen) == 7
+
+
+def test_the_reviewer_sees_titles_but_not_the_coachs_reasons(remote, llm_reply):
+    llm_reply(
+        call("recommend_habits", quests=[pick("bedtime", "A persuasive reason.")]),
         "Here is one habit.",
+        '{"poor_fit": []}',
+    )
+    run_turn(remote, snapshot(), [], BEDTIME, ["Alex"])
+    assert "Calmer bedtimes" in json.dumps(llm_reply.seen[2]["messages"])
+    assert "persuasive" not in json.dumps(llm_reply.seen[2]["messages"])
+
+
+def test_a_failed_fit_check_drops_the_picks(remote, llm_reply):
+    llm_reply(
+        call("research", problem="stalling at bedtime"),
+        call("recommend_habits", quests=[pick("bedtime")]),
+        "Keep it calm. The card can help.",
         httpx.Response(400, json={"error": "no"}),
     )
-    assert run_turn(remote, snapshot(), [], BEDTIME, ["Alex"]).turn.recommendations == {
-        "bedtime": "It helps."
-    }
+    reply = run_turn(remote, snapshot(), [], BEDTIME, ["Alex"])
+    assert reply.turn.recommendations == {} and reply.no_habit_match and reply.text == "Keep it calm."
+
+
+def test_researching_and_choosing_no_habit_is_flagged(remote, llm_reply):
+    llm_reply(call("research", problem="lying"), "Stay calm and praise honesty.")
+    reply = run_turn(remote, snapshot(), [], "He lies to us", ["Alex"])
+    assert reply.no_habit_match and reply.turn.recommendations == {} and len(llm_reply.seen) == 2
 
 
 def test_replies_are_tidied():
@@ -200,13 +234,14 @@ def test_a_clarifying_question_skips_the_fit_check(remote, llm_reply):
     llm_reply("When does it happen?")
     reply = run_turn(remote, snapshot(), [], "Evenings are hard", ["Alex"])
     assert reply.text == "When does it happen?" and len(llm_reply.seen) == 1
+    assert not reply.no_habit_match
 
 
 def test_changes_restore_names_and_an_empty_answer_gets_a_default(remote, llm_reply):
     change = call("propose_plan_change", habit_id="homework", action="pause", reason="Child A needs a break.")
     llm_reply(change, "")
     reply = run_turn(remote, snapshot(), [], "Homework is too much", ["Alex"])
-    assert reply.turn.changes[0].reason == "Alex needs a break."
+    assert reply.turn.changes[0].reason == "Alex needs a break." and not reply.no_habit_match
     assert reply.text.startswith("I've put my suggestions")
 
 

@@ -17,7 +17,10 @@ INSERT INTO hq.goals(id, title, description, keywords, is_active) VALUES
   ('responsibility', 'Helping at home', 'Tidying up and doing small chores without being asked again and again.',
    '{messy,tidy,clean,chores,room,toys,clothes,help,laundry}', true),
   ('feelings', 'Handling big feelings', 'Naming feelings, calming down and being kind when emotions run high.',
-   '{tantrum,meltdown,angry,upset,cry,rude,feelings,worry,anxious,kind,manners}', true)
+   '{tantrum,meltdown,angry,upset,cry,rude,feelings,worry,anxious,kind,manners}', true),
+  ('listening', 'Listening the first time', 'Hearing an instruction, answering it and doing it without repeated asking.',
+   '{listen,ignore,instruction,obey,respond,not hearing,selective hearing,repeat myself,asking again,does not answer}',
+   true)
 ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description,
   keywords = EXCLUDED.keywords, is_active = EXCLUDED.is_active;
 
@@ -113,7 +116,19 @@ INSERT INTO hq.habits(id, goal_id, title, description, kid_title, kid_hint, icon
    'Happy three', 'Tell three good things about today', '🌟', 'bedtime', 5, 13, 3, 20, true),
   ('day-diary', 'feelings', 'Draw or write about the day',
    'A few lines or a drawing about the day helps with reflection.',
-   'Day diary', 'Draw or write about today', '✏️', 'bedtime', 6, 13, 3, 20, true)
+   'Day diary', 'Draw or write about today', '✏️', 'bedtime', 6, 13, 3, 20, true),
+  -- listening
+  ('answer-call', 'listening', 'Answer when called', 'Stopping, looking up and answering the first time a grown-up calls.',
+   'Super ears', 'Look up and say "okay" when a grown-up calls you', '👂', 'after_school', 3, 13, 1, 10, true),
+  ('first-ask', 'listening', 'Do one ask the first time', 'Doing one instruction after being asked once, with no reminder.',
+   'First-time listener', 'Do one thing the first time you are asked', '✅', 'after_school', 3, 13, 1, 10, true),
+  ('say-it-back', 'listening', 'Say the instruction back', 'Repeating an instruction in their own words, to show it was heard.',
+   'Echo power', 'Say back what the grown-up asked you to do', '🦜', 'evening', 4, 13, 1, 10, true),
+  ('not-fun-first', 'listening', 'Do the not-fun ask right away',
+   'Doing one uninteresting job when asked, before going back to play.',
+   'Boring-job beater', 'Do a not-fun job when asked, then go back to play', '💪', 'after_school', 5, 13, 2, 15, true),
+  ('two-step-ask', 'listening', 'Finish a two-step ask', 'Remembering and finishing two steps with no reminder.',
+   'Two-step star', 'Finish both steps of an ask without a reminder', '👣', 'evening', 6, 13, 3, 20, true)
 ON CONFLICT (id) DO UPDATE SET goal_id = EXCLUDED.goal_id, title = EXCLUDED.title,
   description = EXCLUDED.description, kid_title = EXCLUDED.kid_title, kid_hint = EXCLUDED.kid_hint,
   icon = EXCLUDED.icon, anchor = EXCLUDED.anchor, min_age = EXCLUDED.min_age, max_age = EXCLUDED.max_age,

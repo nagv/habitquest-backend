@@ -16,9 +16,21 @@ B = 0.75
 STOP = set(
     "a an and are as at be but by can do does for from has have he her his how i if in into is it its me my of on"
     " or our she so that the their them they this to too us was we when with won't wont doesn't dont don't just"
-    " very really child kid kids son daughter".split()
+    " very really child kid kids son daughter not no such like will would did didn't didnt about all any even"
+    " get got him these those what which who".split()
 )
+MIN_SHARE_OF_BEST = 0.4
 SYNONYMS = {
+    "ignore": ["listen", "instructions"],
+    "instruction": ["listen", "instructions"],
+    "ask": ["listen", "instructions"],
+    "obey": ["listen", "instructions"],
+    "respond": ["listen", "instructions"],
+    "defiant": ["listen", "instructions"],
+    "pretend": ["listen"],
+    "repeat": ["listen"],
+    "remind": ["listen"],
+    "disobey": ["listen", "instructions"],
     "tv": ["screen"],
     "tablet": ["screen"],
     "ipad": ["screen"],
@@ -115,6 +127,7 @@ def load_chunks() -> list[Chunk]:
 
 CHUNKS = load_chunks()
 DOCUMENTS = [Counter(tokenize(f"{c.title} {c.title} {c.text}")) for c in CHUNKS]
+TITLES = [set(tokenize(c.title)) for c in CHUNKS]
 AVERAGE_LENGTH = sum(sum(d.values()) for d in DOCUMENTS) / len(DOCUMENTS)
 FREQUENCY = Counter(term for document in DOCUMENTS for term in document)
 
@@ -130,9 +143,16 @@ def score(terms: set[str], document: Counter) -> float:
 
 
 def search_guidance(query: str, age: int, limit: int = 3) -> list[Chunk]:
-    """The passages for this age that best match the query, best first."""
+    """The passages for this age that best match the query, best first. A passage must be about the query, not
+    merely share a word with it: a term in its title or two in its text, and a score near the best match's.
+    """
     tokens = tokenize(query)
     terms = set(tokens) | {synonym for t in tokens for synonym in SYNONYM_STEMS.get(t, [])}
-    ranked = sorted(zip(CHUNKS, DOCUMENTS, strict=True), key=lambda pair: -score(terms, pair[1]))
-    found = [c for c, document in ranked if score(terms, document) > 0 and c.min_age <= age <= c.max_age]
-    return found[:limit]
+    scored = [
+        (score(terms, document), chunk)
+        for chunk, document, title in zip(CHUNKS, DOCUMENTS, TITLES, strict=True)
+        if chunk.min_age <= age <= chunk.max_age and (terms & title or len(terms & document.keys()) > 1)
+    ]
+    best = max((value for value, _ in scored), default=0.0)
+    ranked = sorted(scored, key=lambda pair: -pair[0])
+    return [chunk for value, chunk in ranked if value >= best * MIN_SHARE_OF_BEST][:limit]

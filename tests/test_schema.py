@@ -159,4 +159,4 @@ def test_seeded_catalog_serves_every_goal_and_age(db):
         " AND a BETWEEN h.min_age AND h.max_age)"
     ).fetchall()
     assert gaps == []  # a level-1 child of any age has a starter habit for every goal
-    assert db.execute("SELECT count(*) FROM hq.habits").fetchone()[0] == 36
+    assert db.execute("SELECT count(*) FROM hq.habits").fetchone()[0] == 41

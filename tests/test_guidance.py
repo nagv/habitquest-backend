@@ -25,6 +25,19 @@ def test_a_search_with_no_match_finds_nothing():
     assert search_guidance("xylophone quantum", 8) == []
 
 
+def test_a_child_who_ignores_instructions_finds_the_listening_guidance():
+    text = (
+        "kid doesn't listen to the instructions when he is not interested on it. he wont bother responding "
+        "such instructions inspite of repeated ask. he will pretend like he didnt listen and ignore such asks"
+    )
+    found = search_guidance(text, 7)
+    assert found and all(c.title.startswith("Listening and following instructions") for c in found)
+
+
+def test_one_shared_common_word_is_not_a_match():
+    assert search_guidance("my kid lies a lot about such things", 7) == []
+
+
 def test_a_search_respects_the_age_range():
     chunk = CHUNKS[0]
     assert search_guidance(chunk.title, chunk.max_age + 1) == []

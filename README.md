@@ -123,7 +123,7 @@ with the child's id and see only that child. The catalog is read-only to the API
 only be added to. Creating a Google user, creating a family and joining one go through `SECURITY DEFINER`
 functions, because the caller cannot yet see the rows involved.
 
-**Catalog.** [db/seed.sql](db/seed.sql) holds 7 goals and 36 habits taken from the frontend's quest library.
+**Catalog.** [db/seed.sql](db/seed.sql) holds 8 goals and 41 habits taken from the frontend's quest library.
 It is applied on every start and upserts by id, so editing a row and redeploying updates it. To stop offering a
 goal or habit, set `is_active = false`; rows are never deleted because plans and history refer to them.
 

@@ -20,6 +20,7 @@ def test_goals_are_the_active_catalog_goals(client, db):
         "screens",
         "responsibility",
         "homework",
+        "listening",
         "mornings",
     ]
     assert set(goals[0]) == {"id", "title", "description"}
