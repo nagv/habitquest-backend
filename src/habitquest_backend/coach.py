@@ -447,7 +447,7 @@ def router(settings: Settings) -> APIRouter:
                         reply.no_habit_match,
                     ),
                 )
-                if reply.turn.recommendations:
+                if reply.turn.recommendations or reply.no_habit_match:
                     conn.execute(
                         "UPDATE hq.ai_suggestions SET status='dismissed',decided_at=now()"
                         " WHERE child_id=%s AND source='coach' AND kind='add' AND status='pending'",

@@ -325,6 +325,14 @@ def test_refining_replaces_the_cards_with_different_habits(client, alex):
     assert second and first not in [s["habit_id"] for s in second]
 
 
+def test_a_reply_with_no_matching_habit_clears_earlier_cards(client, alex, db, monkeypatch):
+    assert say(client, alex).json()["suggestions"]
+    planner = add_card(db, alex, "pause", "story-time")
+    monkeypatch.setattr(coach, "run_turn", lambda *args: coach.Reply("Tips.", no_habit_match=True))
+    body = say(client, alex, "He bites his nails").json()
+    assert [s["id"] for s in body["suggestions"]] == [str(planner)] and body["messages"][-1]["no_habit_match"]
+
+
 def test_risky_text_is_never_stored(client, alex, db):
     body = say(client, alex, "He said he wants to die").json()
     assert body["safety"]["guidance"] == SAFETY_GUIDANCE and body["messages"] == []
