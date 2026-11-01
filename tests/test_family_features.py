@@ -291,10 +291,10 @@ def test_today_reports_the_streak_and_week(client, db, family, alex):
     for back in (1, 2, 4):
         complete(db, row, day - timedelta(days=back))
     body = client.get(f"/v1/children/{alex}/today").json()
-    assert body["streak"] == 2
+    assert body["streak"] == 3  # the missed day pauses the streak
     assert list(body["week"].values()) == [0, 0, 1, 0, 1, 1, 0]
     complete(db, row, day)
-    assert client.get(f"/v1/children/{alex}/today").json()["streak"] == 3
+    assert client.get(f"/v1/children/{alex}/today").json()["streak"] == 4
 
 
 def test_a_gap_breaks_the_streak(client, db, family, alex):
@@ -313,6 +313,7 @@ def test_a_day_with_no_scheduled_habits_has_no_boosts(settings, db, alex):
 
 
 def test_extras_record_discoveries_and_only_owned_outfits(client, db, alex, kid):
+    db.execute("UPDATE hq.child_extras SET journey_bonus=25 WHERE child_id=%s", (alex,))
     for _ in range(2):
         body = client.patch(
             "/v1/kid/extras", json={"discover": "camp:tent", "level_seen": 2}, headers=kid

@@ -32,7 +32,7 @@ Python 3.12, uv, FastAPI and Pydantic, PostgreSQL with row-level security, psyco
 
 ## Children and onboarding
 
-1. **Children.** `POST /v1/families/{id}/children` with `name`, `age` (3-13), `buddy`, `world` and optional
+1. **Children.** `POST /v1/families/{id}/children` with `name`, `age` (3-13), `buddy` and optional
    `routine_times` per part of the day (`morning`, `midday`, `after_school`, `evening`, `bedtime`).
 2. **Describe a problem.** `POST /v1/children/{id}/pain-points` with the parent's own words. The backend
    offers the AI the active goals and, per goal, the habits that suit the child's age and unlocked tier; the AI
@@ -51,8 +51,9 @@ Python 3.12, uv, FastAPI and Pydantic, PostgreSQL with row-level security, psyco
    plan later: unlisted habits are removed and kept as history.
 4. **Adjust one habit.** `PATCH /v1/child-habits/{id}` changes its time or days, pauses it or removes it.
 
-The plan also reports the child's `progress`: Sparks, level (Sprout 0, Explorer 5, Adventurer 15, Hero 30,
-Legend 50) and the highest habit tier unlocked (tier 2 at Explorer, tier 3 at Adventurer).
+The plan also reports the child's `progress`: Sparks, the world and level they have reached (Starter Camp 0, Mosswood
+Forest 30, Sky Islands 90, Coral Cove 180, Crystal Caves 300, Star Harbour 450), and the highest habit tier unlocked
+(tier 2 in Mosswood Forest, tier 3 in Sky Islands, or the parent's `tier_override`).
 
 ## AI helpers
 
@@ -73,7 +74,7 @@ Legend 50) and the highest habit tier unlocked (tier 2 at Explorer, tier 3 at Ad
 2. **"I did it!"** `POST /v1/kid/completions` with a `child_habit_id` from today's list. Tapping again changes
    nothing; a rejected habit can be submitted again.
 3. **Approve.** `GET /v1/families/{id}/approvals` lists everything waiting, oldest first, across all children.
-   `POST /v1/completions/{id}/approve` gives one Spark and the habit's points (a ledger entry, exactly once);
+   `POST /v1/completions/{id}/approve` gives Sparks equal to the habit's tier (at most 6 a day) and the habit's points (a ledger entry, exactly once);
    `.../reject` means "not yet". The response carries the new progress, so the frontend can celebrate a
    level-up.
 
@@ -103,7 +104,7 @@ Eleven tables in the `hq` schema ([db/migrations](db/migrations)). There are no 
 | `users` | A signed-in person; `id` is the subject of our access tokens, `google_sub` links a Google account |
 | `families` | The family: name, time zone, parent PIN hash, invite code for further caregivers |
 | `caregivers` | Who cares for the family's children, with their `role` (`father`, `mother`, `guardian`, `other`) |
-| `children` | Name, age (3-13), buddy, chosen world (`space`, `forest`, `city`) and routine times per anchor |
+| `children` | Name, age (3-13), buddy, the world reached, a parent's quest tier override and routine times per anchor |
 | `goals` | Pre-approved goals ("Calmer bedtimes") with keywords for matching pain points |
 | `habits` | Pre-approved habits, one goal each: parent and kid wording, icon, routine anchor, ages, tier (1-3), points |
 | `pain_points` | A parent's description of a problem, and how it was mapped to goals (`ai`, `keywords`, `manual`) |
@@ -112,7 +113,8 @@ Eleven tables in the `hq` schema ([db/migrations](db/migrations)). There are no 
 | `completions` | One per habit per day: the kid submits, a caregiver approves or rejects |
 | `points_ledger` | Append-only points: `+` per approved completion, `-` per redemption with a note of what it was for |
 
-Sparks are the number of approved completions; a child's level and unlocked habit tier follow from Sparks.
+Sparks are summed from approved completions (each quest's tier, at most 6 a day). A child's world, level and unlocked
+habit tier follow from Sparks. `journey.py` holds the worlds and their landmarks.
 Points are the sum of the ledger.
 
 **Access.** Caregiver requests run as the `hq_api` database role with the caller's user id; row-level

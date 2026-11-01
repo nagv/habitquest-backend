@@ -14,6 +14,8 @@ from habitquest_backend.auth import KID, check_pin, signed_in
 from habitquest_backend.config import Settings
 from habitquest_backend.daily import balance, today_view
 from habitquest_backend.db import one, transaction
+from habitquest_backend.journey import LANDMARKS, progress
+from habitquest_backend.onboarding import Buddy
 
 ACCESSORIES = {
     "party-hat": "Party hat",
@@ -39,7 +41,8 @@ class ExtrasUpdate(StrictModel):
     wearing: str | None = Field(default=None, description='An accessory the child owns, or "" to take it off')
     goal: UUID | None = None
     clear_goal: bool = False
-    level_seen: int | None = Field(default=None, ge=1, le=5)
+    level_seen: int | None = Field(default=None, ge=1, le=6)
+    buddy: Buddy | None = None
 
 
 class AppTime(StrictModel):
@@ -94,8 +97,9 @@ def router(settings: Settings) -> APIRouter:
 
     @api.patch("/v1/kid/extras", tags=["Kid mode"], summary="Save a discovery or outfit")
     def update_extras(body: ExtrasUpdate, kid: Kid) -> dict:
-        """With a kid token: records a `discover` key, the accessory the child is `wearing` (it must be owned;
-        422 otherwise), their savings `goal` (or `clear_goal`), and the highest level seen celebrated.
+        """With a kid token: records a `discover` key (409 until the child has the Sparks to reach that landmark,
+        422 if there is no such landmark), the accessory the child is `wearing` (it must be owned; 422 otherwise),
+        their savings `goal` (or `clear_goal`), the highest level seen celebrated, and their `buddy`.
         """
         with transaction(settings, kid=kid) as conn:
             owned = one(conn, "SELECT accessories FROM hq.child_extras WHERE child_id=%s", (kid,))[
@@ -104,11 +108,18 @@ def router(settings: Settings) -> APIRouter:
             if body.wearing and body.wearing not in owned:
                 raise HTTPException(422, "That accessory hasn't been found yet")
             if body.discover:
+                mark = LANDMARKS.get(body.discover)
+                if mark is None:
+                    raise HTTPException(422, "There is no such landmark")
+                if mark["sparks"] > progress(conn, kid)["sparks"]:
+                    raise HTTPException(409, "Keep going! This landmark is further along the path")
                 conn.execute(
                     "UPDATE hq.child_extras SET discoveries=array_append(discoveries,%s)"
                     " WHERE child_id=%s AND NOT %s=ANY(discoveries)",
                     (body.discover, kid, body.discover),
                 )
+            if body.buddy:
+                conn.execute("SELECT hq.kid_set_buddy(%s)", (body.buddy,))
             if body.wearing is not None:
                 conn.execute(
                     "UPDATE hq.child_extras SET wearing=%s WHERE child_id=%s", (body.wearing or None, kid)

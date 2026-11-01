@@ -8,12 +8,17 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from habitquest_backend.accounts import StrictModel
 from habitquest_backend.auth import KID, signed_in
+from habitquest_backend.coach import save_suggestion
 from habitquest_backend.config import Settings
 from habitquest_backend.db import one, transaction
-from habitquest_backend.onboarding import progress
+from habitquest_backend.journey import quest_stars
+from habitquest_backend.onboarding import DAYS, MAX_ACTIVE_HABITS, progress
 
 MAX_MULTIPLIER = 3
 STREAK_DAYS = 3
+STREAK_GRACE_DAYS = 2  # missed quest days in a row that pause a streak; the third ends it
+WELCOME_BACK_DAYS = 3  # missed quest days before the first day back earns a bonus
+LOOK_BACK_DAYS = 60
 
 
 class Submission(StrictModel):
@@ -35,8 +40,27 @@ def golden_habit(habits: list[str], day: date, child_id: UUID) -> str:
     return habits[value % len(habits)]
 
 
+def quest_days(conn, child_id: UUID) -> set[str]:
+    """The days of the week the child has an active habit. Any other day is a rest day, which is never a miss."""
+    rows = conn.execute(
+        "SELECT DISTINCT unnest(days) AS day FROM hq.child_habits WHERE child_id=%s AND status='active'",
+        (child_id,),
+    ).fetchall()
+    return {row["day"] for row in rows}
+
+
+def is_quest_day(day: date, week: set[str]) -> bool:
+    return DAYS[day.weekday()] in week
+
+
+def quest_days_before(day: date, week: set[str]) -> list[date]:
+    """Recent quest days, newest first."""
+    earlier = (day - timedelta(n) for n in range(1, LOOK_BACK_DAYS))
+    return [past for past in earlier if is_quest_day(past, week)]
+
+
 def boosts(conn, child_id: UUID, day: date) -> dict[str, list[str]]:
-    """Why each habit scheduled on `day` would earn extra: `golden`, `streak` or `double`, each worth 1x more."""
+    """Why each habit on `day` would earn extra: `golden`, `streak`, `double` or `welcome`, each worth 1x more."""
     habits = conn.execute(
         "SELECT habit_id FROM hq.child_habits WHERE child_id=%s AND status='active'"
         " AND to_char(%s::date,'dy')=ANY(days) ORDER BY habit_id",
@@ -46,17 +70,22 @@ def boosts(conn, child_id: UUID, day: date) -> dict[str, list[str]]:
         return {}
     done = conn.execute(
         "SELECT DISTINCT c.day FROM hq.completions c JOIN hq.child_habits ch ON ch.id=c.child_habit_id"
-        " WHERE ch.child_id=%s AND c.status='approved' AND c.day<%s AND c.day>=%s::date-%s",
-        (child_id, day, day, STREAK_DAYS),
+        " WHERE ch.child_id=%s AND c.status='approved' AND c.day<%s",
+        (child_id, day),
     ).fetchall()
     days = {row["day"] for row in done}
-    shared = ["streak"] if all(day - timedelta(n) in days for n in range(1, STREAK_DAYS)) else []
+    earlier = quest_days_before(day, quest_days(conn, child_id))
+    recent = earlier[: STREAK_DAYS - 1]
+    shared = ["streak"] if len(recent) == STREAK_DAYS - 1 and all(past in days for past in recent) else []
     double = conn.execute(
         "SELECT 1 FROM hq.surprises WHERE kind='double' AND day=%s AND (child_id IS NULL OR child_id=%s)"
         " AND family_id=(SELECT family_id FROM hq.children WHERE id=%s)",
         (day, child_id, child_id),
     ).fetchone()
     shared += ["double"] if double else []
+    last = max(days, default=None)
+    missed = len([past for past in earlier if last and past > last])
+    shared += ["welcome"] if missed >= WELCOME_BACK_DAYS else []
     golden = golden_habit([h["habit_id"] for h in habits], day, child_id)
     return {h["habit_id"]: (["golden"] if h["habit_id"] == golden else []) + shared for h in habits}
 
@@ -66,7 +95,9 @@ def multiplier(reasons: list[str]) -> int:
 
 
 def history_view(conn, child_id: UUID, day: date) -> dict:
-    """The current streak, ending today or yesterday, and approved habits per day for the last seven days."""
+    """The current streak, and approved habits per day for the last seven days. Rest days are skipped, and a
+    quest day or two missed pauses the streak without ending it.
+    """
     rows = conn.execute(
         "SELECT c.day,count(*) AS n FROM hq.completions c JOIN hq.child_habits ch ON ch.id=c.child_habit_id"
         " WHERE ch.child_id=%s AND c.status='approved' AND c.day>%s::date-60 GROUP BY c.day",
@@ -74,9 +105,14 @@ def history_view(conn, child_id: UUID, day: date) -> dict:
     ).fetchall()
     counts = {row["day"]: row["n"] for row in rows}
     cursor = day if day in counts else day - timedelta(1)
-    streak = 0
-    while cursor in counts:
-        streak += 1
+    streak = missed = 0
+    quest_week = quest_days(conn, child_id)
+    while missed <= STREAK_GRACE_DAYS and cursor > day - timedelta(LOOK_BACK_DAYS):
+        if cursor in counts:
+            streak += 1
+            missed = 0
+        elif is_quest_day(cursor, quest_week):
+            missed += 1
         cursor -= timedelta(1)
     week = {(day - timedelta(n)).isoformat(): counts.get(day - timedelta(n), 0) for n in range(6, -1, -1)}
     return {"streak": streak, "week": week}
@@ -96,17 +132,52 @@ def today_view(conn, child_id: UUID) -> dict:
         (day, child_id, day),
     ).fetchall()
     reasons = boosts(conn, child_id, day)
+    stars = {row["habit_id"]: row["stars"] for row in quest_stars(conn, child_id)}
     for habit in habits:
         habit["boosts"] = reasons.get(habit["habit_id"], [])
         habit["multiplier"] = multiplier(habit["boosts"])
+        habit["stars"] = stars.get(habit["habit_id"], 0)
+    week = quest_days(conn, child_id)
+    upcoming = (day + timedelta(n) for n in range(1, 8))
     return {
         "child": child,
         "day": day,
+        "welcome_back": any("welcome" in habit["boosts"] for habit in habits),
+        "rest_day": bool(week) and not habits,
+        "next_quest_day": next((d for d in upcoming if is_quest_day(d, week)), None) if not habits else None,
         "progress": progress(conn, child_id),
         "points": balance(conn, child_id),
         "habits": habits,
         **history_view(conn, child_id, day),
     }
+
+
+def suggest_after_mastery(conn, child_id: UUID, habit_id: str) -> None:
+    """When a quest reaches gold, offers the parent a harder quest for the same goal, or retiring this one."""
+    child = one(conn, "SELECT age FROM hq.children WHERE id=%s", (child_id,))
+    habit = one(conn, "SELECT goal_id,tier,title FROM hq.habits WHERE id=%s", (habit_id,))
+    planned = conn.execute(
+        "SELECT habit_id FROM hq.child_habits WHERE child_id=%s AND status<>'removed'", (child_id,)
+    ).fetchall()
+    harder = conn.execute(
+        "SELECT id,title FROM hq.habits WHERE is_active AND goal_id=%s AND tier>%s AND tier<=%s"
+        " AND %s BETWEEN min_age AND max_age AND NOT id=ANY(%s) ORDER BY tier,title LIMIT 1",
+        (
+            habit["goal_id"],
+            habit["tier"],
+            progress(conn, child_id)["unlocked_tier"],
+            child["age"],
+            [row["habit_id"] for row in planned],
+        ),
+    ).fetchone()
+    if harder and len(planned) < MAX_ACTIVE_HABITS:
+        reason = f"{habit['title']} is mastered, so this could be a good next step."
+        save_suggestion(conn, child_id, "mastery", "add", harder["id"], None, reason)
+    else:
+        reason = (
+            "This quest is mastered. If it's now part of everyday life, retiring it makes room for a new one."
+        )
+        save_suggestion(conn, child_id, "mastery", "remove", habit_id, None, reason)
 
 
 def router(settings: Settings) -> APIRouter:
@@ -138,6 +209,13 @@ def router(settings: Settings) -> APIRouter:
                     " VALUES(%s,%s,'earned',%s,%s)",
                     (row["child_id"], row["points"] * multiplier(reasons), completion_id, user),
                 )
+                conn.execute(
+                    "UPDATE hq.children SET world=%s WHERE id=%s",
+                    (progress(conn, row["child_id"])["world"], row["child_id"]),
+                )
+                done = next(q for q in quest_stars(conn, row["child_id"]) if q["habit_id"] == row["habit_id"])
+                if done["approvals"] == done["targets"][-1]:
+                    suggest_after_mastery(conn, row["child_id"], row["habit_id"])
             return {
                 "completion": completion,
                 "child_id": row["child_id"],
@@ -207,8 +285,9 @@ def router(settings: Settings) -> APIRouter:
 
     @api.post("/v1/completions/{completion_id}/approve", tags=["Daily"], summary="Approve")
     def approve(completion_id: UUID, user: User) -> dict:
-        """Approves a submitted completion: the child earns one Spark and the habit's points (added to the
-        points ledger), once. Returns the completion and the child's new `progress` and `points`; compare the
+        """Approves a submitted completion: the child earns Sparks equal to the habit's tier, up to the daily
+        cap, and the habit's points (added to the points ledger), once. Reaching gold on a quest also creates a
+        suggestion for the parent. Returns the completion and the child's new `progress` and `points`; compare the
         level with the previous one to celebrate a level-up. 409 when it was already approved or rejected.
         """
         return decide(user, completion_id, "approved")

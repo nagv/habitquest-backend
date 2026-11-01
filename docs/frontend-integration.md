@@ -71,11 +71,12 @@ VITE_DEV_LOGIN=true
   longer hashed in the browser.
 
 ### Children
-- `POST /v1/families/{familyId}/children {name, age, buddy, world, routine_times}` → 201 Child.
-  - `age` 3-13; `buddy` `fox | owl | bear | bunny`; `world` `space | forest | city` (a theme the parent picks;
-    keep the frontend's explorable worlds camp/mosswood/sky as they are);
+- `POST /v1/families/{familyId}/children {name, age, buddy, routine_times}` → 201 Child.
+  - `age` 3-13; `buddy` `fox | owl | bear | bunny`, which also themes kid mode;
     `routine_times`: `{morning?, midday?, after_school?, evening?, bedtime?}` as 24-hour `"HH:MM"`.
-- Child = `{id, family_id, name, age, buddy, world, routine_times, created_at}`.
+- Child = `{id, family_id, name, age, buddy, world, tier_override, routine_times, created_at}`. `world` is the world
+  the child has reached, set by the server. `PATCH` takes `tier_override`: the highest quest tier to allow, 0 to follow
+  the child's world.
 - `GET /v1/families/{familyId}/children` → Child[]; `GET /v1/children/{id}`; `PATCH /v1/children/{id}` (any
   field; `routine_times` replaces the whole object).
 
@@ -88,8 +89,15 @@ VITE_DEV_LOGIN=true
   - 200 → `{pain_point: null, safety: {guidance}, plan: null}` when the text suggests a child may be at risk.
     Show `guidance` prominently and nothing else.
 - Plan = `{child_id, progress, goals: PlanGoal[], habits: PlanHabit[]}`
-  - progress = `{sparks, level, level_name, unlocked_tier, next_level_at}` (levels: Sprout 0, Explorer 5,
-    Adventurer 15, Hero 30, Legend 50; tier 2 at Explorer, tier 3 at Adventurer; `next_level_at` null at the top).
+  - progress = `{sparks, pending_sparks, level, level_name, world, unlocked_tier, next_level_at, next_landmark}`. A
+    quest earns its tier in Sparks, at most 6 a day. Levels are worlds: Starter Camp 0, Mosswood Forest 30 (tier 2),
+    Sky Islands 90 (tier 3), Coral Cove 180, Crystal Caves 300, Star Harbour 450. `next_level_at` is null at the top.
+  - `GET /v1/kid/journey` and `GET /v1/children/{id}/journey` → `{progress, worlds, discoveries, quest_stars}`. `worlds`
+    lists each world's landmarks with the Sparks they need and their place on the scene. `PATCH /v1/kid/extras` takes
+    `discover` (409 until the child has the Sparks) and `buddy`. `quest_stars` give each quest's `targets`: 5, 15 and
+    30 approvals, or 3, 8 and 15 for a quest done on fewer than 3 days a week.
+  - Streaks, the streak bonus and the welcome back count quest days only. A day with no scheduled quests is a rest day:
+    today's view then has `rest_day: true` and `next_quest_day`.
   - PlanGoal = `{goal_id, title, status: "suggested" | "active", reason, recommended_habit_ids, options: Option[]}`,
     Option = `{id, goal_id, title, description, kid_title, kid_hint, icon, anchor, tier, points, recommended}`.
     `options` are already filtered to the child's age and unlocked tier.
@@ -115,7 +123,8 @@ VITE_DEV_LOGIN=true
 - `GET /v1/families/{familyId}/approvals` → `[{completion_id, child_id, child_name, habit_id, title, kid_title,
   icon, points, day, submitted_at}]`, oldest first.
 - `POST /v1/completions/{id}/approve` / `.../reject` → `{completion: {id, status, day, submitted_at, decided_at},
-  child_id, progress, points}`. Approve gives 1 Spark and the habit's points; compare `progress.level` with the
+  child_id, progress, points}`. Approve gives Sparks equal to the habit's tier (up to the daily cap) and the habit's points; reaching gold on a quest
+  (30 approvals) adds a `mastery` suggestion; compare `progress.level` with the
   previous value to trigger the level-up celebration. 409 if already decided.
 
 ### Points
@@ -147,7 +156,7 @@ VITE_DEV_LOGIN=true
 | Screen | Change |
 |---|---|
 | Login / Register | Google button (plus dev login when enabled). After sign-in: `GET /v1/me`; no family → family setup (create with name, time zone, PIN, your name and role; or join with invite code). Remove local email/password registration. |
-| Add child (part of register today) | `POST /v1/families/{id}/children` with name, age, buddy, world and routine times. |
+| Add child (part of register today) | `POST /v1/families/{id}/children` with name, age, buddy and routine times. |
 | Habit setup (`#/setup`) | Becomes per child: routine times per part of the day (`PATCH /v1/children/{id}`). |
 | Habit coach (`AiHelpers`) | Replace with "Describe a problem" → pain points → show suggested goals with reasons and habit options (recommended pre-ticked), max 6 → `PUT plan`. Show `safety.guidance` when returned. |
 | Quest library (`#/quests/:child`) | Edit the plan: goals and their options from `GET plan`, saving with `PUT plan`; pause/remove/retime with `PATCH child-habits`. |

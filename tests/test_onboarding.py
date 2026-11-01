@@ -12,7 +12,7 @@ from habitquest_backend.db import transaction
 from habitquest_backend.main import create_app
 from habitquest_backend.onboarding import progress
 
-ALEX = {"name": "Alex", "age": 8, "buddy": "owl", "world": "mosswood", "routine_times": {"bedtime": "19:45"}}
+ALEX = {"name": "Alex", "age": 8, "buddy": "owl", "routine_times": {"bedtime": "19:45"}}
 BEDTIME = "Bedtime is a battle every night and he will not go to sleep"
 
 
@@ -54,7 +54,7 @@ def approve(db, child_id, count):
 
 def test_adding_listing_reading_and_editing_children(client, family, alex):
     child = client.get(f"/v1/children/{alex}").json()
-    assert (child["name"], child["age"], child["buddy"], child["world"]) == ("Alex", 8, "owl", "mosswood")
+    assert (child["name"], child["age"], child["buddy"], child["world"]) == ("Alex", 8, "owl", "camp")
     assert child["routine_times"] == {"bedtime": "19:45"} and child["family_id"] == family
     client.post(f"/v1/families/{family}/children", json={"name": "Maya", "age": 4})
     assert [c["name"] for c in client.get(f"/v1/families/{family}/children").json()] == ["Alex", "Maya"]
@@ -110,13 +110,9 @@ def test_a_pain_point_suggests_goals_with_recommended_habits(client, db, alex):
     )
     options = {h["id"]: h["recommended"] for h in goal["options"]}
     assert options == {"brush-teeth": True, "bedtime": True, "story-time": False}  # tier 1, ages fit
-    assert body["plan"]["progress"] == {
-        "sparks": 0,
-        "level": 1,
-        "level_name": "Sprout",
-        "unlocked_tier": 1,
-        "next_level_at": 5,
-    }
+    level = body["plan"]["progress"]
+    assert (level["sparks"], level["level_name"], level["unlocked_tier"]) == (0, "Camp Sprout", 1)
+    assert (level["next_level_at"], level["next_landmark"]["id"]) == (30, "lantern")
     assert db.execute("SELECT text, created_by FROM hq.pain_points").fetchall() == [(BEDTIME, PARENT)]
 
 
@@ -260,30 +256,22 @@ def test_plan_shape_is_validated(client, alex, plan):
 
 
 def test_sparks_unlock_harder_habits(client, db, alex):
-    approve(db, alex, 5)
+    approve(db, alex, 30)
     plan = client.put(
         f"/v1/children/{alex}/plan", json={"goals": ["mornings"], "habits": [{"habit_id": "make-bed"}]}
     )
     assert plan.status_code == 200, plan.text
-    assert plan.json()["progress"] == {
-        "sparks": 5,
-        "level": 2,
-        "level_name": "Explorer",
-        "unlocked_tier": 2,
-        "next_level_at": 15,
-    }
+    level = plan.json()["progress"]
+    assert (level["sparks"], level["level"], level["level_name"]) == (30, 2, "Forest Explorer")
+    assert (level["unlocked_tier"], level["next_level_at"], level["world"]) == (2, 90, "mosswood")
 
 
 def test_the_top_level_has_no_next_level(settings, db, alex):
-    approve(db, alex, 50)
+    approve(db, alex, 450)
     with transaction(settings, PARENT) as conn:
-        assert progress(conn, alex) == {
-            "sparks": 50,
-            "level": 5,
-            "level_name": "Legend",
-            "unlocked_tier": 3,
-            "next_level_at": None,
-        }
+        level = progress(conn, alex)
+    assert (level["sparks"], level["level"], level["level_name"]) == (450, 6, "Star Captain")
+    assert (level["unlocked_tier"], level["next_level_at"]) == (3, None)
 
 
 def test_adjusting_pausing_and_removing_one_habit(client, settings, db, alex):

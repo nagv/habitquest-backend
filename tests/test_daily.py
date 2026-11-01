@@ -148,16 +148,16 @@ def test_approvals_cover_every_child_oldest_first(client, home):
     assert [(w["child_name"], w["habit_id"]) for w in waiting] == [("Alex", "bedtime"), ("Maya", "lunch")]
 
 
-def test_approving_the_fifth_spark_levels_up(client, db, home):
+def test_approving_the_thirtieth_spark_levels_up(client, db, home):
     db.execute(
         "INSERT INTO hq.completions(child_habit_id,day,status,decided_by,decided_at)"
-        " SELECT %s,current_date-n,'approved',%s,now() FROM generate_series(1,4) n",
+        " SELECT %s,current_date-n,'approved',%s,now() FROM generate_series(1,29) n",
         (home["habits"]["story-time"], PARENT),
     )
     submit(client, home, "bedtime")
     [waiting] = client.get(f"/v1/families/{home['family']}/approvals").json()
     level = client.post(f"/v1/completions/{waiting['completion_id']}/approve").json()["progress"]
-    assert (level["sparks"], level["level_name"], level["unlocked_tier"]) == (5, "Explorer", 2)
+    assert (level["sparks"], level["level_name"], level["unlocked_tier"]) == (30, "Forest Explorer", 2)
 
 
 def test_the_database_holds_kids_to_submitting_today(settings, client, db, home):

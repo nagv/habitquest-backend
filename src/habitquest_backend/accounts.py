@@ -252,8 +252,8 @@ def router(settings: Settings) -> APIRouter:
         with transaction(settings, user) as conn:
             family = family_view(conn, family_id)
             children = conn.execute(
-                "SELECT id,name,age,buddy,world,routine_times,created_at FROM hq.children WHERE family_id=%s"
-                " ORDER BY created_at,id",
+                "SELECT id,name,age,buddy,world,tier_override,routine_times,created_at FROM hq.children"
+                " WHERE family_id=%s ORDER BY created_at,id",
                 (family_id,),
             ).fetchall()
             for child in children:

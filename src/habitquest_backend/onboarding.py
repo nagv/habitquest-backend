@@ -12,6 +12,7 @@ from habitquest_backend.ai import Candidate, map_pain_point
 from habitquest_backend.auth import signed_in
 from habitquest_backend.config import Settings
 from habitquest_backend.db import one, transaction
+from habitquest_backend.journey import progress
 
 MAX_ACTIVE_HABITS = 6
 DAYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
@@ -22,22 +23,13 @@ DEFAULT_CUES = {
     "evening": "18:30",
     "bedtime": "20:00",
 }
-# (Sparks needed, level, name, highest habit tier unlocked), as in the frontend.
-LEVELS = [
-    (0, 1, "Sprout", 1),
-    (5, 2, "Explorer", 2),
-    (15, 3, "Adventurer", 3),
-    (30, 4, "Hero", 3),
-    (50, 5, "Legend", 3),
-]
-CHILD_COLUMNS = "id,family_id,name,age,buddy,world,routine_times,created_at"
+CHILD_COLUMNS = "id,family_id,name,age,buddy,world,tier_override,routine_times,created_at"
 HABIT_COLUMNS = "h.id,h.goal_id,h.title,h.description,h.kid_title,h.kid_hint,h.icon,h.anchor,h.tier,h.points"
 
 Anchor = Literal["morning", "midday", "after_school", "evening", "bedtime"]
 Day = Literal["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
 Time = Annotated[str, Field(pattern=r"^([01]\d|2[0-3]):[0-5]\d$", description="24-hour HH:MM")]
 Buddy = Literal["fox", "owl", "bear", "bunny"]
-World = Literal["camp", "mosswood", "sky"]
 Days = Annotated[list[Day], Field(min_length=1, max_length=7)]
 
 
@@ -51,7 +43,6 @@ class ChildInput(StrictModel):
     name: str = Field(min_length=1, max_length=40)
     age: int = Field(ge=3, le=13)
     buddy: Buddy = "fox"
-    world: World = "camp"
     routine_times: dict[Anchor, Time] = Field(
         default_factory=dict, description='When each part of the day starts, e.g. {"bedtime": "20:00"}'
     )
@@ -61,7 +52,9 @@ class ChildUpdate(StrictModel):
     name: str | None = Field(default=None, min_length=1, max_length=40)
     age: int | None = Field(default=None, ge=3, le=13)
     buddy: Buddy | None = None
-    world: World | None = None
+    tier_override: int | None = Field(
+        default=None, ge=0, le=3, description="Highest quest tier to allow; 0 follows the child's world"
+    )
     routine_times: dict[Anchor, Time] | None = None
 
 
@@ -96,24 +89,6 @@ class ChildHabitUpdate(StrictModel):
     status: Literal["active", "paused", "removed"] | None = None
 
     _days = field_validator("days")(unique)
-
-
-def progress(conn, child_id: UUID) -> dict:
-    """Sparks (approved completions), the level they reach, and the highest habit tier it unlocks."""
-    sparks = conn.execute(
-        "SELECT count(*) AS n FROM hq.completions c JOIN hq.child_habits ch ON ch.id=c.child_habit_id"
-        " WHERE ch.child_id=%s AND c.status='approved'",
-        (child_id,),
-    ).fetchone()["n"]
-    _, level, name, tier = [entry for entry in LEVELS if sparks >= entry[0]][-1]
-    following = [entry[0] for entry in LEVELS if entry[0] > sparks]
-    return {
-        "sparks": sparks,
-        "level": level,
-        "level_name": name,
-        "unlocked_tier": tier,
-        "next_level_at": following[0] if following else None,
-    }
 
 
 def candidates(conn, age: int, tier: int) -> list[Candidate]:
@@ -179,16 +154,16 @@ def router(settings: Settings) -> APIRouter:
     @api.post("/v1/families/{family_id}/children", status_code=201, tags=["Children"], summary="Add a child")
     def add_child(family_id: UUID, body: ChildInput, user: User) -> dict:
         """Adds a child to the family: `name`, `age` (3-13, decides which habits suit them), `buddy` (fox, owl,
-        bear, bunny), `world` (camp, mosswood, sky) and optional `routine_times` per part of the day
+        bear, bunny) and optional `routine_times` per part of the day
         (`morning`, `midday`, `after_school`, `evening`, `bedtime`), used as default habit times.
         """
         with transaction(settings, user) as conn:
             one(conn, "SELECT id FROM hq.families WHERE id=%s", (family_id,))
             return one(
                 conn,
-                f"INSERT INTO hq.children(family_id,name,age,buddy,world,routine_times) VALUES(%s,%s,%s,%s,%s,%s)"
+                f"INSERT INTO hq.children(family_id,name,age,buddy,routine_times) VALUES(%s,%s,%s,%s,%s)"
                 f" RETURNING {CHILD_COLUMNS}",
-                (family_id, body.name, body.age, body.buddy, body.world, Jsonb(body.routine_times)),
+                (family_id, body.name, body.age, body.buddy, Jsonb(body.routine_times)),
             )
 
     @api.get("/v1/families/{family_id}/children", tags=["Children"], summary="List children")
@@ -209,8 +184,8 @@ def router(settings: Settings) -> APIRouter:
 
     @api.patch("/v1/children/{child_id}", tags=["Children"], summary="Edit a child")
     def update_child(child_id: UUID, body: ChildUpdate, user: User) -> dict:
-        """Changes any of `name`, `age`, `buddy`, `world` and `routine_times` (replaced as a whole); omitted
-        fields stay as they are. Habits already in the plan keep their times.
+        """Changes any of `name`, `age`, `buddy`, `tier_override` (the highest quest tier to allow, 0 to follow
+        the child's world) and `routine_times` (replaced as a whole); omitted fields stay as they are. Habits already in the plan keep their times.
         """
         changes = body.model_dump(exclude_none=True)
         with transaction(settings, user) as conn:
