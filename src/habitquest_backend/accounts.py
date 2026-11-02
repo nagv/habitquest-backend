@@ -1,4 +1,4 @@
-"""Google sign-in, families and their caregivers, the family PIN, and kid sessions."""
+"""Google sign-in, families and their caregivers, the family PIN, kid sessions and kid login."""
 
 import secrets
 from typing import Annotated, Literal
@@ -6,7 +6,7 @@ from uuid import UUID
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import psycopg
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Body, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from habitquest_backend.auth import KID, check_pin, hash_pin, issue_token, signed_in, verify_google
@@ -84,14 +84,23 @@ class PinInput(StrictModel):
     pin: Pin
 
 
+class KidLogin(PinInput):
+    child_id: UUID
+
+
 def invite_code() -> str:
     return "".join(secrets.choice(INVITE_ALPHABET) for _ in range(8))
+
+
+def clean_code(code: str) -> str:
+    """Codes are not case-sensitive and may include spaces or dashes."""
+    return "".join(code.upper().split()).replace("-", "")
 
 
 def family_view(conn, family_id: UUID) -> dict:
     family = one(
         conn,
-        "SELECT id,name,timezone,invite_code,pin_hash IS NOT NULL AS has_pin,created_at"
+        "SELECT id,name,timezone,invite_code,login_code,pin_hash IS NOT NULL AS has_pin,created_at"
         " FROM hq.families WHERE id=%s",
         (family_id,),
     )
@@ -163,7 +172,7 @@ def router(settings: Settings) -> APIRouter:
         code is not case-sensitive and may include spaces or dashes. 404 for an unknown code, 409 when the
         caller already cares for that family.
         """
-        code = "".join(body.invite_code.upper().split()).replace("-", "")
+        code = clean_code(body.invite_code)
         with transaction(settings, user) as conn:
             try:
                 family = conn.execute(
@@ -223,6 +232,80 @@ def router(settings: Settings) -> APIRouter:
             one(conn, "SELECT id FROM hq.families WHERE id=%s", (family_id,))
             conn.execute("UPDATE hq.families SET invite_code=%s WHERE id=%s", (invite_code(), family_id))
             return family_view(conn, family_id)
+
+    @api.post("/v1/families/{family_id}/login-code", tags=["Kid login"], summary="Make a new login code")
+    def new_login_code(family_id: UUID, user: User) -> dict:
+        """Makes the family's login code, or replaces it. The code (shared as a QR code) lets a child sign in on
+        their own device with their kid PIN, and shows a grown-up the way to join. The old code stops working
+        at once. Returns the family with the new `login_code`.
+        """
+        with transaction(settings, user) as conn:
+            one(conn, "SELECT id FROM hq.families WHERE id=%s", (family_id,))
+            conn.execute("UPDATE hq.families SET login_code=%s WHERE id=%s", (invite_code(), family_id))
+            return family_view(conn, family_id)
+
+    @api.put("/v1/children/{child_id}/kid-pin", status_code=204, tags=["Kid login"], summary="Set a kid PIN")
+    def set_kid_pin(child_id: UUID, body: PinInput, user: User) -> Response:
+        """Sets the child's own four-digit PIN, stored only as a salted hash. With it the child can sign in
+        with the family login code, and "Who's playing?" asks for it on a shared device.
+        """
+        with transaction(settings, user) as conn:
+            one(conn, "SELECT id FROM hq.children WHERE id=%s", (child_id,))
+            conn.execute("UPDATE hq.children SET kid_pin_hash=%s WHERE id=%s", (hash_pin(body.pin), child_id))
+        return Response(status_code=204)
+
+    @api.delete(
+        "/v1/children/{child_id}/kid-pin", status_code=204, tags=["Kid login"], summary="Remove a kid PIN"
+    )
+    def remove_kid_pin(child_id: UUID, user: User) -> Response:
+        """Removes the child's PIN: they can no longer sign in on their own, and pick themselves with one tap
+        on a shared device.
+        """
+        with transaction(settings, user) as conn:
+            one(conn, "SELECT id FROM hq.children WHERE id=%s", (child_id,))
+            conn.execute("UPDATE hq.children SET kid_pin_hash=NULL WHERE id=%s", (child_id,))
+        return Response(status_code=204)
+
+    @api.get("/v1/kid-login/{code}", tags=["Kid login"], summary="Who can sign in with this code")
+    def login_family(code: str, request: Request) -> dict:
+        """Without signing in: the family for a login code (`id`, `name`) and its children's first names,
+        buddies and whether each has a PIN (`has_pin`). 404 for an unknown code, 429 after too many tries.
+        """
+        settings.sign_in_attempts.check(client_address(request))
+        with transaction(settings) as conn:
+            rows = conn.execute("SELECT * FROM hq.login_family(%s)", (clean_code(code),)).fetchall()
+        if not rows:
+            raise HTTPException(404, "Unknown login code")
+        children = [
+            {"id": r["child_id"], "name": r["child_name"], "buddy": r["buddy"], "has_pin": r["has_pin"]}
+            for r in rows
+            if r["child_id"]
+        ]
+        return {"family": {"id": rows[0]["family_id"], "name": rows[0]["family_name"]}, "children": children}
+
+    @api.post("/v1/kid-login/{code}", tags=["Kid login"], summary="Kid signs in")
+    def kid_login(code: str, body: KidLogin, request: Request) -> dict:
+        """A child signs in on their own device with the family login code and their PIN. Returns a kid token,
+        valid for 8 hours, with the `child` and the `family` (`id`, `name`). 404 when the code or child is
+        unknown, 409 when the child has no PIN yet, 403 for a wrong PIN, 429 after too many tries.
+        """
+        settings.sign_in_attempts.check(client_address(request))
+        settings.pin_attempts.check(f"kid:{body.child_id}")
+        with transaction(settings) as conn:
+            row = one(conn, "SELECT * FROM hq.login_child_pin(%s,%s)", (clean_code(code), body.child_id))
+            family = one(
+                conn,
+                "SELECT family_id AS id,family_name AS name FROM hq.login_family(%s) LIMIT 1",
+                (clean_code(code),),
+            )
+        if row["pin_hash"] is None:
+            raise HTTPException(409, "Ask a grown-up to set your PIN first")
+        if not check_pin(body.pin, row["pin_hash"]):
+            raise HTTPException(403, "Wrong PIN")
+        with transaction(settings, kid=body.child_id) as conn:
+            child = one(conn, "SELECT id,name,age,buddy,world FROM hq.children WHERE id=%s", (body.child_id,))
+        token = issue_token(settings, body.child_id, minutes=SESSION_MINUTES, role=KID)
+        return {**token_response(token, SESSION_MINUTES), "child": child, "family": family}
 
     @api.put("/v1/families/{family_id}/pin", status_code=204, tags=["Families"], summary="Change the PIN")
     def set_pin(family_id: UUID, body: PinInput, user: User) -> Response:
@@ -308,13 +391,19 @@ def router(settings: Settings) -> APIRouter:
         return Response(status_code=204)
 
     @api.post("/v1/children/{child_id}/kid-session", tags=["Kid mode"], summary="Start kid mode")
-    def kid_session(child_id: UUID, user: User) -> dict:
+    def kid_session(child_id: UUID, user: User, body: Annotated[PinInput | None, Body()] = None) -> dict:
         """A caregiver starts kid mode for one of their children on this device. Returns a kid token, valid
         for 8 hours, that can only use the kid endpoints for that child; caregiver endpoints refuse it.
-        404 unless the caller cares for the child.
+        When the child has a kid PIN, the body must carry it (`pin`), so siblings can't open each other's
+        quests: 403 when it is missing or wrong. 404 unless the caller cares for the child.
         """
         with transaction(settings, user) as conn:
-            child = one(conn, "SELECT id,name FROM hq.children WHERE id=%s", (child_id,))
+            child = one(conn, "SELECT id,name,kid_pin_hash FROM hq.children WHERE id=%s", (child_id,))
+        pin_hash = child.pop("kid_pin_hash")
+        if pin_hash is not None:
+            settings.pin_attempts.check(f"kid:{child_id}")
+            if body is None or not check_pin(body.pin, pin_hash):
+                raise HTTPException(403, "Wrong PIN")
         response = token_response(
             issue_token(settings, child_id, minutes=SESSION_MINUTES, role=KID), SESSION_MINUTES
         )

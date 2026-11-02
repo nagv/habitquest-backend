@@ -112,7 +112,13 @@ VITE_DEV_LOGIN=true
 - Catalog: `GET /v1/goals` → `[{id, title, description}]`; `GET /v1/goals/{id}/habits?age=&max_tier=`.
 
 ### Kid mode and the daily loop
-- `POST /v1/children/{id}/kid-session` (caregiver token) → `{access_token, token_type, expires_in, child: {id, name}}`.
+- `POST /v1/children/{id}/kid-session [{pin}]` (caregiver token) → `{access_token, token_type, expires_in, child: {id, name}}`.
+  When the child has a kid PIN (`has_pin` on the child), `pin` is required: 403 when missing or wrong.
+- Kid login (a child's own device): `POST /v1/families/{id}/login-code` (caregiver) makes or replaces the family's
+  `login_code`, shared as a QR code to `#/join/<code>`; `PUT` / `DELETE /v1/children/{id}/kid-pin {pin}` sets or
+  removes the child's PIN. Without any token, `GET /v1/kid-login/{code}` → `{family: {id, name}, children:
+  [{id, name, buddy, has_pin}]}` and `POST /v1/kid-login/{code} {child_id, pin}` → kid token plus `child` and
+  `family`. 404 unknown code or child, 409 no PIN yet, 403 wrong PIN, 429 too many tries.
 - `GET /v1/kid/me` (kid token) → `{id, name, age, buddy, world}`.
 - `GET /v1/kid/today` (kid token) or `GET /v1/children/{id}/today` (caregiver) → Today =
   `{child: {id, name, buddy, world}, day: "YYYY-MM-DD", progress, points, habits: TodayHabit[]}`,

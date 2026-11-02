@@ -23,7 +23,7 @@ DEFAULT_CUES = {
     "evening": "18:30",
     "bedtime": "20:00",
 }
-CHILD_COLUMNS = "id,family_id,name,age,buddy,world,tier_override,routine_times,created_at"
+CHILD_COLUMNS = "id,family_id,name,age,buddy,world,tier_override,routine_times,kid_pin_hash IS NOT NULL AS has_pin,created_at"
 HABIT_COLUMNS = "h.id,h.goal_id,h.title,h.description,h.kid_title,h.kid_hint,h.icon,h.anchor,h.tier,h.points"
 
 Anchor = Literal["morning", "midday", "after_school", "evening", "bedtime"]

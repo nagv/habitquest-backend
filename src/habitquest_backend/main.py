@@ -37,7 +37,9 @@ activate the plan (`PUT /v1/children/{id}/plan`). Each day the child taps "I did
 (`POST /v1/kid/completions`) and a caregiver approves (`GET /v1/families/{id}/approvals`,
 `POST /v1/completions/{id}/approve`): one Spark and the habit's points. A caregiver records what points were
 spent on (`POST /v1/children/{id}/redemptions`). Kid mode: a caregiver gets a kid token for one child
-(`POST /v1/children/{id}/kid-session`); kid endpoints accept only that token.
+(`POST /v1/children/{id}/kid-session`); kid endpoints accept only that token. Kid login: with the family login
+code (`POST /v1/families/{id}/login-code`, shared as a QR code) and their own PIN
+(`PUT /v1/children/{id}/kid-pin`), a child signs in on their own device (`POST /v1/kid-login/{code}`).
 """
 TAGS = [
     {"name": "Health", "description": "Liveness and readiness probes for hosting."},
@@ -47,6 +49,11 @@ TAGS = [
         "description": "The signed-in user, their families, caregivers, invite codes and PIN.",
     },
     {"name": "Kid mode", "description": "Kid tokens for a shared device, and what a kid token can read."},
+    {
+        "name": "Kid login",
+        "description": "The family login code (shared as a QR code) and each child's PIN, so a child can sign in "
+        "on their own device.",
+    },
     {"name": "Children", "description": "Each child's profile: name, age, buddy, world and routine times."},
     {
         "name": "Onboarding",

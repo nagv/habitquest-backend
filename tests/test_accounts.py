@@ -290,6 +290,103 @@ def test_a_kid_sees_only_their_own_child_row(client, settings, db, family):
         assert kid_client.get("/v1/kid/me", headers=kid).status_code == 404
 
 
+# ── Kid login ─────────────────────────────────────────────────────────────────
+
+
+def login_code(client, family):
+    return client.post(f"/v1/families/{family['id']}/login-code").json()["login_code"]
+
+
+def test_a_kid_signs_in_with_the_family_code_and_their_pin(client, db, family):
+    alex, maya = child(db, family["id"]), child(db, family["id"], "Maya")
+    assert family["login_code"] is None
+    code = login_code(client, family)
+    assert client.put(f"/v1/children/{alex}/kid-pin", json={"pin": "4321"}).status_code == 204
+    assert client.get(f"/v1/children/{alex}").json()["has_pin"] is True
+    client.headers.pop("Authorization")  # nobody is signed in on the kid's device
+
+    found = client.get(f"/v1/kid-login/{code.lower()[:4]}-{code[4:]}")
+    assert found.status_code == 200, found.text
+    assert found.json() == {
+        "family": {"id": family["id"], "name": "Rivera"},
+        "children": [
+            {"id": str(alex), "name": "Alex", "buddy": "fox", "has_pin": True},
+            {"id": str(maya), "name": "Maya", "buddy": "fox", "has_pin": False},
+        ],
+    }
+    signed_in = client.post(f"/v1/kid-login/{code}", json={"child_id": str(alex), "pin": "4321"})
+    assert signed_in.status_code == 200, signed_in.text
+    body = signed_in.json()
+    assert body["child"]["name"] == "Alex" and body["family"] == {"id": family["id"], "name": "Rivera"}
+    assert body["expires_in"] == 8 * 3600
+    kid = {"Authorization": "Bearer " + body["access_token"]}
+    assert client.get("/v1/kid/me", headers=kid).json()["id"] == str(alex)
+    assert client.get(f"/v1/families/{family['id']}", headers=kid).status_code == 401
+
+
+def test_kid_login_refuses_wrong_pins_codes_and_children(client, db, family):
+    alex, maya = child(db, family["id"]), child(db, family["id"], "Maya")
+    stranger = db.execute("INSERT INTO hq.families(name) VALUES('Okafor') RETURNING id").fetchone()[0]
+    code = login_code(client, family)
+    client.put(f"/v1/children/{alex}/kid-pin", json={"pin": "4321"})
+
+    def login(kid, pin="4321", at=code):
+        return client.post(f"/v1/kid-login/{at}", json={"child_id": str(kid), "pin": pin})
+
+    assert login(alex, "0000").status_code == 403
+    assert login(maya).status_code == 409  # no PIN yet
+    assert login(child(db, stranger)).status_code == 404  # not this family's child
+    assert login(alex, at="NOTACODE").status_code == 404
+    assert client.get("/v1/kid-login/NOTACODE").status_code == 404
+
+    client.delete(f"/v1/children/{alex}/kid-pin")
+    assert login(alex).status_code == 409
+    fresh = login_code(client, family)
+    assert fresh != code and client.get(f"/v1/kid-login/{code}").status_code == 404
+
+
+def test_a_family_without_children_can_still_be_found(client, family):
+    found = client.get(f"/v1/kid-login/{login_code(client, family)}").json()
+    assert found["children"] == [] and found["family"]["name"] == "Rivera"
+
+
+def test_kid_pin_guesses_are_limited(client, settings, db, family):
+    alex = child(db, family["id"])
+    code = login_code(client, family)
+    client.put(f"/v1/children/{alex}/kid-pin", json={"pin": "4321"})
+    codes = [
+        client.post(f"/v1/kid-login/{code}", json={"child_id": str(alex), "pin": "0000"}).status_code
+        for _ in range(settings.pin_limit + 1)
+    ]
+    assert codes[-1] == 429 and set(codes[:-1]) == {403}
+
+
+def test_only_the_familys_caregivers_manage_codes_and_kid_pins(client, settings, db, family):
+    alex = child(db, family["id"])
+    outsider = as_user(client, settings, OTHER)
+    assert client.post(f"/v1/families/{family['id']}/login-code", headers=outsider).status_code == 404
+    assert (
+        client.put(f"/v1/children/{alex}/kid-pin", json={"pin": "1111"}, headers=outsider).status_code == 404
+    )
+    assert client.delete(f"/v1/children/{alex}/kid-pin", headers=outsider).status_code == 404
+    assert client.put(f"/v1/children/{alex}/kid-pin", json={"pin": "12"}).status_code == 422
+
+
+def test_a_shared_device_asks_for_the_kids_pin_when_they_have_one(client, db, family):
+    alex = child(db, family["id"])
+    client.put(f"/v1/children/{alex}/kid-pin", json={"pin": "4321"})
+    assert client.post(f"/v1/children/{alex}/kid-session").status_code == 403
+    assert client.post(f"/v1/children/{alex}/kid-session", json={"pin": "0000"}).status_code == 403
+    session = client.post(f"/v1/children/{alex}/kid-session", json={"pin": "4321"})
+    assert session.status_code == 200 and session.json()["child"] == {"id": str(alex), "name": "Alex"}
+
+
+def test_kid_login_functions_reveal_nothing_without_the_code(settings, db, family):
+    with transaction(settings) as conn:
+        assert conn.execute("SELECT * FROM hq.login_family('')").fetchall() == []
+        assert conn.execute("SELECT * FROM hq.login_child_pin('',%s)", (uuid4(),)).fetchall() == []
+
+
 # ── Browser access ────────────────────────────────────────────────────────────
 
 
