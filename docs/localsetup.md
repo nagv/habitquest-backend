@@ -222,9 +222,6 @@ psql "postgresql://<user>@<host>:<port>/<new database>" -v ON_ERROR_STOP=1 -f do
 | 9 | `202611020002_coach_no_habit_match.sql` | `coach_messages.no_habit_match`, used for the "no approved habit fits" warning |
 | 10 | `202611030001_kid_login.sql` | Kid login: `families.login_code` (the family QR code), `children.kid_pin_hash`, `login_family()` and `login_child_pin()` |
 
-Migration 10 is new on the `feat/kid-login` branch. It reaches the hosted database the first time that branch,
-merged into `main`, deploys.
-
 ## Tables
 
 | Table | One row per | Key columns |

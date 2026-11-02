@@ -3,8 +3,7 @@
 The tables of the `hq` schema, how they relate, and what each one is for. The SQL that builds them is in
 `db/migrations`. [localsetup.md](localsetup.md) explains how to build a database from it.
 
-Columns marked *kid login* come from `202611030001_kid_login.sql`. That migration is on the `feat/kid-login` branch
-and isn't in `main` yet.
+Columns marked *kid login* come from `202611030001_kid_login.sql`.
 
 ## The whole schema
 
