@@ -9,10 +9,11 @@ failure, keyword matching answers instead.
 
 import logging
 import re
+from collections.abc import Sequence
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import TimeoutError as FutureTimeout
 from dataclasses import dataclass, field
-from typing import Annotated, Literal, cast
+from typing import Annotated, Any, Literal, cast
 from uuid import UUID
 
 import openai
@@ -35,6 +36,7 @@ from habitquest_backend.guidance import search_guidance
 from habitquest_backend.llm import chat_model
 from habitquest_backend.onboarding import DAYS, DEFAULT_CUES, MAX_ACTIVE_HABITS, candidates, progress
 from habitquest_backend.safety import parent_at_risk
+from habitquest_backend.tracing import keeps_text, send_trace, start_trace
 
 log = logging.getLogger(__name__)
 HISTORY_MESSAGES = 20
@@ -184,6 +186,10 @@ def build_graph(settings: Settings, snapshot: Snapshot, turn: Turn, label: str):
     return graph.compile()
 
 
+def age_band(age: int) -> str:
+    return "3-5" if age < 6 else "6-8" if age < 9 else "9-13"
+
+
 def fallback(snapshot: Snapshot, text: str) -> Reply:
     """Keyword matching, used in `fake` mode and whenever the model fails."""
     turn = Turn()
@@ -205,8 +211,11 @@ def run_turn(
     history: list[dict],
     text: str,
     names: list[str],
+    caregivers: Sequence[str] = (),
 ) -> Reply:
-    """Answers one parent message. `names` lists the family's children, this child first."""
+    """Answers one parent message. `names` lists the family's children, this child first. `caregivers` are only
+    used to remove their names from traces.
+    """
     if parent_at_risk(text):
         return Reply(SAFETY_GUIDANCE, safety=SAFETY_GUIDANCE, mapped_by="manual")
     # Keywords need the whole conversation: "something different" alone matches nothing.
@@ -226,12 +235,15 @@ def run_turn(
     messages.append(HumanMessage(content=swap_names(text, labels)))
     turn = Turn()
     graph = build_graph(settings, snapshot, turn, "Child A")
+    private = [*names, *caregivers]
+    collector = start_trace(settings)
+    config: dict[str, Any] = {"recursion_limit": STEP_LIMIT, "callbacks": [collector] if collector else []}
     executor = ThreadPoolExecutor(max_workers=1)
     try:
         future = executor.submit(
             graph.invoke,
             {"messages": messages, "retried": False, "poor_fit": []},
-            {"recursion_limit": STEP_LIMIT},
+            config,
         )
         final = future.result(timeout=settings.coach_timeout_seconds)
         has_cards = bool(turn.recommendations or turn.changes)
@@ -239,6 +251,9 @@ def run_turn(
     except (openai.OpenAIError, GraphRecursionError, FutureTimeout, ValueError, KeyError, TypeError) as exc:
         status = exc.status_code if isinstance(exc, openai.APIStatusError) else ""
         log.warning("Coach turn failed (%s %s); using keyword matching", type(exc).__name__, status)
+        send_trace(
+            settings, collector, private, True, {"outcome": "failed", "age_band": age_band(snapshot.age)}
+        )
         return fallback(snapshot, problem)
     finally:
         executor.shutdown(wait=False, cancel_futures=True)
@@ -258,6 +273,21 @@ def run_turn(
     for change in turn.changes:
         change.reason = swap_names(change.reason, restore)
     no_match = turn.researched and not turn.recommendations and not turn.changes
+    has_outcome = turn.recommendations or turn.changes
+    send_trace(
+        settings,
+        collector,
+        private,
+        keeps_text(settings, wanted=no_match or final["retried"]),
+        {
+            "outcome": "no_habit_match" if no_match else "cards" if has_outcome else "question",
+            "age_band": age_band(snapshot.age),
+            "habits": list(turn.recommendations),
+            "changes": [change.kind for change in turn.changes],
+            "sources": list(turn.sources),
+            "retried": final["retried"],
+        },
+    )
     return Reply(swap_names(answer, restore)[:REPLY_LENGTH], turn, no_habit_match=no_match)
 
 
@@ -421,6 +451,9 @@ def router(settings: Settings) -> APIRouter:
                 "SELECT name FROM hq.children WHERE family_id=%s AND id<>%s ORDER BY created_at,id",
                 (child["family_id"], child_id),
             ).fetchall()
+            caregivers = conn.execute(
+                "SELECT display_name FROM hq.caregivers WHERE family_id=%s", (child["family_id"],)
+            ).fetchall()
             history = conn.execute(
                 "SELECT role,content FROM (SELECT id,role,content FROM hq.coach_messages WHERE child_id=%s"
                 " ORDER BY id DESC LIMIT %s) recent ORDER BY id",
@@ -428,7 +461,9 @@ def router(settings: Settings) -> APIRouter:
             ).fetchall()
         # The model call happens outside any transaction.
         names = [child["name"], *(s["name"] for s in siblings)]
-        reply = run_turn(settings, snapshot, history, body.text, names)
+        reply = run_turn(
+            settings, snapshot, history, body.text, names, [c["display_name"] for c in caregivers]
+        )
         with transaction(settings, user) as conn:
             if reply.safety is None:
                 sources = [{"ref": ref, "title": title} for ref, title in reply.turn.sources.items()]

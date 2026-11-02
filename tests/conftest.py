@@ -24,6 +24,7 @@ load_dotenv()
 # Tests never reach a real model, whatever a developer's .env says.
 for name in ("AI_MODE", "OPENAI_BASE_URL", "OPENAI_MODEL", "OPENAI_SMALL_MODEL", "OPENAI_API_KEY"):
     os.environ.pop(name, None)
+os.environ["TRACE_COACH"] = "false"
 URL = os.getenv("TEST_DATABASE_URL", "postgresql://hq_dev@127.0.0.1:55432/hq_test")
 if not conninfo_to_dict(URL).get("dbname", "").endswith("_test"):
     raise pytest.UsageError(

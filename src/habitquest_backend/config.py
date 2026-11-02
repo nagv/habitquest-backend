@@ -31,6 +31,12 @@ class Settings(BaseSettings):
     # The coach's whole turn (several model calls), and model-backed requests per family per day.
     coach_timeout_seconds: float = Field(default=50, gt=0, le=120)
     ai_daily_limit: int = Field(default=100, gt=0)
+    # Redacted coach traces in LangSmith. `trace_sample` is the share of ordinary turns that keep their text.
+    trace_coach: bool = False
+    trace_sample: float = Field(default=0.1, ge=0, le=1)
+    langsmith_api_key: SecretStr | None = None
+    langsmith_endpoint: str = "https://api.smith.langchain.com"
+    langsmith_project: str = "habitquest"
     # Attempts per minute: Google sign-in per address, and PIN checks per signed-in person.
     sign_in_limit: int = Field(default=20, gt=0)
     pin_limit: int = Field(default=10, gt=0)
@@ -44,6 +50,8 @@ class Settings(BaseSettings):
             self.openai_base_url and self.openai_model and self.openai_api_key
         ):
             raise ValueError("AI_MODE=openai requires OPENAI_BASE_URL, OPENAI_MODEL and OPENAI_API_KEY")
+        if self.trace_coach and not self.langsmith_api_key:
+            raise ValueError("TRACE_COACH requires LANGSMITH_API_KEY")
         if self.dev_login:
             password = self.dev_login_password.get_secret_value() if self.dev_login_password else ""
             if len(password) < 12 or not self.jwt_secret:

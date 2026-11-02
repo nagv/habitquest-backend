@@ -42,6 +42,10 @@ envVarGroups:
         sync: false
       - key: OPENAI_API_KEY
         sync: false
+      - key: TRACE_COACH       # true sends redacted coach traces to LangSmith; update the privacy notice first
+        value: false
+      - key: LANGSMITH_API_KEY
+        sync: false
       - key: DEV_LOGIN         # /docs username/password login for testers
         value: "true"
       - key: DEV_LOGIN_PASSWORD  # shared tester password, 12+ characters

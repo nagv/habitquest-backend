@@ -64,6 +64,9 @@ Forest 30, Sky Islands 90, Coral Cove 180, Crystal Caves 300, Star Harbour 450),
 - **Quest planner and weekly review** (`insights.py`): one structured call each, on facts computed in code.
 - **Buddy lines**: one small call, then a safety check; a built-in line replaces anything unusable.
 - **Suggestions**: nothing applies until a caregiver accepts with the family PIN, and the plan rules are checked again.
+- **Coach traces** (`tracing.py`): off unless `TRACE_COACH=true` with `LANGSMITH_API_KEY`. Family names, emails, phone
+  numbers, addresses and links are removed on the server. Failed, retried and no-match turns keep redacted text, as do
+  `TRACE_SAMPLE` of the rest; other turns send structure only. LangChain's own `LANGSMITH_TRACING` is forced off.
 - **Limits**: `AI_DAILY_LIMIT` model-backed requests per family per day, `COACH_TIMEOUT_SECONDS` per coach turn.
 
 ## The daily loop
