@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import Field
 
 from habitquest_backend.accounts import StrictModel
-from habitquest_backend.auth import KID, check_pin, signed_in
+from habitquest_backend.auth import KID, family_pin_ok, signed_in
 from habitquest_backend.config import Settings
 from habitquest_backend.daily import balance
 from habitquest_backend.db import one, transaction
@@ -54,7 +54,9 @@ class RewardRequest(StrictModel):
 
 
 class PinConfirm(StrictModel):
-    pin: str = Field(pattern=r"^\d{4}$")
+    pin: str | None = Field(
+        default=None, pattern=r"^\d{4}$", description="Left out when the family has no PIN"
+    )
 
 
 class Redemption(StrictModel):
@@ -253,7 +255,7 @@ def router(settings: Settings) -> APIRouter:
                 (request_id,),
             )
             settings.pin_attempts.check(str(user))
-            if status == "approved" and not check_pin(pin or "", row["pin_hash"]):
+            if status == "approved" and not family_pin_ok(pin, row["pin_hash"]):
                 raise HTTPException(403, "Wrong PIN")
             if row["status"] != "pending":
                 raise HTTPException(409, f"This request was already {row['status']}")
@@ -273,7 +275,7 @@ def router(settings: Settings) -> APIRouter:
 
     @api.post("/v1/reward-requests/{request_id}/approve", tags=["Points"], summary="Approve a reward")
     def approve_request(request_id: UUID, body: PinConfirm, user: User) -> dict:
-        """Approves a request after checking the family PIN (403 if wrong). Screen-time rewards add minutes to
+        """Approves a request after checking the family PIN when it has one (403 if wrong). Screen-time rewards add minutes to
         today's `screen_bonus`. 409 when it was already decided.
         """
         return decide(request_id, user, "approved", body.pin)

@@ -9,7 +9,15 @@ import psycopg
 from fastapi import APIRouter, Body, Depends, HTTPException, Request, Response
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from habitquest_backend.auth import KID, check_pin, hash_pin, issue_token, signed_in, verify_google
+from habitquest_backend.auth import (
+    KID,
+    check_pin,
+    family_pin_ok,
+    hash_pin,
+    issue_token,
+    signed_in,
+    verify_google,
+)
 from habitquest_backend.config import Settings
 from habitquest_backend.db import one, transaction
 from habitquest_backend.limits import client_address
@@ -59,7 +67,7 @@ class CaregiverInput(StrictModel):
 class FamilyCreate(CaregiverInput):
     name: str = Field(min_length=1, max_length=60)
     timezone: str = "UTC"
-    pin: Pin
+    pin: Pin | None = None
 
     _timezone = field_validator("timezone")(valid_timezone)
 
@@ -82,6 +90,12 @@ class CaregiverUpdate(StrictModel):
 
 class PinInput(StrictModel):
     pin: Pin
+
+
+class FamilyPin(StrictModel):
+    """The family PIN, which a family without one leaves out."""
+
+    pin: Pin | None = None
 
 
 class KidLogin(PinInput):
@@ -156,13 +170,15 @@ def router(settings: Settings) -> APIRouter:
     def create_family(body: FamilyCreate, user: User) -> dict:
         """Creates a family with the caller as its first caregiver (`display_name`, `role`: father, mother,
         guardian or other). `timezone` (IANA, default UTC) decides what "today" is for the children's habits.
-        `pin` (four digits) unlocks grown-up screens on a shared device. The response includes the
+        `pin` (four digits, optional) guards approvals and grown-up screens on a shared device; leave it out for
+        a family without one (`has_pin` false), which can add one later. The response includes the
         `invite_code` other caregivers use to join.
         """
+        pin_hash = hash_pin(body.pin) if body.pin else None
         with transaction(settings, user) as conn:
             family = conn.execute(
                 "SELECT hq.create_family(%s,%s,%s,%s,%s,%s) AS id",
-                (body.name, body.timezone, hash_pin(body.pin), invite_code(), body.display_name, body.role),
+                (body.name, body.timezone, pin_hash, invite_code(), body.display_name, body.role),
             ).fetchone()["id"]
             return family_view(conn, family)
 
@@ -309,23 +325,39 @@ def router(settings: Settings) -> APIRouter:
 
     @api.put("/v1/families/{family_id}/pin", status_code=204, tags=["Families"], summary="Change the PIN")
     def set_pin(family_id: UUID, body: PinInput, user: User) -> Response:
-        """Sets a new four-digit family PIN. Any caregiver of the family may change it; it is stored only as a
-        salted hash.
+        """Sets a new four-digit family PIN, or adds one to a family without one. Any caregiver of the family
+        may change it; it is stored only as a salted hash.
         """
         with transaction(settings, user) as conn:
             one(conn, "SELECT id FROM hq.families WHERE id=%s", (family_id,))
             conn.execute("UPDATE hq.families SET pin_hash=%s WHERE id=%s", (hash_pin(body.pin), family_id))
         return Response(status_code=204)
 
-    @api.post("/v1/families/{family_id}/pin/verify", tags=["Families"], summary="Check the PIN")
-    def verify_pin(family_id: UUID, body: PinInput, user: User) -> dict:
-        """Returns `{"valid": true}` when `pin` matches the family PIN, otherwise `{"valid": false}`. The
-        frontend asks for the PIN before leaving kid mode or opening a grown-up screen on a shared device.
+    @api.post(
+        "/v1/families/{family_id}/pin/remove", status_code=204, tags=["Families"], summary="Turn off the PIN"
+    )
+    def remove_pin(family_id: UUID, body: FamilyPin, user: User) -> Response:
+        """Removes the family PIN after checking it (403 if wrong), so approvals and grown-up screens no longer
+        ask for one. Nothing changes for a family that has none.
         """
         settings.pin_attempts.check(str(user))
         with transaction(settings, user) as conn:
             stored = one(conn, "SELECT pin_hash FROM hq.families WHERE id=%s", (family_id,))["pin_hash"]
-        return {"valid": check_pin(body.pin, stored)}
+            if not family_pin_ok(body.pin, stored):
+                raise HTTPException(403, "Wrong PIN")
+            conn.execute("UPDATE hq.families SET pin_hash=NULL WHERE id=%s", (family_id,))
+        return Response(status_code=204)
+
+    @api.post("/v1/families/{family_id}/pin/verify", tags=["Families"], summary="Check the PIN")
+    def verify_pin(family_id: UUID, body: FamilyPin, user: User) -> dict:
+        """Returns `{"valid": true}` when `pin` matches the family PIN, otherwise `{"valid": false}`. A family
+        without a PIN is always valid. The frontend asks for the PIN before leaving kid mode or opening a
+        grown-up screen on a shared device.
+        """
+        settings.pin_attempts.check(str(user))
+        with transaction(settings, user) as conn:
+            stored = one(conn, "SELECT pin_hash FROM hq.families WHERE id=%s", (family_id,))["pin_hash"]
+        return {"valid": family_pin_ok(body.pin, stored)}
 
     @api.get("/v1/families/{family_id}/export", tags=["Families"], summary="Export family data")
     def export_family(family_id: UUID, user: User) -> dict:
@@ -347,21 +379,23 @@ def router(settings: Settings) -> APIRouter:
     @api.post(
         "/v1/families/{family_id}/delete", status_code=204, tags=["Families"], summary="Delete a family"
     )
-    def delete_family(family_id: UUID, body: PinInput, user: User) -> Response:
+    def delete_family(family_id: UUID, body: FamilyPin, user: User) -> Response:
         """Permanently deletes the family and everything about its children, after checking the family PIN
-        (403 if wrong). This cannot be undone. Caregivers keep their sign-in.
+        when it has one (403 if wrong). This cannot be undone. Caregivers keep their sign-in.
         """
         settings.pin_attempts.check(str(user))
         with transaction(settings, user) as conn:
             family = one(conn, "SELECT pin_hash FROM hq.families WHERE id=%s", (family_id,))
-            if not check_pin(body.pin, family["pin_hash"]):
+            if not family_pin_ok(body.pin, family["pin_hash"]):
                 raise HTTPException(403, "Wrong PIN")
             conn.execute("DELETE FROM hq.families WHERE id=%s", (family_id,))
         return Response(status_code=204)
 
     @api.post("/v1/children/{child_id}/delete", status_code=204, tags=["Children"], summary="Delete a child")
-    def delete_child(child_id: UUID, body: PinInput, user: User) -> Response:
-        """Permanently deletes a child and all their data, after checking the family PIN (403 if wrong)."""
+    def delete_child(child_id: UUID, body: FamilyPin, user: User) -> Response:
+        """Permanently deletes a child and all their data, after checking the family PIN when it has one (403 if
+        wrong).
+        """
         settings.pin_attempts.check(str(user))
         with transaction(settings, user) as conn:
             family = one(
@@ -369,7 +403,7 @@ def router(settings: Settings) -> APIRouter:
                 "SELECT f.pin_hash FROM hq.children k JOIN hq.families f ON f.id=k.family_id WHERE k.id=%s",
                 (child_id,),
             )
-            if not check_pin(body.pin, family["pin_hash"]):
+            if not family_pin_ok(body.pin, family["pin_hash"]):
                 raise HTTPException(403, "Wrong PIN")
             conn.execute("DELETE FROM hq.children WHERE id=%s", (child_id,))
         return Response(status_code=204)

@@ -241,6 +241,26 @@ def test_the_pin_is_checked_and_can_be_changed(client, family):
     assert client.post(base + "/verify", json={"pin": "4321"}).json() == {"valid": True}
 
 
+def test_a_family_can_go_without_a_pin(client, db):
+    users(db, PARENT)
+    family = client.post("/v1/families", json={k: v for k, v in FAMILY.items() if k != "pin"}).json()
+    base = f"/v1/families/{family['id']}"
+    assert family["has_pin"] is False
+    assert client.post(base + "/pin/verify", json={}).json() == {"valid": True}
+    assert client.put(base + "/pin", json={"pin": "4321"}).status_code == 204
+    assert client.get(base).json()["has_pin"] is True
+    assert client.post(base + "/pin/verify", json={}).json() == {"valid": False}
+
+
+def test_turning_the_pin_off_needs_the_pin(client, family):
+    base = f"/v1/families/{family['id']}"
+    assert client.post(base + "/pin/remove", json={}).status_code == 403
+    assert client.post(base + "/pin/remove", json={"pin": "9999"}).status_code == 403
+    assert client.post(base + "/pin/remove", json={"pin": "1234"}).status_code == 204
+    assert client.get(base).json()["has_pin"] is False
+    assert client.post(base + "/pin/remove", json={}).status_code == 204
+
+
 def test_pin_hashes_are_salted():
     first, second = hash_pin("1234"), hash_pin("1234")
     assert first != second and check_pin("1234", first) and check_pin("1234", second)

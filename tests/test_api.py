@@ -79,7 +79,7 @@ def test_every_endpoint_is_documented(settings):
     ).openapi()
     tags = {tag["name"] for tag in spec["tags"]}
     operations = [(method, path, op) for path, ops in spec["paths"].items() for method, op in ops.items()]
-    assert len(operations) == 81
+    assert len(operations) == 82
     undocumented = [
         (method, path)
         for method, path, op in operations

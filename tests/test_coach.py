@@ -386,6 +386,14 @@ def test_accepting_needs_the_pin_and_adds_the_habit(client, family, alex):
     assert client.post(f"/v1/suggestions/{card['id']}/dismiss").status_code == 409
 
 
+def test_a_family_without_a_pin_accepts_without_one(client, family, alex):
+    card = say(client, alex).json()["suggestions"][0]
+    assert client.post(f"/v1/suggestions/{card['id']}/accept", json={}).status_code == 403
+    client.post(f"/v1/families/{family}/pin/remove", json={"pin": "1234"})
+    assert client.post(f"/v1/suggestions/{card['id']}/accept", json={}).status_code == 200
+    assert list(in_plan(client, alex)) == [card["habit_id"]]
+
+
 def test_dismissing_leaves_the_plan_alone(client, alex):
     card = say(client, alex).json()["suggestions"][0]
     assert client.post(f"/v1/suggestions/{card['id']}/dismiss").json()["suggestions"] == []

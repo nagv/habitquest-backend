@@ -104,6 +104,11 @@ def check_pin(pin: str, stored: str | None) -> bool:
     return hmac.compare_digest(candidate.hex(), digest)
 
 
+def family_pin_ok(pin: str | None, stored: str | None) -> bool:
+    """The family PIN is optional: a family without one needs no PIN, otherwise `pin` must match it."""
+    return stored is None or (pin is not None and check_pin(pin, stored))
+
+
 def dev_identity(username: str) -> UUID | None:
     """`parent`, or `parent:<label>` for a separate parent with a stable id."""
     if username == "parent":

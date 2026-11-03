@@ -10,7 +10,7 @@ from psycopg.types.json import Jsonb
 from pydantic import Field
 
 from habitquest_backend.accounts import StrictModel
-from habitquest_backend.auth import KID, check_pin, signed_in
+from habitquest_backend.auth import KID, family_pin_ok, signed_in
 from habitquest_backend.config import Settings
 from habitquest_backend.daily import balance, today_view
 from habitquest_backend.db import one, transaction
@@ -51,7 +51,9 @@ class AppTime(StrictModel):
 
 class AppExtension(StrictModel):
     minutes: int = Field(gt=0, le=120)
-    pin: str = Field(pattern=r"^\d{4}$")
+    pin: str | None = Field(
+        default=None, pattern=r"^\d{4}$", description="Left out when the family has no PIN"
+    )
 
 
 class SettingsUpdate(StrictModel):
@@ -182,7 +184,7 @@ def router(settings: Settings) -> APIRouter:
 
     @api.post("/v1/children/{child_id}/app-time/extend", tags=["Children"], summary="Allow more time today")
     def extend_time(child_id: UUID, body: AppExtension, user: User) -> dict:
-        """Adds extra kid-mode minutes for today after checking the family PIN (403 if wrong)."""
+        """Adds extra kid-mode minutes for today after checking the family PIN when it has one (403 if wrong)."""
         with transaction(settings, user) as conn:
             family = one(
                 conn,
@@ -190,7 +192,7 @@ def router(settings: Settings) -> APIRouter:
                 (child_id,),
             )
             settings.pin_attempts.check(str(user))
-            if not check_pin(body.pin, family["pin_hash"]):
+            if not family_pin_ok(body.pin, family["pin_hash"]):
                 raise HTTPException(403, "Wrong PIN")
             add_to_day(conn, "app_extra_minutes", child_id, body.minutes)
             return extras_view(conn, child_id)

@@ -59,16 +59,19 @@ VITE_DEV_LOGIN=true
 
 ### Family
 - `POST /v1/families {name, timezone, pin, display_name, role}` → 201 Family. `timezone` is IANA (use
-  `Intl.DateTimeFormat().resolvedOptions().timeZone`); `pin` is exactly 4 digits; `role` is
-  `father | mother | guardian | other`.
+  `Intl.DateTimeFormat().resolvedOptions().timeZone`); `pin` is exactly 4 digits, or left out for a family
+  without a parent PIN; `role` is `father | mother | guardian | other`.
 - Family = `{id, name, timezone, invite_code, has_pin, created_at, caregivers: [{user_id, display_name, role}]}`.
 - `POST /v1/families/join {invite_code, display_name, role}` → Family. 404 unknown code, 409 already a member.
 - `GET /v1/families/{id}`, `PATCH /v1/families/{id} {name?, timezone?}`,
   `PATCH /v1/families/{id}/caregivers/me {display_name?, role?}`,
   `POST /v1/families/{id}/invite-code` (new code) → Family.
-- `PUT /v1/families/{id}/pin {pin}` → 204. `POST /v1/families/{id}/pin/verify {pin}` → `{valid: boolean}`.
-  Use verify wherever the app asks for the parent PIN today (leaving kid mode, grown-up pages). The PIN is no
-  longer hashed in the browser.
+- `PUT /v1/families/{id}/pin {pin}` → 204 (sets, changes or turns on the PIN). `POST /v1/families/{id}/pin/verify
+  {pin}` → `{valid: boolean}`. Use verify wherever the app asks for the parent PIN today (leaving kid mode,
+  grown-up pages). The PIN is no longer hashed in the browser.
+- The parent PIN is optional. `POST /v1/families/{id}/pin/remove {pin}` → 204 turns it off (403 wrong PIN). While
+  `has_pin` is false, skip the PIN prompt and leave `pin` out of every request that takes one (approving a
+  reward, accepting a suggestion, more app time, deleting a child or the family); verify answers `{valid: true}`.
 
 ### Children
 - `POST /v1/families/{familyId}/children {name, age, buddy, routine_times}` → 201 Child.
@@ -161,7 +164,7 @@ VITE_DEV_LOGIN=true
 
 | Screen | Change |
 |---|---|
-| Login / Register | Google button (plus dev login when enabled). After sign-in: `GET /v1/me`; no family → family setup (create with name, time zone, PIN, your name and role; or join with invite code). Remove local email/password registration. |
+| Login / Register | Google button (plus dev login when enabled). After sign-in: `GET /v1/me`; no family → family setup (create with name, time zone, optional PIN, your name and role; or join with invite code). Remove local email/password registration. |
 | Add child (part of register today) | `POST /v1/families/{id}/children` with name, age, buddy and routine times. |
 | Habit setup (`#/setup`) | Becomes per child: routine times per part of the day (`PATCH /v1/children/{id}`). |
 | Habit coach (`AiHelpers`) | Replace with "Describe a problem" → pain points → show suggested goals with reasons and habit options (recommended pre-ticked), max 6 → `PUT plan`. Show `safety.guidance` when returned. |

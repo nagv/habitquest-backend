@@ -449,6 +449,17 @@ def test_export_holds_the_family_without_the_pin(client, db, family, alex):
     assert "pin_hash" not in json.dumps(body)
 
 
+def test_a_family_without_a_pin_is_never_asked_for_one(client, db, family, alex, kid):
+    assert client.post(f"/v1/families/{family}/pin/remove", json={"pin": "1234"}).status_code == 204
+    assert client.post(f"/v1/children/{alex}/app-time/extend", json={"minutes": 5}).status_code == 200
+    give_points(db, alex, 100)
+    reward = reward_named(client, family, "+15 minutes screen time")
+    request = client.post("/v1/kid/reward-requests", json={"reward_id": reward["id"]}, headers=kid).json()
+    assert client.post(f"/v1/reward-requests/{request['request']['id']}/approve", json={}).status_code == 200
+    assert client.post(f"/v1/children/{alex}/delete", json={}).status_code == 204
+    assert client.post(f"/v1/families/{family}/delete", json={}).status_code == 204
+
+
 def test_deleting_a_child_needs_the_pin(client, family, alex):
     assert client.post(f"/v1/children/{alex}/delete", json={"pin": "9999"}).status_code == 403
     assert client.post(f"/v1/children/{alex}/delete", json={"pin": "1234"}).status_code == 204

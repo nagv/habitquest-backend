@@ -28,7 +28,7 @@ from pydantic import BaseModel, Field
 
 from habitquest_backend.accounts import StrictModel
 from habitquest_backend.ai import SAFETY_GUIDANCE, keyword_goals
-from habitquest_backend.auth import check_pin, signed_in
+from habitquest_backend.auth import family_pin_ok, signed_in
 from habitquest_backend.coach_tools import MAX_RECOMMENDATIONS, Snapshot, Turn, build_tools
 from habitquest_backend.config import Settings
 from habitquest_backend.db import one, transaction
@@ -100,7 +100,9 @@ class CoachMessage(StrictModel):
 
 
 class PinConfirm(StrictModel):
-    pin: str = Field(pattern=r"^\d{4}$")
+    pin: str | None = Field(
+        default=None, pattern=r"^\d{4}$", description="Left out when the family has no PIN"
+    )
 
 
 class FitVerdict(BaseModel):
@@ -526,7 +528,7 @@ def router(settings: Settings) -> APIRouter:
 
     @api.post("/v1/suggestions/{suggestion_id}/accept", tags=["Coach"], summary="Accept a suggestion")
     def accept(suggestion_id: UUID, body: PinConfirm, user: User) -> dict:
-        """Applies a suggestion after checking the family PIN (403 if wrong). The age, tier and six-habit limits
+        """Applies a suggestion after checking the family PIN when it has one (403 if wrong). The age, tier and six-habit limits
         are checked again here; 409 when one fails, or when the suggestion was already decided.
         """
         with transaction(settings, user) as conn:
@@ -538,7 +540,7 @@ def router(settings: Settings) -> APIRouter:
                 (suggestion_id,),
             )
             settings.pin_attempts.check(str(user))
-            if not check_pin(body.pin, row["pin_hash"]):
+            if not family_pin_ok(body.pin, row["pin_hash"]):
                 raise HTTPException(403, "Wrong PIN")
             if row["status"] != "pending":
                 raise HTTPException(409, f"This suggestion was already {row['status']}")
